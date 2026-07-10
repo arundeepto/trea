@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Printing Committee</title>
+<title>Arundeepto Printers - Treasury</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -181,13 +181,13 @@
 <!-- ============ SETUP OVERLAY (shown only if firebaseConfig is unfilled) ============ -->
 <div id="setup-overlay" class="setup-overlay hidden">
   <div class="setup-card">
-    <h2></h2>
-    <p></p>
-    <!--
-      <li><a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase Console</a>-এ গিয়ে একটা প্রজেক্ট বানাও।</li>
-      <li>Build → <b>Authentication</b> → Sign-in method → <b>Email/Password</b> চালু করো।</li>
-      <li>Build → <b>Firestore Database</b> → একটা ডাটাবেস তৈরি করো (production mode)।</li>
-      <li><b</b> 
+    <h2>Firebase Setup Guide</h2>
+    <p>Complete these one-time setup steps to connect your Firebase project:</p>
+    <ol>
+      <li>Go to the <a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase Console</a> and create a project.</li>
+      <li>Build → <b>Authentication</b> → Sign-in method → enable <b>Email/Password</b>.</li>
+      <li>Build → <b>Firestore Database</b> → create a database (production mode).</li>
+      <li><b>Paste the following into your Firestore rules:</b>
         <pre>rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -197,19 +197,19 @@ service cloud.firestore {
   }
 }</pre>
       </li>
-      <li>Project settings → General → নিচের দিকে "Your apps" → Web app যোগ করে <code>firebaseConfig</code> অবজেক্টটা কপি করো।</li>
-      <li>এই ফাইলের <code>&lt;script type="module"&gt;</code> এর শুরুতে <code>firebaseConfig</code> এর জায়গায় নিজেরটা বসিয়ে ফাইলটা আবার সেভ/আপলোড করো।</li>
+      <li>Project settings → General → scroll down to "Your apps" → add a Web app and copy the <code>firebaseConfig</code> object.</li>
+      <li>In this file, paste your own config in place of <code>firebaseConfig</code> at the start of the <code>&lt;script type="module"&gt;</code> block, then save/upload the file again.</li>
     </ol>
-    <p style="color:var(--ink-soft);font-size:.82rem;">এই ধাপগুলো একবারই করতে হবে। এরপর থেকে যে কেউ ট্রেজারার হিসেবে অ্যাকাউন্ট বানিয়ে লগইন করতে পারবে এবং সব হিসাব ফায়ারবেসে জমা থাকবে।</p>
+    <p style="color:var(--ink-soft);font-size:.82rem;">These steps only need to be done once. After that, anyone can register as a Treasurer, log in, and all records will be stored in Firebase.</p>
   </div>
--->
+</div>
 
 <!-- ============ AUTH SCREEN ============ -->
 <div id="auth-screen" class="auth-screen hidden">
   <div class="auth-card">
     <div class="auth-stamp"><div class="stamp">৳</div></div>
-    <h1>Printing Treasury</h1>
-    <div class="sub">Login</div>
+    <h1>Arundeepto Printers</h1>
+    <div class="sub">Treasury Login</div>
 
     <div id="auth-error" class="auth-error hidden"></div>
 
@@ -223,15 +223,15 @@ service cloud.firestore {
         <label>Password</label>
         <input type="password" id="login-password" placeholder="••••••••">
       </div>
-      <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">লগইন করো</button>
-      <div class="auth-toggle">New Treasurer<a onclick="toggleAuthMode()">নিবন্ধন করো</a></div>
+      <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Log In</button>
+      <div class="auth-toggle">New Treasurer? <a onclick="toggleAuthMode()">Register</a></div>
     </div>
 
     <!-- REGISTER FORM -->
     <div id="register-form" class="hidden">
       <div class="field" style="margin-bottom:10px;">
         <label>Name</label>
-        <input type="text" id="reg-name" placeholder="যেমন: রাফিদ হাসান">
+        <input type="text" id="reg-name" placeholder="e.g. John Smith">
       </div>
       <div class="field" style="margin-bottom:10px;">
         <label>Email</label>
@@ -241,8 +241,8 @@ service cloud.firestore {
         <label>Password</label>
         <input type="password" id="reg-password" placeholder="••••••••">
       </div>
-      <button class="btn btn-gold" style="width:100%;" onclick="doRegister()">নিবন্ধন করে লগইন করো</button>
-      <div class="auth-toggle"> Have an Account? <a onclick="toggleAuthMode()">লগইন করো</a></div>
+      <button class="btn btn-gold" style="width:100%;" onclick="doRegister()">Register & Log In</button>
+      <div class="auth-toggle">Already have an account? <a onclick="toggleAuthMode()">Log In</a></div>
     </div>
   </div>
 </div>
@@ -253,60 +253,60 @@ service cloud.firestore {
   <div class="masthead">
     <div>
       <h1>Arundeepto Printers</h1>
-      <div class="sub"></div>
+      <div class="sub">Subscriber Treasury Dashboard</div>
     </div>
     <div class="stamp-wrap">
       <div class="who">
         <div class="name" id="current-user-name">—</div>
-        <div class="role">Executive</div>
+        <div class="role">Treasurer</div>
       </div>
       <div class="stamp" id="current-user-stamp">?</div>
-      <button class="logout-btn" onclick="doLogout()">লগআউট</button>
+      <button class="logout-btn" onclick="doLogout()">Log Out</button>
     </div>
   </div>
 
   <!-- summary cards -->
   <div class="summary-grid">
-    <div class="sum-card green"><div class="label">শিক্ষার্থী কালেকশন</div><div class="val num" id="sum-collection">৳0</div></div>
-    <div class="sum-card gold"><div class="label">ফান্ড</div><div class="val num" id="sum-donation">৳0</div></div>
-    <div class="sum-card red"><div class="label">মোট খরচ</div><div class="val num" id="sum-expense">৳0</div></div>
-    <div class="sum-card"><div class="label">হাতে থাকা ব্যালেন্স</div><div class="val num" id="sum-balance">৳0</div></div>
+    <div class="sum-card green"><div class="label">Subscriber Collection</div><div class="val num" id="sum-collection">৳0</div></div>
+    <div class="sum-card gold"><div class="label">Fund</div><div class="val num" id="sum-donation">৳0</div></div>
+    <div class="sum-card red"><div class="label">Total Expense</div><div class="val num" id="sum-expense">৳0</div></div>
+    <div class="sum-card"><div class="label">Balance in Hand</div><div class="val num" id="sum-balance">৳0</div></div>
   </div>
 
   <!-- report buttons -->
   <div class="panel">
-    <h2>রিপোর্ট ও ভাউচার</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 6px;">পূর্ণাঙ্গ হিসাব বিবরণী পিডিএফ আকারে নামাও, অথবা একটা খরচের ভাউচার ছবি হিসেবে সেভ করো।</p>
+    <h2>Reports & Vouchers</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 6px;">Download the full statement as a PDF, or save an expense voucher as an image.</p>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="downloadFullReport()">📄 পূর্ণ পিডিএফ রিপোর্ট</button>
-      <button class="btn btn-outline" onclick="openVoucherModal()">🧾 খরচের ভাউচার (PNG)</button>
+      <button class="btn btn-primary" onclick="downloadFullReport()">📄 Full PDF Report</button>
+      <button class="btn btn-outline" onclick="openVoucherModal()">🧾 Expense Voucher (PNG)</button>
     </div>
   </div>
 
   <!-- student management -->
   <div class="panel">
-    <h2>শিক্ষার্থী যোগ করো</h2>
+    <h2>Add Subscriber</h2>
     <div class="field-row">
-      <div class="field"><label>নাম</label><input type="text" id="new-student-name" placeholder=""></div>
-      <div class="field"><label>রোল</label><input type="number" id="new-student-roll" placeholder=""></div>
-      <div class="field"><label>মোবাইল নম্বর</label><input type="tel" id="new-student-mobile" placeholder=""></div>
+      <div class="field"><label>Name</label><input type="text" id="new-student-name" placeholder="e.g. John Smith"></div>
+      <div class="field"><label>Roll</label><input type="number" id="new-student-roll" placeholder="e.g. 12"></div>
+      <div class="field"><label>Mobile Number</label><input type="tel" id="new-student-mobile" placeholder="e.g. 01700000000"></div>
     </div>
-    <div class="btn-row"><button class="btn btn-primary" onclick="addStudent()">শিক্ষার্থী যোগ করো</button></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="addStudent()">Add Subscriber</button></div>
   </div>
 
   <!-- fund (donation) -->
   <div class="panel">
-    <h2>ফান্ড যোগ করো</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;"></p>
+    <h2>Add Fund</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">Record contributions received from parents, alumni, or other donors.</p>
     <div class="field-row">
-      <div class="field"><label>Purpose</label><input type="text" id="donation-name" placeholder="যেমন: অভিভাবক / প্রাক্তন শিক্ষার্থী"></div>
-      <div class="field"><label>পরিমাণ (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
-      <div class="field"><label>নোট (ঐচ্ছিক)</label><input type="text" id="donation-note" placeholder="যেমন: ঈদ উপহার"></div>
+      <div class="field"><label>Purpose</label><input type="text" id="donation-name" placeholder="e.g. Parent / Former Subscriber"></div>
+      <div class="field"><label>Amount (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="donation-note" placeholder="e.g. Eid gift"></div>
     </div>
-    <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">ফান্ড সেভ করো</button></div>
+    <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">Save Fund</button></div>
     <div class="table-scroll" style="margin-top:16px;">
       <table class="ledger">
-        <thead><tr><th>তারিখ</th><th>Purpose</th><th>পরিমাণ</th><th>নোট</th><th>যোগ করেছেন</th></tr></thead>
+        <thead><tr><th>Date</th><th>Purpose</th><th>Amount</th><th>Note</th><th>Added By</th></tr></thead>
         <tbody id="donation-list"></tbody>
       </table>
     </div>
@@ -314,15 +314,15 @@ service cloud.firestore {
 
   <!-- expense -->
   <div class="panel">
-    <h2>খরচ যোগ করো</h2>
+    <h2>Add Expense</h2>
     <div class="field-row">
-      <div class="field" style="flex:2;"><label>বিবরণ</label><input type="text" id="expense-desc" placeholder="যেমন: ক্লাস পিকনিক বাস ভাড়া"></div>
-      <div class="field"><label>পরিমাণ (৳)</label><input type="number" id="expense-amount" placeholder="1000"></div>
+      <div class="field" style="flex:2;"><label>Description</label><input type="text" id="expense-desc" placeholder="e.g. Printing paper purchase"></div>
+      <div class="field"><label>Amount (৳)</label><input type="number" id="expense-amount" placeholder="1000"></div>
     </div>
-    <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">খরচ সেভ করো</button></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
     <div class="table-scroll" style="margin-top:16px;">
       <table class="ledger">
-        <thead><tr><th>তারিখ</th><th>বিবরণ</th><th>পরিমাণ</th><th>যোগ করেছেন</th></tr></thead>
+        <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Added By</th></tr></thead>
         <tbody id="expense-list"></tbody>
       </table>
     </div>
@@ -330,14 +330,14 @@ service cloud.firestore {
 
   <!-- student ledger -->
   <div class="panel">
-    <h2>Subscriber এর তালিকা</h2>
-    <!---style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;"
-      হিসাব নিয়ম: (মোট খরচ − মোট ফান্ড) ÷ মোট শিক্ষার্থী = জনপ্রতি ভাগ। প্রতি শিক্ষার্থীর <b>বাকি/জমা</b> = তার কালেকশন − জনপ্রতি ভাগ। সবুজ মানে জমা আছে, লাল মানে বাকি আছে।
-  -->
-    <input type="text" class="search-box" id="student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজো..." oninput="filterStudents()">
+    <h2>Subscriber List</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
+      Calculation rule: (Total Expense − Total Fund) ÷ Total Subscribers = Equal Share. Each subscriber's <b>Due/Credit</b> = their Collection − Equal Share. Green means credit, red means due.
+    </p>
+    <input type="text" class="search-box" id="student-search" placeholder="🔍 Search by name or roll..." oninput="filterStudents()">
     <div class="table-scroll">
       <table class="ledger">
-        <thead><tr><th>রোল</th><th>নাম</th><th>মোবাইল</th><th>কালেকশন (৳)</th><th>বাকি/জমা</th><th>সর্বশেষ আপডেট</th><th></th></tr></thead>
+        <thead><tr><th>Roll</th><th>Name</th><th>Mobile</th><th>Collection (৳)</th><th>Due/Credit</th><th>Last Updated</th><th></th></tr></thead>
         <tbody id="student-body"></tbody>
       </table>
     </div>
@@ -355,19 +355,19 @@ service cloud.firestore {
 <div id="voucher-box" style="padding:28px;width:420px;background:#FFFFFF;border:2px solid #1E293B;font-family:'Inter',sans-serif;">
   <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #E2E8F0;padding-bottom:10px;margin-bottom:14px;">
     <div>
-      <div style="font-size:1.15rem;font-weight:700;color:#1E293B;">খরচের ভাউচার</div>
+      <div style="font-size:1.15rem;font-weight:700;color:#1E293B;">Expense Voucher</div>
       <div style="font-size:.75rem;color:#64748B;" id="voucher-date"></div>
     </div>
     <div style="width:44px;height:44px;border-radius:50%;background:#2563EB;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">৳</div>
   </div>
   <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
-    <thead><tr style="text-align:left;color:#64748B;font-size:.7rem;"><th style="padding:4px 0;">বিবরণ</th><th style="padding:4px 0;text-align:right;">পরিমাণ</th></tr></thead>
+    <thead><tr style="text-align:left;color:#64748B;font-size:.7rem;"><th style="padding:4px 0;">Description</th><th style="padding:4px 0;text-align:right;">Amount</th></tr></thead>
     <tbody id="voucher-rows"></tbody>
   </table>
   <div style="border-top:2px solid #1E293B;margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-weight:700;">
-    <span>সর্বমোট খরচ</span><span id="voucher-total"></span>
+    <span>Total Expense</span><span id="voucher-total"></span>
   </div>
-  <div style="margin-top:18px;font-size:.78rem;color:#64748B;">প্রস্তুতকারী: <span id="voucher-treasurer"></span></div>
+  <div style="margin-top:18px;font-size:.78rem;color:#64748B;">Prepared by: <span id="voucher-treasurer"></span></div>
 </div>
 
 <script type="module">
@@ -381,7 +381,7 @@ import {
   query, orderBy, limit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ============ ১) তোমার Firebase Config ============
+// ============ 1) Your Firebase Config ============
 const firebaseConfig = {
   apiKey: "AIzaSyCuT_E8UUdBmftYGcVa7nxww6fUE1WBuak",
   authDomain: "tree-d26aa.firebaseapp.com",
@@ -391,7 +391,7 @@ const firebaseConfig = {
   appId: "1:222720179431:web:e86835cdc1b950e8a07642"
 };
 
-// ---- setup guard: config বসানো না থাকলে সেটআপ গাইড দেখাও ----
+// ---- setup guard: show the setup guide if the config hasn't been filled in ----
 if (firebaseConfig.apiKey === "YOUR_API_KEY") {
   document.getElementById('setup-overlay').classList.remove('hidden');
   throw new Error("Firebase config not set. Follow the setup guide.");
@@ -401,7 +401,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ============ ২) শিক্ষার্থী তালিকা — এখন সরাসরি ফায়ারবেস থেকে আসে, ম্যানুয়ালি যোগ করা হয় ============
+// ============ 2) Subscriber list — now comes directly from Firebase, added manually via the form ============
 let students = []; // [{id, roll, name, mobile}]
 
 // ============ state ============
@@ -430,11 +430,11 @@ function showAuthError(msg) {
 window.doLogin = async () => {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
-  if (!email || !password) return showAuthError("ইমেইল ও পাসওয়ার্ড দুটোই দাও।");
+  if (!email || !password) return showAuthError("Please enter both email and password.");
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (e) {
-    showAuthError("Failed");
+    showAuthError("Login failed. Please check your email and password.");
   }
 };
 
@@ -442,15 +442,20 @@ window.doRegister = async () => {
   const name = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
-  if (!name || !email || !password) return showAuthError("সব ফিল্ড পূরণ করো।");
-  if (password.length < 6) return showAuthError("6 digit");
+  if (!name || !email || !password) return showAuthError("Please fill in all fields.");
+  if (password.length < 6) return showAuthError("Password must be at least 6 characters.");
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
     // force refresh so onAuthStateChanged sees the updated displayName
     await auth.currentUser.reload();
+    // onAuthStateChanged already fired (with the pre-update name) when the account
+    // was created, and reload() alone won't re-trigger it — so update the UI here too
+    currentTreasurerName = name;
+    document.getElementById('current-user-name').textContent = currentTreasurerName;
+    document.getElementById('current-user-stamp').textContent = stampInitials(currentTreasurerName);
   } catch (e) {
-    showAuthError("Failed");
+    showAuthError("Registration failed. Please try again.");
   }
 };
 
@@ -520,12 +525,12 @@ function startListeners() {
   });
 }
 
-// ============ STUDENT MANAGEMENT (WRITES) ============
+// ============ SUBSCRIBER MANAGEMENT (WRITES) ============
 window.addStudent = async () => {
   const name = document.getElementById('new-student-name').value.trim();
   const roll = parseInt(document.getElementById('new-student-roll').value);
   const mobile = document.getElementById('new-student-mobile').value.trim();
-  if (!name || !roll) { alert("নাম ও রোল নম্বর দুটোই দাও।"); return; }
+  if (!name || !roll) { alert("Please enter both name and roll number."); return; }
   await setDoc(doc(db, "students", roll.toString()), {
     name, roll, mobile: mobile || "", addedBy: currentTreasurerName, addedAt: serverTimestamp()
   });
@@ -535,7 +540,7 @@ window.addStudent = async () => {
 };
 
 window.deleteStudent = async (roll) => {
-  if (!confirm("এই শিক্ষার্থীকে তালিকা থেকে বাদ দিতে চাও?")) return;
+  if (!confirm("Remove this subscriber from the list?")) return;
   await deleteDoc(doc(db, "students", roll.toString()));
   try { await deleteDoc(doc(db, "collections", roll.toString())); } catch (e) {}
 };
@@ -544,7 +549,7 @@ window.deleteStudent = async (roll) => {
 function renderStudentRows() {
   const tbody = document.getElementById('student-body');
   if (!students.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="activity-meta">এখনো কোনো শিক্ষার্থী যোগ করা হয়নি। উপরের ফর্ম দিয়ে যোগ করো।</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="activity-meta">No subscribers added yet. Use the form above to add one.</td></tr>`;
     return;
   }
   tbody.innerHTML = students.map(s => `
@@ -583,7 +588,7 @@ function renderStudents() {
     }
     const updEl = document.getElementById(`upd-${s.roll}`);
     if (updEl && rec && rec.updatedBy) {
-      const t = rec.updatedAt && rec.updatedAt.toDate ? rec.updatedAt.toDate().toLocaleDateString('bn-BD') : "";
+      const t = rec.updatedAt && rec.updatedAt.toDate ? rec.updatedAt.toDate().toLocaleDateString('en-US') : "";
       updEl.textContent = `${rec.updatedBy} ${t ? "· " + t : ""}`;
     }
   });
@@ -602,15 +607,15 @@ function renderSummary() {
 
 function renderDonations() {
   document.getElementById('donation-list').innerHTML = donationsData.map(d => {
-    const t = d.addedAt && d.addedAt.toDate ? d.addedAt.toDate().toLocaleDateString('bn-BD') : "...";
+    const t = d.addedAt && d.addedAt.toDate ? d.addedAt.toDate().toLocaleDateString('en-US') : "...";
     return `<tr>
       <td class="activity-meta">${t}</td>
-      <td>${d.donorName || "অজ্ঞাত"}</td>
+      <td>${d.donorName || "Anonymous"}</td>
       <td class="num">৳${(d.amount || 0).toFixed(2)}</td>
       <td>${d.note || "—"}</td>
       <td class="activity-meta">${d.addedBy || ""}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো কোনো ফান্ড যোগ হয়নি।</td></tr>`;
+  }).join('') || `<tr><td colspan="5" class="activity-meta">No funds added yet.</td></tr>`;
 }
 
 function renderExpenses() {
@@ -621,13 +626,13 @@ function renderExpenses() {
       <td class="num">৳${(e.amount || 0).toFixed(2)}</td>
       <td class="activity-meta">${e.addedBy || ""}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="4" class="activity-meta">এখনো কোনো খরচ যোগ হয়নি।</td></tr>`;
+  }).join('') || `<tr><td colspan="4" class="activity-meta">No expenses added yet.</td></tr>`;
 }
 
 function renderActivity() {
   const iconClass = { payment: "pay", donation: "don", expense: "exp" };
   document.getElementById('activity-feed').innerHTML = activityData.map(a => {
-    const t = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().toLocaleString('bn-BD') : "এইমাত্র";
+    const t = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().toLocaleString('en-US') : "just now";
     return `<div class="activity-item">
       <div class="activity-dot ${iconClass[a.type] || 'pay'}"></div>
       <div>
@@ -635,7 +640,7 @@ function renderActivity() {
         <div class="activity-meta">${a.actor} · ${t}</div>
       </div>
     </div>`;
-  }).join('') || `<div class="activity-meta">এখনো কোনো কার্যক্রম নেই।</div>`;
+  }).join('') || `<div class="activity-meta">No activity yet.</div>`;
 }
 
 window.filterStudents = () => {
@@ -657,7 +662,7 @@ window.updateCollection = async (roll, amount) => {
   await addDoc(collection(db, "activity"), {
     type: "payment",
     actor: currentTreasurerName,
-    detail: `রোল ${roll} (${student ? student.name : ''}) এর কালেকশন ৳${amt.toFixed(2)} করে আপডেট হয়েছে`,
+    detail: `Collection for roll ${roll} (${student ? student.name : ''}) updated to ৳${amt.toFixed(2)}`,
     amount: amt,
     createdAt: serverTimestamp()
   });
@@ -667,13 +672,13 @@ window.saveDonation = async () => {
   const donorName = document.getElementById('donation-name').value.trim();
   const amount = parseFloat(document.getElementById('donation-amount').value);
   const note = document.getElementById('donation-note').value.trim();
-  if (!amount || amount <= 0) { alert("সঠিক পরিমাণ দাও।"); return; }
+  if (!amount || amount <= 0) { alert("Please enter a valid amount."); return; }
   await addDoc(collection(db, "donations"), {
-    donorName: donorName || "অজ্ঞাত", amount, note, addedBy: currentTreasurerName, addedAt: serverTimestamp()
+    donorName: donorName || "Anonymous", amount, note, addedBy: currentTreasurerName, addedAt: serverTimestamp()
   });
   await addDoc(collection(db, "activity"), {
     type: "donation", actor: currentTreasurerName,
-    detail: `${donorName || 'অজ্ঞাত প্রদানকারী'} থেকে ৳${amount.toFixed(2)} ফান্ড যোগ হয়েছে`,
+    detail: `Fund of ৳${amount.toFixed(2)} added from ${donorName || 'an anonymous donor'}`,
     amount, createdAt: serverTimestamp()
   });
   document.getElementById('donation-name').value = "";
@@ -684,14 +689,14 @@ window.saveDonation = async () => {
 window.saveExpense = async () => {
   const desc = document.getElementById('expense-desc').value.trim();
   const amount = parseFloat(document.getElementById('expense-amount').value);
-  if (!desc || !amount || amount <= 0) { alert("বিবরণ ও সঠিক পরিমাণ দাও।"); return; }
-  const date = new Date().toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
+  if (!desc || !amount || amount <= 0) { alert("Please enter a description and a valid amount."); return; }
+  const date = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
   await addDoc(collection(db, "expenses"), {
     description: desc, amount, date, addedBy: currentTreasurerName, addedAt: serverTimestamp()
   });
   await addDoc(collection(db, "activity"), {
     type: "expense", actor: currentTreasurerName,
-    detail: `"${desc}" এর জন্য ৳${amount.toFixed(2)} খরচ যোগ হয়েছে`,
+    detail: `Expense of ৳${amount.toFixed(2)} added for "${desc}"`,
     amount, createdAt: serverTimestamp()
   });
   document.getElementById('expense-desc').value = "";
@@ -701,7 +706,7 @@ window.saveExpense = async () => {
 // ============ VOUCHER ============
 window.openVoucherModal = () => {
   const box = document.getElementById('voucher-box');
-  document.getElementById('voucher-date').textContent = new Date().toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('voucher-date').textContent = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
   document.getElementById('voucher-treasurer').textContent = currentTreasurerName;
   document.getElementById('voucher-rows').innerHTML = expensesData.slice(0, 12).map(e =>
     `<tr><td style="padding:4px 0;">${e.description}</td><td style="padding:4px 0;text-align:right;">৳${e.amount.toFixed(2)}</td></tr>`
