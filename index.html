@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ট্রেজারি খাতা</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --paper:#F1EAD9;
+    --paper-2:#E7DEC7;
+    --panel:#FBF8F0;
+    --ink:#22304A;
+    --ink-soft:#5B6B85;
+    --line:#CFC3A2;
+    --line-strong:#B7A87D;
+    --green:#2E6B4F;
+    --green-bg:#E4EEE7;
+    --red:#9B3A3A;
+    --red-bg:#F3E4E1;
+    --gold:#B4823A;
+    --shadow: 0 10px 30px rgba(34,48,74,0.10);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter','Noto Sans Bengali',sans-serif;
+    color:var(--ink);
+    background:
+      repeating-linear-gradient(180deg, transparent 0 38px, rgba(183,168,125,0.22) 38px 39px),
+      var(--paper);
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{font-family:'Fraunces','Noto Sans Bengali',serif;}
+  .num{font-family:'IBM Plex Mono','Noto Sans Bengali',monospace; font-variant-numeric: tabular-nums;}
+  a{color:inherit;}
+  ::selection{background:#D7C69A;}
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* ---------- shell ---------- */
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 18px 80px;}
+  .hidden{display:none !important;}
+
+  /* ---------- header / stamp ---------- */
+  .masthead{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding-bottom:18px;margin-bottom:22px;border-bottom:3px double var(--line-strong);
+    flex-wrap:wrap;
+  }
+  .masthead h1{margin:0;font-size:1.9rem;font-weight:700;letter-spacing:.2px;}
+  .masthead .sub{color:var(--ink-soft);font-size:.85rem;margin-top:2px;}
+  .stamp-wrap{display:flex;align-items:center;gap:12px;}
+  .stamp{
+    width:64px;height:64px;border-radius:50%;
+    border:2.5px solid var(--gold);color:var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-weight:700;font-size:1.5rem;
+    transform:rotate(-9deg);flex:none;
+    box-shadow: inset 0 0 0 3px rgba(180,130,58,0.15);
+  }
+  .who{line-height:1.25;}
+  .who .name{font-weight:600;font-size:.95rem;}
+  .who .role{font-size:.75rem;color:var(--ink-soft);}
+  .logout-btn{
+    background:none;border:1px solid var(--line-strong);color:var(--ink-soft);
+    padding:6px 12px;border-radius:6px;font-size:.8rem;cursor:pointer;
+  }
+  .logout-btn:hover{background:var(--paper-2);}
+
+  /* ---------- cards ---------- */
+  .panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:20px 22px;box-shadow:var(--shadow);margin-bottom:20px;
+  }
+  .panel h2{font-size:1.05rem;margin:0 0 14px;display:flex;align-items:center;gap:8px;}
+  .panel h2 .idx{color:var(--gold);font-size:.85rem;font-weight:600;}
+
+  .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+  .sum-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;box-shadow:var(--shadow);
+  }
+  .sum-card .label{font-size:.72rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;}
+  .sum-card .val{font-size:1.35rem;font-weight:600;margin-top:4px;}
+  .sum-card.green .val{color:var(--green);}
+  .sum-card.red .val{color:var(--red);}
+  .sum-card.gold .val{color:var(--gold);}
+  @media (max-width:720px){.summary-grid{grid-template-columns:repeat(2,1fr);}}
+
+  /* ---------- forms ---------- */
+  .field-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .field{flex:1;min-width:140px;}
+  label{font-size:.78rem;color:var(--ink-soft);display:block;margin-bottom:4px;}
+  input[type=text],input[type=number],input[type=email],input[type=password]{
+    width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;
+    background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);
+  }
+  input:focus{border-color:var(--gold);}
+  .btn{
+    border:none;border-radius:6px;padding:9px 16px;font-size:.88rem;font-weight:600;
+    cursor:pointer;transition:transform .05s ease;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-primary:hover{background:#2c3d5e;}
+  .btn-gold{background:var(--gold);color:#fff;}
+  .btn-gold:hover{background:#9c6f2e;}
+  .btn-outline{background:none;border:1px solid var(--line-strong);color:var(--ink);}
+  .btn-outline:hover{background:var(--paper-2);}
+  .btn-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+
+  /* ---------- table ---------- */
+  .table-scroll{overflow-x:auto;}
+  table.ledger{width:100%;border-collapse:collapse;font-size:.9rem;}
+  table.ledger thead th{
+    text-align:left;font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink-soft);border-bottom:2px solid var(--line-strong);padding:8px 10px;white-space:nowrap;
+  }
+  table.ledger tbody td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  table.ledger tbody tr:hover{background:rgba(183,168,125,0.08);}
+  .due-pos{color:var(--green);font-weight:600;}
+  .due-neg{color:var(--red);font-weight:600;}
+  .coll-input{width:110px;}
+  .search-box{max-width:280px;margin-bottom:12px;}
+
+  /* ---------- activity ---------- */
+  .activity-item{
+    display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.85rem;
+  }
+  .activity-item:last-child{border-bottom:none;}
+  .activity-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;}
+  .activity-dot.pay{background:var(--green);}
+  .activity-dot.don{background:var(--gold);}
+  .activity-dot.exp{background:var(--red);}
+  .activity-meta{color:var(--ink-soft);font-size:.75rem;}
+
+  /* ---------- auth screen ---------- */
+  .auth-screen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .auth-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:36px 32px;max-width:400px;width:100%;
+  }
+  .auth-card h1{font-size:1.5rem;margin:0 0 4px;text-align:center;}
+  .auth-card .sub{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-bottom:22px;}
+  .auth-toggle{text-align:center;margin-top:14px;font-size:.85rem;}
+  .auth-toggle a{color:var(--gold);cursor:pointer;font-weight:600;text-decoration:none;}
+  .auth-error{
+    background:var(--red-bg);color:var(--red);border-radius:6px;padding:8px 12px;
+    font-size:.82rem;margin-bottom:12px;
+  }
+  .auth-stamp{display:flex;justify-content:center;margin-bottom:18px;}
+
+  /* ---------- setup overlay ---------- */
+  .setup-overlay{
+    position:fixed;inset:0;background:rgba(34,48,74,0.85);z-index:999;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .setup-card{
+    background:var(--panel);border-radius:12px;max-width:560px;width:100%;
+    padding:30px 32px;max-height:88vh;overflow-y:auto;
+  }
+  .setup-card h2{margin-top:0;}
+  .setup-card ol{padding-left:20px;font-size:.9rem;line-height:1.7;}
+  .setup-card code{background:var(--paper-2);padding:2px 6px;border-radius:4px;font-size:.82rem;}
+  .setup-card pre{background:var(--ink);color:#e8e8e8;padding:12px 14px;border-radius:8px;font-size:.78rem;overflow-x:auto;}
+
+  #voucher-box{display:none;}
+</style>
+</head>
+<body>
+
+<!-- ============ SETUP OVERLAY (shown only if firebaseConfig is unfilled) ============ -->
+<div id="setup-overlay" class="setup-overlay hidden">
+  <div class="setup-card">
+    <h2>🔧 প্রথমবার সেটআপ দরকার</h2>
+    <p>এই অ্যাপটা চালাতে নিজের একটা ফায়ারবেস প্রজেক্ট লাগবে। ধাপগুলো:</p>
+    <ol>
+      <li><a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase Console</a>-এ গিয়ে একটা প্রজেক্ট বানাও।</li>
+      <li>Build → <b>Authentication</b> → Sign-in method → <b>Email/Password</b> চালু করো।</li>
+      <li>Build → <b>Firestore Database</b> → একটা ডাটাবেস তৈরি করো (production mode)।</li>
+      <li>Firestore এর <b>Rules</b> ট্যাবে গিয়ে নিচেরটা বসাও (শুধু লগইন করা ট্রেজারারই লিখতে/পড়তে পারবে):
+        <pre>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}</pre>
+      </li>
+      <li>Project settings → General → নিচের দিকে "Your apps" → Web app যোগ করে <code>firebaseConfig</code> অবজেক্টটা কপি করো।</li>
+      <li>এই ফাইলের <code>&lt;script type="module"&gt;</code> এর শুরুতে <code>firebaseConfig</code> এর জায়গায় নিজেরটা বসিয়ে ফাইলটা আবার সেভ/আপলোড করো।</li>
+    </ol>
+    <p style="color:var(--ink-soft);font-size:.82rem;">এই ধাপগুলো একবারই করতে হবে। এরপর থেকে যে কেউ ট্রেজারার হিসেবে অ্যাকাউন্ট বানিয়ে লগইন করতে পারবে এবং সব হিসাব ফায়ারবেসে জমা থাকবে।</p>
+  </div>
+</div>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="auth-screen" class="auth-screen hidden">
+  <div class="auth-card">
+    <div class="auth-stamp"><div class="stamp">৳</div></div>
+    <h1>ট্রেজারি খাতা</h1>
+    <div class="sub">ক্লাস ট্রেজারারদের জন্য লগইন</div>
+
+    <div id="auth-error" class="auth-error hidden"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="login-form">
+      <div class="field" style="margin-bottom:10px;">
+        <label>ইমেইল</label>
+        <input type="email" id="login-email" placeholder="you@example.com">
+      </div>
+      <div class="field" style="margin-bottom:16px;">
+        <label>পাসওয়ার্ড</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">লগইন করো</button>
+      <div class="auth-toggle">ট্রেজারার হিসেবে নতুন? <a onclick="toggleAuthMode()">নিবন্ধন করো</a></div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="register-form" class="hidden">
+      <div class="field" style="margin-bottom:10px;">
+        <label>তোমার নাম (রেকর্ডে এই নামই দেখাবে)</label>
+        <input type="text" id="reg-name" placeholder="যেমন: রাফিদ হাসান">
+      </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label>ইমেইল</label>
+        <input type="email" id="reg-email" placeholder="you@example.com">
+      </div>
+      <div class="field" style="margin-bottom:16px;">
+        <label>পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)</label>
+        <input type="password" id="reg-password" placeholder="••••••••">
+      </div>
+      <button class="btn btn-gold" style="width:100%;" onclick="doRegister()">নিবন্ধন করে লগইন করো</button>
+      <div class="auth-toggle">আগে থেকে অ্যাকাউন্ট আছে? <a onclick="toggleAuthMode()">লগইন করো</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
+<div id="app" class="wrap hidden">
+
+  <div class="masthead">
+    <div>
+      <h1>ট্রেজারি খাতা</h1>
+      <div class="sub">সব হিসাব লগইনকৃত ট্রেজারারের নামসহ ফায়ারবেসে সংরক্ষিত হচ্ছে</div>
+    </div>
+    <div class="stamp-wrap">
+      <div class="who">
+        <div class="name" id="current-user-name">—</div>
+        <div class="role">বর্তমান ট্রেজারার</div>
+      </div>
+      <div class="stamp" id="current-user-stamp">?</div>
+      <button class="logout-btn" onclick="doLogout()">লগআউট</button>
+    </div>
+  </div>
+
+  <!-- summary cards -->
+  <div class="summary-grid">
+    <div class="sum-card green"><div class="label">শিক্ষার্থী কালেকশন</div><div class="val num" id="sum-collection">৳0</div></div>
+    <div class="sum-card gold"><div class="label">অনুদান</div><div class="val num" id="sum-donation">৳0</div></div>
+    <div class="sum-card red"><div class="label">মোট খরচ</div><div class="val num" id="sum-expense">৳0</div></div>
+    <div class="sum-card"><div class="label">হাতে থাকা ব্যালেন্স</div><div class="val num" id="sum-balance">৳0</div></div>
+  </div>
+
+  <!-- report buttons -->
+  <div class="panel">
+    <h2><span class="idx">০১</span> রিপোর্ট ও ভাউচার</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 6px;">পূর্ণাঙ্গ হিসাব বিবরণী পিডিএফ আকারে নামাও, অথবা একটা খরচের ভাউচার ছবি হিসেবে সেভ করো।</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="downloadFullReport()">📄 পূর্ণ পিডিএফ রিপোর্ট</button>
+      <button class="btn btn-outline" onclick="openVoucherModal()">🧾 খরচের ভাউচার (PNG)</button>
+    </div>
+  </div>
+
+  <!-- donation -->
+  <div class="panel">
+    <h2><span class="idx">০২</span> অনুদান যোগ করো</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">শিক্ষার্থীর ব্যক্তিগত এন্ট্রি ছাড়াও, বাইরে থেকে কোনো অনুদান পেলে এখানে যোগ করো — এটা মোট খরচের ভাগ কমিয়ে সবার উপকারে যাবে।</p>
+    <div class="field-row">
+      <div class="field"><label>দাতার নাম (ঐচ্ছিক)</label><input type="text" id="donation-name" placeholder="যেমন: অভিভাবক / প্রাক্তন শিক্ষার্থী"></div>
+      <div class="field"><label>পরিমাণ (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
+      <div class="field"><label>নোট (ঐচ্ছিক)</label><input type="text" id="donation-note" placeholder="যেমন: ঈদ উপহার"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">অনুদান সেভ করো</button></div>
+    <div class="table-scroll" style="margin-top:16px;">
+      <table class="ledger">
+        <thead><tr><th>তারিখ</th><th>দাতা</th><th>পরিমাণ</th><th>নোট</th><th>যোগ করেছেন</th></tr></thead>
+        <tbody id="donation-list"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- expense -->
+  <div class="panel">
+    <h2><span class="idx">০৩</span> খরচ যোগ করো</h2>
+    <div class="field-row">
+      <div class="field" style="flex:2;"><label>বিবরণ</label><input type="text" id="expense-desc" placeholder="যেমন: ক্লাস পিকনিক বাস ভাড়া"></div>
+      <div class="field"><label>পরিমাণ (৳)</label><input type="number" id="expense-amount" placeholder="1000"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">খরচ সেভ করো</button></div>
+    <div class="table-scroll" style="margin-top:16px;">
+      <table class="ledger">
+        <thead><tr><th>তারিখ</th><th>বিবরণ</th><th>পরিমাণ</th><th>যোগ করেছেন</th></tr></thead>
+        <tbody id="expense-list"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- student ledger -->
+  <div class="panel">
+    <h2><span class="idx">০৪</span> শিক্ষার্থী লেজার</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
+      হিসাব নিয়ম: (মোট খরচ − মোট অনুদান) ÷ মোট শিক্ষার্থী = জনপ্রতি ভাগ। প্রতি শিক্ষার্থীর <b>বাকি/জমা</b> = তার কালেকশন − জনপ্রতি ভাগ। সবুজ মানে জমা আছে, লাল মানে বাকি আছে।
+    </p>
+    <input type="text" class="search-box" id="student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজো..." oninput="filterStudents()">
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>রোল</th><th>নাম</th><th>কালেকশন (৳)</th><th>বাকি/জমা</th><th>সর্বশেষ আপডেট</th></tr></thead>
+        <tbody id="student-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- activity feed -->
+  <div class="panel">
+    <h2><span class="idx">০৫</span> সাম্প্রতিক কার্যক্রম</h2>
+    <div id="activity-feed"></div>
+  </div>
+
+</div>
+
+<!-- ============ VOUCHER (hidden, rendered to canvas) ============ -->
+<div id="voucher-box" style="padding:28px;width:420px;background:#FBF8F0;border:2px solid #22304A;font-family:'Fraunces',serif;">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px double #B7A87D;padding-bottom:10px;margin-bottom:14px;">
+    <div>
+      <div style="font-size:1.2rem;font-weight:700;color:#22304A;">খরচের ভাউচার</div>
+      <div style="font-size:.75rem;color:#5B6B85;font-family:Inter,sans-serif;" id="voucher-date"></div>
+    </div>
+    <div style="width:52px;height:52px;border-radius:50%;border:2px solid #B4823A;color:#B4823A;display:flex;align-items:center;justify-content:center;font-weight:700;transform:rotate(-8deg);">৳</div>
+  </div>
+  <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;font-size:.85rem;">
+    <thead><tr style="text-align:left;color:#5B6B85;font-size:.7rem;text-transform:uppercase;"><th style="padding:4px 0;">বিবরণ</th><th style="padding:4px 0;text-align:right;">পরিমাণ</th></tr></thead>
+    <tbody id="voucher-rows"></tbody>
+  </table>
+  <div style="border-top:2px solid #22304A;margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-weight:700;font-family:Inter,sans-serif;">
+    <span>সর্বমোট খরচ</span><span id="voucher-total"></span>
+  </div>
+  <div style="margin-top:18px;font-size:.78rem;color:#5B6B85;font-family:Inter,sans-serif;">প্রস্তুতকারী: <span id="voucher-treasurer"></span></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+  createUserWithEmailAndPassword, updateProfile, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, collection, onSnapshot, addDoc,
+  query, orderBy, limit, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ============ ১) তোমার Firebase Config ============
+const firebaseConfig = {
+  apiKey: "AIzaSyCuT_E8UUdBmftYGcVa7nxww6fUE1WBuak",
+  authDomain: "tree-d26aa.firebaseapp.com",
+  projectId: "tree-d26aa",
+  storageBucket: "tree-d26aa.firebasestorage.app",
+  messagingSenderId: "222720179431",
+  appId: "1:222720179431:web:e86835cdc1b950e8a07642"
+};
+
+// ---- setup guard: config বসানো না থাকলে সেটআপ গাইড দেখাও ----
+if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+  document.getElementById('setup-overlay').classList.remove('hidden');
+  throw new Error("Firebase config not set. Follow the setup guide.");
+}
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ============ ২) শিক্ষার্থী তালিকা (স্থির রেফারেন্স ডেটা) ============
+const students = [
+  {"class_roll": 1, "name": "MD. KAWSER AZAM"}, {"class_roll": 2, "name": "S. B. ANURADHA"}, {"class_roll": 3, "name": "REHNUMA ISLAM"}, {"class_roll": 4, "name": "MD. ABDUR RAHIM"}, {"class_roll": 5, "name": "TAHMID UR RAHMAN"}, {"class_roll": 6, "name": "JANNATUN NAHAR"}, {"class_roll": 7, "name": "MD. SHOAIB AKHTAR"}, {"class_roll": 8, "name": "ZUYANA ALIF"}, {"class_roll": 9, "name": "MD. AL SERAFIC ZIHAD"}, {"class_roll": 10, "name": "MOST. HAMZA IFFAT NUBAH"}, {"class_roll": 11, "name": "ROJA ASKARI"}, {"class_roll": 12, "name": "MST. SIRAJAM MUNIRA"}, {"class_roll": 13, "name": "RAFID HASAN SIDDIQUI"}, {"class_roll": 14, "name": "MST. NUSRAT JAHAN NADIA"}, {"class_roll": 15, "name": "MD. ABDUR ROUF"}, {"class_roll": 16, "name": "SHAH MD. JUHAYER JARIF"}, {"class_roll": 17, "name": "SAFA MARIYA WORPA"}, {"class_roll": 18, "name": "AFIYA MUBASHIRA MAYESHA"}, {"class_roll": 19, "name": "SIDRATUL MUNTAHA MAHI"}, {"class_roll": 20, "name": "FAHIM ASHFAK ALIN"}, {"class_roll": 21, "name": "MD. MAHMUD ALAM"}, {"class_roll": 22, "name": "MD. ABDULLAH AL RAFI"}, {"class_roll": 23, "name": "S. M. TAMZID HOSSAIN PRODHAN"}, {"class_roll": 24, "name": "MAIDA ALAMGIR"}, {"class_roll": 25, "name": "TURE SINA FAIZA MOMO"}, {"class_roll": 26, "name": "MST. TONU"}, {"class_roll": 27, "name": "MST. TASNIA RASHID LISHA"}, {"class_roll": 28, "name": "MD. NAFIZ AHMMED"}, {"class_roll": 29, "name": "MD. SAZZAD AHAMED"}, {"class_roll": 30, "name": "SAMIYA JANNAT"}, {"class_roll": 31, "name": "MST. JANNATUL SAHIMA HAQUE"}, {"class_roll": 32, "name": "NAYEEMA SALEHA"}, {"class_roll": 33, "name": "MD. ALIFUL ISLAM ALIF"}, {"class_roll": 34, "name": "NAZIA ISMAIL REETU"}, {"class_roll": 35, "name": "MST. AKHI"}, {"class_roll": 36, "name": "MST. SINTHIYA AKTHER"}, {"class_roll": 37, "name": "MST. RAISHA ANJUM"}, {"class_roll": 38, "name": "FERDOUS HASAN FAHIM"}, {"class_roll": 39, "name": "ZANNATUL MAWA KHAN"}, {"class_roll": 40, "name": "TAIN NUR OMI"}, {"class_roll": 41, "name": "MD. RAFIUR ISLAM"}, {"class_roll": 42, "name": "MOST. AME KHATUN"}, {"class_roll": 43, "name": "MST. MOHONA RAHMAN"}, {"class_roll": 44, "name": "TANIA AKTER"}, {"class_roll": 45, "name": "SUMAIYA AFRIN FAIZA"}, {"class_roll": 46, "name": "KAZI KHADIJA ANAM"}, {"class_roll": 47, "name": "MD. MIZANUR RAHMAN"}, {"class_roll": 48, "name": "ADITYA CHAKMA"}, {"class_roll": 49, "name": "GALIB MAHMUD"}, {"class_roll": 50, "name": "TASNIM RAHI"}, {"class_roll": 51, "name": "SHEMONTY ISLAM SUSHOMA"}, {"class_roll": 52, "name": "NAZMUN NAHAR"}, {"class_roll": 53, "name": "TASNIM ARA SHREYOSEE"}, {"class_roll": 54, "name": "MD. ABDUR ROKIB AHMED RAK"}, {"class_roll": 55, "name": "M. A. MOSTAKIM"}, {"class_roll": 56, "name": "AYSA KHATUN"}, {"class_roll": 57, "name": "SUPARNA DAS"}, {"class_roll": 58, "name": "MIDULA MAHJABIN"}, {"class_roll": 59, "name": "MD. HEMAYETULLAH HIMU"}, {"class_roll": 60, "name": "MD. S. M. RIFAT SHAH"}, {"class_roll": 61, "name": "TANJEHE NAWRATI ROWZA"}, {"class_roll": 62, "name": "UMME SALMA"}, {"class_roll": 63, "name": "MAISHA KASHFIA ZAMAN"}, {"class_roll": 64, "name": "SHAOMA SIDDIK AKHI"}, {"class_roll": 65, "name": "SANCHITA ROY DIYA"}, {"class_roll": 66, "name": "SHAH MUNAF WASIF SIDDIQUE ANAN"}, {"class_roll": 67, "name": "MORSALINA NUPUR"}, {"class_roll": 68, "name": "AYESHA SHIDDIKA"}, {"class_roll": 69, "name": "TASNIM JAHAN MARIA"}, {"class_roll": 70, "name": "KABBO PROSAD GUPTA"}, {"class_roll": 71, "name": "MD. MUNTASIR MAHMUD MUHI"}, {"class_roll": 72, "name": "TASNIM TABASSUM TISHA"}, {"class_roll": 73, "name": "MD. TANJIMUL ISLAM"}
+];
+
+// ============ state ============
+let collectionsData = {};   // { roll: {amount, updatedBy, updatedAt} }
+let donationsData = [];     // [{id, donorName, amount, note, addedBy, addedAt}]
+let expensesData = [];      // [{id, description, amount, date, addedBy, addedAt}]
+let activityData = [];      // recent activity log
+let currentTreasurerName = "";
+let isRegisterMode = false;
+
+// ============ AUTH ============
+function toggleAuthMode() {
+  isRegisterMode = !isRegisterMode;
+  document.getElementById('login-form').classList.toggle('hidden', isRegisterMode);
+  document.getElementById('register-form').classList.toggle('hidden', !isRegisterMode);
+  document.getElementById('auth-error').classList.add('hidden');
+}
+window.toggleAuthMode = toggleAuthMode;
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+window.doLogin = async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showAuthError("ইমেইল ও পাসওয়ার্ড দুটোই দাও।");
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    showAuthError("লগইন ব্যর্থ হয়েছে। ইমেইল/পাসওয়ার্ড আবার চেক করো।");
+  }
+};
+
+window.doRegister = async () => {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!name || !email || !password) return showAuthError("সব ফিল্ড পূরণ করো।");
+  if (password.length < 6) return showAuthError("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।");
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: name });
+    // force refresh so onAuthStateChanged sees the updated displayName
+    await auth.currentUser.reload();
+  } catch (e) {
+    showAuthError("নিবন্ধন ব্যর্থ হয়েছে: এই ইমেইল হয়তো আগে থেকেই ব্যবহৃত।");
+  }
+};
+
+window.doLogout = async () => {
+  await signOut(auth);
+};
+
+function stampInitials(name) {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
+}
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentTreasurerName = user.displayName || user.email;
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('current-user-name').textContent = currentTreasurerName;
+    document.getElementById('current-user-stamp').textContent = stampInitials(currentTreasurerName);
+    startListeners();
+  } else {
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('auth-screen').classList.remove('hidden');
+  }
+});
+
+// ============ FIRESTORE LISTENERS ============
+let listenersStarted = false;
+function startListeners() {
+  if (listenersStarted) return;
+  listenersStarted = true;
+
+  onSnapshot(collection(db, "collections"), (snap) => {
+    collectionsData = {};
+    snap.forEach(d => collectionsData[d.id] = d.data());
+    renderStudents();
+    renderSummary();
+  });
+
+  onSnapshot(query(collection(db, "donations"), orderBy("addedAt", "desc")), (snap) => {
+    donationsData = [];
+    snap.forEach(d => donationsData.push({ id: d.id, ...d.data() }));
+    renderDonations();
+    renderSummary();
+  });
+
+  onSnapshot(query(collection(db, "expenses"), orderBy("addedAt", "desc")), (snap) => {
+    expensesData = [];
+    snap.forEach(d => expensesData.push({ id: d.id, ...d.data() }));
+    renderExpenses();
+    renderSummary();
+  });
+
+  onSnapshot(query(collection(db, "activity"), orderBy("createdAt", "desc"), limit(20)), (snap) => {
+    activityData = [];
+    snap.forEach(d => activityData.push({ id: d.id, ...d.data() }));
+    renderActivity();
+  });
+
+  renderStudentRows(); // build the empty rows once
+}
+
+// ============ RENDERING ============
+function renderStudentRows() {
+  const tbody = document.getElementById('student-body');
+  tbody.innerHTML = students.map(s => `
+    <tr data-name="${s.name.toLowerCase()}" data-roll="${s.class_roll}">
+      <td class="num">${s.class_roll}</td>
+      <td>${s.name}</td>
+      <td><input type="number" class="coll-input" id="coll-${s.class_roll}" value="0" onchange="updateCollection(${s.class_roll}, this.value)"></td>
+      <td class="num" id="rem-${s.class_roll}">৳0</td>
+      <td class="activity-meta" id="upd-${s.class_roll}">—</td>
+    </tr>
+  `).join('');
+}
+
+function getEqualShare() {
+  const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0);
+  const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
+  const netToSplit = Math.max(totalExpense - totalDonation, 0);
+  return netToSplit / students.length;
+}
+
+function renderStudents() {
+  const equalShare = getEqualShare();
+  students.forEach(s => {
+    const rec = collectionsData[s.class_roll];
+    const amount = rec ? (rec.amount || 0) : 0;
+    const input = document.getElementById(`coll-${s.class_roll}`);
+    if (input && document.activeElement !== input) input.value = amount;
+    const remaining = amount - equalShare;
+    const remEl = document.getElementById(`rem-${s.class_roll}`);
+    remEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
+    remEl.className = "num " + (remaining >= 0 ? "due-pos" : "due-neg");
+    const updEl = document.getElementById(`upd-${s.class_roll}`);
+    if (rec && rec.updatedBy) {
+      const t = rec.updatedAt && rec.updatedAt.toDate ? rec.updatedAt.toDate().toLocaleDateString('bn-BD') : "";
+      updEl.textContent = `${rec.updatedBy} ${t ? "· " + t : ""}`;
+    }
+  });
+}
+
+function renderSummary() {
+  const totalCollection = students.reduce((a, s) => a + ((collectionsData[s.class_roll] || {}).amount || 0), 0);
+  const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
+  const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0);
+  const balance = totalCollection + totalDonation - totalExpense;
+  document.getElementById('sum-collection').textContent = "৳" + totalCollection.toFixed(2);
+  document.getElementById('sum-donation').textContent = "৳" + totalDonation.toFixed(2);
+  document.getElementById('sum-expense').textContent = "৳" + totalExpense.toFixed(2);
+  document.getElementById('sum-balance').textContent = "৳" + balance.toFixed(2);
+}
+
+function renderDonations() {
+  document.getElementById('donation-list').innerHTML = donationsData.map(d => {
+    const t = d.addedAt && d.addedAt.toDate ? d.addedAt.toDate().toLocaleDateString('bn-BD') : "...";
+    return `<tr>
+      <td class="activity-meta">${t}</td>
+      <td>${d.donorName || "অজ্ঞাত"}</td>
+      <td class="num">৳${(d.amount || 0).toFixed(2)}</td>
+      <td>${d.note || "—"}</td>
+      <td class="activity-meta">${d.addedBy || ""}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো কোনো অনুদান যোগ হয়নি।</td></tr>`;
+}
+
+function renderExpenses() {
+  document.getElementById('expense-list').innerHTML = expensesData.map(e => {
+    return `<tr>
+      <td class="activity-meta">${e.date || ""}</td>
+      <td>${e.description}</td>
+      <td class="num">৳${(e.amount || 0).toFixed(2)}</td>
+      <td class="activity-meta">${e.addedBy || ""}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="4" class="activity-meta">এখনো কোনো খরচ যোগ হয়নি।</td></tr>`;
+}
+
+function renderActivity() {
+  const iconClass = { payment: "pay", donation: "don", expense: "exp" };
+  document.getElementById('activity-feed').innerHTML = activityData.map(a => {
+    const t = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().toLocaleString('bn-BD') : "এইমাত্র";
+    return `<div class="activity-item">
+      <div class="activity-dot ${iconClass[a.type] || 'pay'}"></div>
+      <div>
+        <div>${a.detail}</div>
+        <div class="activity-meta">${a.actor} · ${t}</div>
+      </div>
+    </div>`;
+  }).join('') || `<div class="activity-meta">এখনো কোনো কার্যক্রম নেই।</div>`;
+}
+
+window.filterStudents = () => {
+  const q = document.getElementById('student-search').value.trim().toLowerCase();
+  document.querySelectorAll('#student-body tr').forEach(tr => {
+    const match = tr.dataset.name.includes(q) || tr.dataset.roll.includes(q);
+    tr.style.display = match ? "" : "none";
+  });
+};
+
+// ============ WRITES ============
+window.updateCollection = async (roll, amount) => {
+  const amt = parseFloat(amount) || 0;
+  const student = students.find(s => s.class_roll === roll);
+  await setDoc(doc(db, "collections", roll.toString()), {
+    amount: amt, updatedBy: currentTreasurerName, updatedAt: serverTimestamp()
+  }, { merge: true });
+  await addDoc(collection(db, "activity"), {
+    type: "payment",
+    actor: currentTreasurerName,
+    detail: `রোল ${roll} (${student ? student.name : ''}) এর কালেকশন ৳${amt.toFixed(2)} করে আপডেট হয়েছে`,
+    amount: amt,
+    createdAt: serverTimestamp()
+  });
+};
+
+window.saveDonation = async () => {
+  const donorName = document.getElementById('donation-name').value.trim();
+  const amount = parseFloat(document.getElementById('donation-amount').value);
+  const note = document.getElementById('donation-note').value.trim();
+  if (!amount || amount <= 0) { alert("সঠিক পরিমাণ দাও।"); return; }
+  await addDoc(collection(db, "donations"), {
+    donorName: donorName || "অজ্ঞাত", amount, note, addedBy: currentTreasurerName, addedAt: serverTimestamp()
+  });
+  await addDoc(collection(db, "activity"), {
+    type: "donation", actor: currentTreasurerName,
+    detail: `${donorName || 'অজ্ঞাত দাতা'} থেকে ৳${amount.toFixed(2)} অনুদান যোগ হয়েছে`,
+    amount, createdAt: serverTimestamp()
+  });
+  document.getElementById('donation-name').value = "";
+  document.getElementById('donation-amount').value = "";
+  document.getElementById('donation-note').value = "";
+};
+
+window.saveExpense = async () => {
+  const desc = document.getElementById('expense-desc').value.trim();
+  const amount = parseFloat(document.getElementById('expense-amount').value);
+  if (!desc || !amount || amount <= 0) { alert("বিবরণ ও সঠিক পরিমাণ দাও।"); return; }
+  const date = new Date().toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
+  await addDoc(collection(db, "expenses"), {
+    description: desc, amount, date, addedBy: currentTreasurerName, addedAt: serverTimestamp()
+  });
+  await addDoc(collection(db, "activity"), {
+    type: "expense", actor: currentTreasurerName,
+    detail: `"${desc}" এর জন্য ৳${amount.toFixed(2)} খরচ যোগ হয়েছে`,
+    amount, createdAt: serverTimestamp()
+  });
+  document.getElementById('expense-desc').value = "";
+  document.getElementById('expense-amount').value = "";
+};
+
+// ============ VOUCHER ============
+window.openVoucherModal = () => {
+  const box = document.getElementById('voucher-box');
+  document.getElementById('voucher-date').textContent = new Date().toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('voucher-treasurer').textContent = currentTreasurerName;
+  document.getElementById('voucher-rows').innerHTML = expensesData.slice(0, 12).map(e =>
+    `<tr><td style="padding:4px 0;">${e.description}</td><td style="padding:4px 0;text-align:right;">৳${e.amount.toFixed(2)}</td></tr>`
+  ).join('');
+  const total = expensesData.reduce((a, e) => a + (e.amount || 0), 0);
+  document.getElementById('voucher-total').textContent = "৳" + total.toFixed(2);
+
+  box.style.position = 'fixed'; box.style.left = '-9999px'; box.style.display = 'block';
+  html2canvas(box, { scale: 2 }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'Voucher.png';
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    box.style.display = 'none';
+  });
+};
+
+// ============ FULL PDF REPORT ============
+window.downloadFullReport = () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const equalShare = getEqualShare();
+  const totalCollection = students.reduce((a, s) => a + ((collectionsData[s.class_roll] || {}).amount || 0), 0);
+  const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
+  const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0);
+  const balance = totalCollection + totalDonation - totalExpense;
+  const now = new Date();
+
+  // Header
+  doc.setFontSize(18); doc.setTextColor(34, 48, 74);
+  doc.text("Class Treasury Ledger — Report", 14, 18);
+  doc.setFontSize(10); doc.setTextColor(90, 100, 120);
+  doc.text(`Prepared by: ${currentTreasurerName}   |   Generated: ${now.toLocaleString()}`, 14, 25);
+
+  // Summary table
+  doc.autoTable({
+    startY: 32,
+    head: [["Total Collection", "Total Donations", "Total Expense", "Balance in Hand", "Per-student Share"]],
+    body: [[
+      `Tk ${totalCollection.toFixed(2)}`, `Tk ${totalDonation.toFixed(2)}`,
+      `Tk ${totalExpense.toFixed(2)}`, `Tk ${balance.toFixed(2)}`, `Tk ${equalShare.toFixed(2)}`
+    ]],
+    theme: "grid",
+    headStyles: { fillColor: [34, 48, 74] },
+    styles: { halign: "center", fontSize: 9 }
+  });
+
+  // Student ledger
+  doc.setFontSize(12); doc.setTextColor(34, 48, 74);
+  doc.text("Student Ledger", 14, doc.lastAutoTable.finalY + 10);
+  const studentRows = students.map(s => {
+    const amt = (collectionsData[s.class_roll] || {}).amount || 0;
+    const rem = amt - equalShare;
+    return [s.class_roll, s.name, `Tk ${amt.toFixed(2)}`, `${rem >= 0 ? "" : "-"}Tk ${Math.abs(rem).toFixed(2)}`];
+  });
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 14,
+    head: [["Roll", "Name", "Collected", "Due / Credit"]],
+    body: studentRows,
+    theme: "striped",
+    headStyles: { fillColor: [34, 48, 74] },
+    styles: { fontSize: 8 },
+    didParseCell: (data) => {
+      if (data.section === 'body' && data.column.index === 3) {
+        const txt = data.cell.raw;
+        data.cell.styles.textColor = txt.startsWith('-') ? [155, 58, 58] : [46, 107, 79];
+      }
+    }
+  });
+
+  // Donations
+  if (donationsData.length) {
+    doc.setFontSize(12); doc.setTextColor(34, 48, 74);
+    doc.text("Donations", 14, doc.lastAutoTable.finalY + 10);
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 14,
+      head: [["Donor", "Amount", "Note", "Added By"]],
+      body: donationsData.map(d => [d.donorName || "Anonymous", `Tk ${d.amount.toFixed(2)}`, d.note || "-", d.addedBy || "-"]),
+      theme: "grid", headStyles: { fillColor: [180, 130, 58] }, styles: { fontSize: 8 }
+    });
+  }
+
+  // Expenses
+  if (expensesData.length) {
+    doc.setFontSize(12); doc.setTextColor(34, 48, 74);
+    doc.text("Expenses", 14, doc.lastAutoTable.finalY + 10);
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 14,
+      head: [["Date", "Description", "Amount", "Added By"]],
+      body: expensesData.map(e => [e.date, e.description, `Tk ${e.amount.toFixed(2)}`, e.addedBy || "-"]),
+      theme: "grid", headStyles: { fillColor: [155, 58, 58] }, styles: { fontSize: 8 }
+    });
+  }
+
+  // Footer stamp
+  const finalY = doc.lastAutoTable.finalY + 20;
+  doc.setDrawColor(180, 130, 58); doc.setLineWidth(0.8);
+  doc.circle(30, finalY, 12);
+  doc.setFontSize(9); doc.setTextColor(180, 130, 58);
+  doc.text("Tk", 27, finalY + 2);
+  doc.setFontSize(9); doc.setTextColor(34, 48, 74);
+  doc.text(`Verified by: ${currentTreasurerName}`, 48, finalY - 2);
+  doc.setFontSize(8); doc.setTextColor(90, 100, 120);
+  doc.text(`Generated on ${now.toLocaleDateString()}`, 48, finalY + 4);
+
+  doc.save(`Treasury_Report_${now.toISOString().slice(0,10)}.pdf`);
+};
+</script>
+</body>
+</html>
