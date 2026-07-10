@@ -183,7 +183,7 @@
   <div class="setup-card">
     <h2></h2>
     <p></p>
-    <!---ol>
+    <!--
       <li><a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase Console</a>-এ গিয়ে একটা প্রজেক্ট বানাও।</li>
       <li>Build → <b>Authentication</b> → Sign-in method → <b>Email/Password</b> চালু করো।</li>
       <li>Build → <b>Firestore Database</b> → একটা ডাটাবেস তৈরি করো (production mode)।</li>
@@ -202,7 +202,7 @@ service cloud.firestore {
     </ol>
     <p style="color:var(--ink-soft);font-size:.82rem;">এই ধাপগুলো একবারই করতে হবে। এরপর থেকে যে কেউ ট্রেজারার হিসেবে অ্যাকাউন্ট বানিয়ে লগইন করতে পারবে এবং সব হিসাব ফায়ারবেসে জমা থাকবে।</p>
   </div>
-</div___>
+-->
 
 <!-- ============ AUTH SCREEN ============ -->
 <div id="auth-screen" class="auth-screen hidden">
@@ -331,9 +331,9 @@ service cloud.firestore {
   <!-- student ledger -->
   <div class="panel">
     <h2>Subscriber এর তালিকা</h2>
-    <!---style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
+    <!---style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;"
       হিসাব নিয়ম: (মোট খরচ − মোট ফান্ড) ÷ মোট শিক্ষার্থী = জনপ্রতি ভাগ। প্রতি শিক্ষার্থীর <b>বাকি/জমা</b> = তার কালেকশন − জনপ্রতি ভাগ। সবুজ মানে জমা আছে, লাল মানে বাকি আছে।
-  </p--->
+  -->
     <input type="text" class="search-box" id="student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজো..." oninput="filterStudents()">
     <div class="table-scroll">
       <table class="ledger">
