@@ -5,87 +5,84 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ট্রেজারি খাতা</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
-    --paper:#F1EAD9;
-    --paper-2:#E7DEC7;
-    --panel:#FBF8F0;
-    --ink:#22304A;
-    --ink-soft:#5B6B85;
-    --line:#CFC3A2;
-    --line-strong:#B7A87D;
-    --green:#2E6B4F;
-    --green-bg:#E4EEE7;
-    --red:#9B3A3A;
-    --red-bg:#F3E4E1;
-    --gold:#B4823A;
-    --shadow: 0 10px 30px rgba(34,48,74,0.10);
+    --bg:#F4F6F8;
+    --panel:#FFFFFF;
+    --ink:#1E293B;
+    --ink-soft:#64748B;
+    --line:#E2E8F0;
+    --line-strong:#CBD5E1;
+    --accent:#2563EB;
+    --accent-bg:#EFF4FF;
+    --green:#16A34A;
+    --green-bg:#DCFCE7;
+    --red:#DC2626;
+    --red-bg:#FEE2E2;
+    --gold:#D97706;
+    --gold-bg:#FEF3C7;
+    --shadow: 0 2px 10px rgba(15,23,42,0.06);
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     font-family:'Inter','Noto Sans Bengali',sans-serif;
     color:var(--ink);
-    background:
-      repeating-linear-gradient(180deg, transparent 0 38px, rgba(183,168,125,0.22) 38px 39px),
-      var(--paper);
+    background:var(--bg);
     min-height:100vh;
   }
-  h1,h2,h3,.display{font-family:'Fraunces','Noto Sans Bengali',serif;}
-  .num{font-family:'IBM Plex Mono','Noto Sans Bengali',monospace; font-variant-numeric: tabular-nums;}
+  h1,h2,h3{font-family:'Inter','Noto Sans Bengali',sans-serif;}
+  .num{font-variant-numeric: tabular-nums;}
   a{color:inherit;}
-  ::selection{background:#D7C69A;}
-  :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  ::selection{background:#CFE0FF;}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
 
   /* ---------- shell ---------- */
-  .wrap{max-width:1080px;margin:0 auto;padding:28px 18px 80px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 16px 64px;}
   .hidden{display:none !important;}
 
-  /* ---------- header / stamp ---------- */
+  /* ---------- header ---------- */
   .masthead{
     display:flex;align-items:center;justify-content:space-between;gap:16px;
-    padding-bottom:18px;margin-bottom:22px;border-bottom:3px double var(--line-strong);
+    padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid var(--line-strong);
     flex-wrap:wrap;
   }
-  .masthead h1{margin:0;font-size:1.9rem;font-weight:700;letter-spacing:.2px;}
-  .masthead .sub{color:var(--ink-soft);font-size:.85rem;margin-top:2px;}
-  .stamp-wrap{display:flex;align-items:center;gap:12px;}
+  .masthead h1{margin:0;font-size:1.5rem;font-weight:700;}
+  .masthead .sub{color:var(--ink-soft);font-size:.82rem;margin-top:2px;}
+  .stamp-wrap{display:flex;align-items:center;gap:10px;}
   .stamp{
-    width:64px;height:64px;border-radius:50%;
-    border:2.5px solid var(--gold);color:var(--gold);
+    width:40px;height:40px;border-radius:50%;
+    background:var(--accent);color:#fff;
     display:flex;align-items:center;justify-content:center;
-    font-family:'Fraunces',serif;font-weight:700;font-size:1.5rem;
-    transform:rotate(-9deg);flex:none;
-    box-shadow: inset 0 0 0 3px rgba(180,130,58,0.15);
+    font-weight:700;font-size:.95rem;flex:none;
   }
-  .who{line-height:1.25;}
-  .who .name{font-weight:600;font-size:.95rem;}
-  .who .role{font-size:.75rem;color:var(--ink-soft);}
+  .who{line-height:1.25;text-align:right;}
+  .who .name{font-weight:600;font-size:.9rem;}
+  .who .role{font-size:.72rem;color:var(--ink-soft);}
   .logout-btn{
     background:none;border:1px solid var(--line-strong);color:var(--ink-soft);
     padding:6px 12px;border-radius:6px;font-size:.8rem;cursor:pointer;
   }
-  .logout-btn:hover{background:var(--paper-2);}
+  .logout-btn:hover{background:var(--bg);}
 
   /* ---------- cards ---------- */
   .panel{
     background:var(--panel);border:1px solid var(--line);border-radius:10px;
-    padding:20px 22px;box-shadow:var(--shadow);margin-bottom:20px;
+    padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px;
   }
-  .panel h2{font-size:1.05rem;margin:0 0 14px;display:flex;align-items:center;gap:8px;}
-  .panel h2 .idx{color:var(--gold);font-size:.85rem;font-weight:600;}
+  .panel h2{font-size:1rem;margin:0 0 12px;font-weight:600;}
 
-  .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+  .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
   .sum-card{
     background:var(--panel);border:1px solid var(--line);border-radius:10px;
     padding:14px 16px;box-shadow:var(--shadow);
   }
-  .sum-card .label{font-size:.72rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;}
-  .sum-card .val{font-size:1.35rem;font-weight:600;margin-top:4px;}
+  .sum-card .label{font-size:.72rem;color:var(--ink-soft);}
+  .sum-card .val{font-size:1.3rem;font-weight:700;margin-top:4px;}
   .sum-card.green .val{color:var(--green);}
   .sum-card.red .val{color:var(--red);}
   .sum-card.gold .val{color:var(--gold);}
@@ -95,37 +92,42 @@
   .field-row{display:flex;gap:10px;flex-wrap:wrap;}
   .field{flex:1;min-width:140px;}
   label{font-size:.78rem;color:var(--ink-soft);display:block;margin-bottom:4px;}
-  input[type=text],input[type=number],input[type=email],input[type=password]{
+  input[type=text],input[type=number],input[type=email],input[type=password],input[type=tel]{
     width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;
     background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);
   }
-  input:focus{border-color:var(--gold);}
+  input:focus{border-color:var(--accent);}
   .btn{
     border:none;border-radius:6px;padding:9px 16px;font-size:.88rem;font-weight:600;
-    cursor:pointer;transition:transform .05s ease;
+    cursor:pointer;transition:opacity .1s ease;
   }
-  .btn:active{transform:scale(.98);}
+  .btn:active{opacity:.85;}
   .btn-primary{background:var(--ink);color:#fff;}
-  .btn-primary:hover{background:#2c3d5e;}
+  .btn-primary:hover{background:#334155;}
   .btn-gold{background:var(--gold);color:#fff;}
-  .btn-gold:hover{background:#9c6f2e;}
+  .btn-gold:hover{background:#B45F04;}
   .btn-outline{background:none;border:1px solid var(--line-strong);color:var(--ink);}
-  .btn-outline:hover{background:var(--paper-2);}
+  .btn-outline:hover{background:var(--bg);}
   .btn-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
 
   /* ---------- table ---------- */
   .table-scroll{overflow-x:auto;}
-  table.ledger{width:100%;border-collapse:collapse;font-size:.9rem;}
+  table.ledger{width:100%;border-collapse:collapse;font-size:.88rem;}
   table.ledger thead th{
-    text-align:left;font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;
-    color:var(--ink-soft);border-bottom:2px solid var(--line-strong);padding:8px 10px;white-space:nowrap;
+    text-align:left;font-weight:600;font-size:.72rem;
+    color:var(--ink-soft);border-bottom:1px solid var(--line-strong);padding:8px 10px;white-space:nowrap;
   }
   table.ledger tbody td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
-  table.ledger tbody tr:hover{background:rgba(183,168,125,0.08);}
+  table.ledger tbody tr:hover{background:var(--bg);}
   .due-pos{color:var(--green);font-weight:600;}
   .due-neg{color:var(--red);font-weight:600;}
-  .coll-input{width:110px;}
+  .coll-input{width:100px;}
   .search-box{max-width:280px;margin-bottom:12px;}
+  .icon-btn{
+    background:none;border:1px solid var(--line-strong);border-radius:6px;
+    padding:4px 9px;font-size:.78rem;cursor:pointer;color:var(--red);
+  }
+  .icon-btn:hover{background:var(--red-bg);}
 
   /* ---------- activity ---------- */
   .activity-item{
@@ -143,31 +145,32 @@
     min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
   }
   .auth-card{
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    box-shadow:var(--shadow);padding:36px 32px;max-width:400px;width:100%;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    box-shadow:var(--shadow);padding:32px 28px;max-width:380px;width:100%;
   }
-  .auth-card h1{font-size:1.5rem;margin:0 0 4px;text-align:center;}
-  .auth-card .sub{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-bottom:22px;}
+  .auth-card h1{font-size:1.35rem;margin:0 0 4px;text-align:center;}
+  .auth-card .sub{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-bottom:20px;}
   .auth-toggle{text-align:center;margin-top:14px;font-size:.85rem;}
-  .auth-toggle a{color:var(--gold);cursor:pointer;font-weight:600;text-decoration:none;}
+  .auth-toggle a{color:var(--accent);cursor:pointer;font-weight:600;text-decoration:none;}
   .auth-error{
     background:var(--red-bg);color:var(--red);border-radius:6px;padding:8px 12px;
     font-size:.82rem;margin-bottom:12px;
   }
-  .auth-stamp{display:flex;justify-content:center;margin-bottom:18px;}
+  .auth-stamp{display:flex;justify-content:center;margin-bottom:16px;}
+  .auth-stamp .stamp{width:52px;height:52px;font-size:1.15rem;}
 
   /* ---------- setup overlay ---------- */
   .setup-overlay{
-    position:fixed;inset:0;background:rgba(34,48,74,0.85);z-index:999;
+    position:fixed;inset:0;background:rgba(15,23,42,0.75);z-index:999;
     display:flex;align-items:center;justify-content:center;padding:20px;
   }
   .setup-card{
     background:var(--panel);border-radius:12px;max-width:560px;width:100%;
-    padding:30px 32px;max-height:88vh;overflow-y:auto;
+    padding:28px 30px;max-height:88vh;overflow-y:auto;
   }
   .setup-card h2{margin-top:0;}
   .setup-card ol{padding-left:20px;font-size:.9rem;line-height:1.7;}
-  .setup-card code{background:var(--paper-2);padding:2px 6px;border-radius:4px;font-size:.82rem;}
+  .setup-card code{background:var(--bg);padding:2px 6px;border-radius:4px;font-size:.82rem;}
   .setup-card pre{background:var(--ink);color:#e8e8e8;padding:12px 14px;border-radius:8px;font-size:.78rem;overflow-x:auto;}
 
   #voucher-box{display:none;}
@@ -250,7 +253,7 @@ service cloud.firestore {
   <div class="masthead">
     <div>
       <h1>ট্রেজারি খাতা</h1>
-      <div class="sub">সব হিসাব লগইনকৃত ট্রেজারারের নামসহ ফায়ারবেসে সংরক্ষিত হচ্ছে</div>
+      <div class="sub">সব হিসাব ফায়ারবেসে নিরাপদে সংরক্ষিত হচ্ছে</div>
     </div>
     <div class="stamp-wrap">
       <div class="who">
@@ -265,14 +268,14 @@ service cloud.firestore {
   <!-- summary cards -->
   <div class="summary-grid">
     <div class="sum-card green"><div class="label">শিক্ষার্থী কালেকশন</div><div class="val num" id="sum-collection">৳0</div></div>
-    <div class="sum-card gold"><div class="label">অনুদান</div><div class="val num" id="sum-donation">৳0</div></div>
+    <div class="sum-card gold"><div class="label">ফান্ড</div><div class="val num" id="sum-donation">৳0</div></div>
     <div class="sum-card red"><div class="label">মোট খরচ</div><div class="val num" id="sum-expense">৳0</div></div>
     <div class="sum-card"><div class="label">হাতে থাকা ব্যালেন্স</div><div class="val num" id="sum-balance">৳0</div></div>
   </div>
 
   <!-- report buttons -->
   <div class="panel">
-    <h2><span class="idx">০১</span> রিপোর্ট ও ভাউচার</h2>
+    <h2>রিপোর্ট ও ভাউচার</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 6px;">পূর্ণাঙ্গ হিসাব বিবরণী পিডিএফ আকারে নামাও, অথবা একটা খরচের ভাউচার ছবি হিসেবে সেভ করো।</p>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="downloadFullReport()">📄 পূর্ণ পিডিএফ রিপোর্ট</button>
@@ -280,19 +283,30 @@ service cloud.firestore {
     </div>
   </div>
 
-  <!-- donation -->
+  <!-- student management -->
   <div class="panel">
-    <h2><span class="idx">০২</span> অনুদান যোগ করো</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">শিক্ষার্থীর ব্যক্তিগত এন্ট্রি ছাড়াও, বাইরে থেকে কোনো অনুদান পেলে এখানে যোগ করো — এটা মোট খরচের ভাগ কমিয়ে সবার উপকারে যাবে।</p>
+    <h2>শিক্ষার্থী যোগ করো</h2>
     <div class="field-row">
-      <div class="field"><label>দাতার নাম (ঐচ্ছিক)</label><input type="text" id="donation-name" placeholder="যেমন: অভিভাবক / প্রাক্তন শিক্ষার্থী"></div>
+      <div class="field"><label>নাম</label><input type="text" id="new-student-name" placeholder="যেমন: রাফিদ হাসান"></div>
+      <div class="field"><label>রোল</label><input type="number" id="new-student-roll" placeholder="১"></div>
+      <div class="field"><label>মোবাইল নম্বর (ঐচ্ছিক)</label><input type="tel" id="new-student-mobile" placeholder="01XXXXXXXXX"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="addStudent()">শিক্ষার্থী যোগ করো</button></div>
+  </div>
+
+  <!-- fund (donation) -->
+  <div class="panel">
+    <h2>ফান্ড যোগ করো</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">শিক্ষার্থীর ব্যক্তিগত এন্ট্রি ছাড়াও, বাইরে থেকে কোনো ফান্ড পেলে এখানে যোগ করো — এটা মোট খরচের ভাগ কমিয়ে সবার উপকারে যাবে।</p>
+    <div class="field-row">
+      <div class="field"><label>প্রদানকারীর নাম (ঐচ্ছিক)</label><input type="text" id="donation-name" placeholder="যেমন: অভিভাবক / প্রাক্তন শিক্ষার্থী"></div>
       <div class="field"><label>পরিমাণ (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
       <div class="field"><label>নোট (ঐচ্ছিক)</label><input type="text" id="donation-note" placeholder="যেমন: ঈদ উপহার"></div>
     </div>
-    <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">অনুদান সেভ করো</button></div>
+    <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">ফান্ড সেভ করো</button></div>
     <div class="table-scroll" style="margin-top:16px;">
       <table class="ledger">
-        <thead><tr><th>তারিখ</th><th>দাতা</th><th>পরিমাণ</th><th>নোট</th><th>যোগ করেছেন</th></tr></thead>
+        <thead><tr><th>তারিখ</th><th>প্রদানকারী</th><th>পরিমাণ</th><th>নোট</th><th>যোগ করেছেন</th></tr></thead>
         <tbody id="donation-list"></tbody>
       </table>
     </div>
@@ -300,7 +314,7 @@ service cloud.firestore {
 
   <!-- expense -->
   <div class="panel">
-    <h2><span class="idx">০৩</span> খরচ যোগ করো</h2>
+    <h2>খরচ যোগ করো</h2>
     <div class="field-row">
       <div class="field" style="flex:2;"><label>বিবরণ</label><input type="text" id="expense-desc" placeholder="যেমন: ক্লাস পিকনিক বাস ভাড়া"></div>
       <div class="field"><label>পরিমাণ (৳)</label><input type="number" id="expense-amount" placeholder="1000"></div>
@@ -316,14 +330,14 @@ service cloud.firestore {
 
   <!-- student ledger -->
   <div class="panel">
-    <h2><span class="idx">০৪</span> শিক্ষার্থী লেজার</h2>
+    <h2>শিক্ষার্থী লেজার</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
-      হিসাব নিয়ম: (মোট খরচ − মোট অনুদান) ÷ মোট শিক্ষার্থী = জনপ্রতি ভাগ। প্রতি শিক্ষার্থীর <b>বাকি/জমা</b> = তার কালেকশন − জনপ্রতি ভাগ। সবুজ মানে জমা আছে, লাল মানে বাকি আছে।
+      হিসাব নিয়ম: (মোট খরচ − মোট ফান্ড) ÷ মোট শিক্ষার্থী = জনপ্রতি ভাগ। প্রতি শিক্ষার্থীর <b>বাকি/জমা</b> = তার কালেকশন − জনপ্রতি ভাগ। সবুজ মানে জমা আছে, লাল মানে বাকি আছে।
     </p>
     <input type="text" class="search-box" id="student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজো..." oninput="filterStudents()">
     <div class="table-scroll">
       <table class="ledger">
-        <thead><tr><th>রোল</th><th>নাম</th><th>কালেকশন (৳)</th><th>বাকি/জমা</th><th>সর্বশেষ আপডেট</th></tr></thead>
+        <thead><tr><th>রোল</th><th>নাম</th><th>মোবাইল</th><th>কালেকশন (৳)</th><th>বাকি/জমা</th><th>সর্বশেষ আপডেট</th><th></th></tr></thead>
         <tbody id="student-body"></tbody>
       </table>
     </div>
@@ -331,29 +345,29 @@ service cloud.firestore {
 
   <!-- activity feed -->
   <div class="panel">
-    <h2><span class="idx">০৫</span> সাম্প্রতিক কার্যক্রম</h2>
+    <h2>সাম্প্রতিক কার্যক্রম</h2>
     <div id="activity-feed"></div>
   </div>
 
 </div>
 
 <!-- ============ VOUCHER (hidden, rendered to canvas) ============ -->
-<div id="voucher-box" style="padding:28px;width:420px;background:#FBF8F0;border:2px solid #22304A;font-family:'Fraunces',serif;">
-  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px double #B7A87D;padding-bottom:10px;margin-bottom:14px;">
+<div id="voucher-box" style="padding:28px;width:420px;background:#FFFFFF;border:2px solid #1E293B;font-family:'Inter',sans-serif;">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #E2E8F0;padding-bottom:10px;margin-bottom:14px;">
     <div>
-      <div style="font-size:1.2rem;font-weight:700;color:#22304A;">খরচের ভাউচার</div>
-      <div style="font-size:.75rem;color:#5B6B85;font-family:Inter,sans-serif;" id="voucher-date"></div>
+      <div style="font-size:1.15rem;font-weight:700;color:#1E293B;">খরচের ভাউচার</div>
+      <div style="font-size:.75rem;color:#64748B;" id="voucher-date"></div>
     </div>
-    <div style="width:52px;height:52px;border-radius:50%;border:2px solid #B4823A;color:#B4823A;display:flex;align-items:center;justify-content:center;font-weight:700;transform:rotate(-8deg);">৳</div>
+    <div style="width:44px;height:44px;border-radius:50%;background:#2563EB;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">৳</div>
   </div>
-  <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;font-size:.85rem;">
-    <thead><tr style="text-align:left;color:#5B6B85;font-size:.7rem;text-transform:uppercase;"><th style="padding:4px 0;">বিবরণ</th><th style="padding:4px 0;text-align:right;">পরিমাণ</th></tr></thead>
+  <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+    <thead><tr style="text-align:left;color:#64748B;font-size:.7rem;"><th style="padding:4px 0;">বিবরণ</th><th style="padding:4px 0;text-align:right;">পরিমাণ</th></tr></thead>
     <tbody id="voucher-rows"></tbody>
   </table>
-  <div style="border-top:2px solid #22304A;margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-weight:700;font-family:Inter,sans-serif;">
+  <div style="border-top:2px solid #1E293B;margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-weight:700;">
     <span>সর্বমোট খরচ</span><span id="voucher-total"></span>
   </div>
-  <div style="margin-top:18px;font-size:.78rem;color:#5B6B85;font-family:Inter,sans-serif;">প্রস্তুতকারী: <span id="voucher-treasurer"></span></div>
+  <div style="margin-top:18px;font-size:.78rem;color:#64748B;">প্রস্তুতকারী: <span id="voucher-treasurer"></span></div>
 </div>
 
 <script type="module">
@@ -363,7 +377,7 @@ import {
   createUserWithEmailAndPassword, updateProfile, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, setDoc, collection, onSnapshot, addDoc,
+  getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, addDoc,
   query, orderBy, limit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -387,10 +401,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ============ ২) শিক্ষার্থী তালিকা (স্থির রেফারেন্স ডেটা) ============
-const students = [
-  {"class_roll": 1, "name": "MD. KAWSER AZAM"}, {"class_roll": 2, "name": "S. B. ANURADHA"}, {"class_roll": 3, "name": "REHNUMA ISLAM"}, {"class_roll": 4, "name": "MD. ABDUR RAHIM"}, {"class_roll": 5, "name": "TAHMID UR RAHMAN"}, {"class_roll": 6, "name": "JANNATUN NAHAR"}, {"class_roll": 7, "name": "MD. SHOAIB AKHTAR"}, {"class_roll": 8, "name": "ZUYANA ALIF"}, {"class_roll": 9, "name": "MD. AL SERAFIC ZIHAD"}, {"class_roll": 10, "name": "MOST. HAMZA IFFAT NUBAH"}, {"class_roll": 11, "name": "ROJA ASKARI"}, {"class_roll": 12, "name": "MST. SIRAJAM MUNIRA"}, {"class_roll": 13, "name": "RAFID HASAN SIDDIQUI"}, {"class_roll": 14, "name": "MST. NUSRAT JAHAN NADIA"}, {"class_roll": 15, "name": "MD. ABDUR ROUF"}, {"class_roll": 16, "name": "SHAH MD. JUHAYER JARIF"}, {"class_roll": 17, "name": "SAFA MARIYA WORPA"}, {"class_roll": 18, "name": "AFIYA MUBASHIRA MAYESHA"}, {"class_roll": 19, "name": "SIDRATUL MUNTAHA MAHI"}, {"class_roll": 20, "name": "FAHIM ASHFAK ALIN"}, {"class_roll": 21, "name": "MD. MAHMUD ALAM"}, {"class_roll": 22, "name": "MD. ABDULLAH AL RAFI"}, {"class_roll": 23, "name": "S. M. TAMZID HOSSAIN PRODHAN"}, {"class_roll": 24, "name": "MAIDA ALAMGIR"}, {"class_roll": 25, "name": "TURE SINA FAIZA MOMO"}, {"class_roll": 26, "name": "MST. TONU"}, {"class_roll": 27, "name": "MST. TASNIA RASHID LISHA"}, {"class_roll": 28, "name": "MD. NAFIZ AHMMED"}, {"class_roll": 29, "name": "MD. SAZZAD AHAMED"}, {"class_roll": 30, "name": "SAMIYA JANNAT"}, {"class_roll": 31, "name": "MST. JANNATUL SAHIMA HAQUE"}, {"class_roll": 32, "name": "NAYEEMA SALEHA"}, {"class_roll": 33, "name": "MD. ALIFUL ISLAM ALIF"}, {"class_roll": 34, "name": "NAZIA ISMAIL REETU"}, {"class_roll": 35, "name": "MST. AKHI"}, {"class_roll": 36, "name": "MST. SINTHIYA AKTHER"}, {"class_roll": 37, "name": "MST. RAISHA ANJUM"}, {"class_roll": 38, "name": "FERDOUS HASAN FAHIM"}, {"class_roll": 39, "name": "ZANNATUL MAWA KHAN"}, {"class_roll": 40, "name": "TAIN NUR OMI"}, {"class_roll": 41, "name": "MD. RAFIUR ISLAM"}, {"class_roll": 42, "name": "MOST. AME KHATUN"}, {"class_roll": 43, "name": "MST. MOHONA RAHMAN"}, {"class_roll": 44, "name": "TANIA AKTER"}, {"class_roll": 45, "name": "SUMAIYA AFRIN FAIZA"}, {"class_roll": 46, "name": "KAZI KHADIJA ANAM"}, {"class_roll": 47, "name": "MD. MIZANUR RAHMAN"}, {"class_roll": 48, "name": "ADITYA CHAKMA"}, {"class_roll": 49, "name": "GALIB MAHMUD"}, {"class_roll": 50, "name": "TASNIM RAHI"}, {"class_roll": 51, "name": "SHEMONTY ISLAM SUSHOMA"}, {"class_roll": 52, "name": "NAZMUN NAHAR"}, {"class_roll": 53, "name": "TASNIM ARA SHREYOSEE"}, {"class_roll": 54, "name": "MD. ABDUR ROKIB AHMED RAK"}, {"class_roll": 55, "name": "M. A. MOSTAKIM"}, {"class_roll": 56, "name": "AYSA KHATUN"}, {"class_roll": 57, "name": "SUPARNA DAS"}, {"class_roll": 58, "name": "MIDULA MAHJABIN"}, {"class_roll": 59, "name": "MD. HEMAYETULLAH HIMU"}, {"class_roll": 60, "name": "MD. S. M. RIFAT SHAH"}, {"class_roll": 61, "name": "TANJEHE NAWRATI ROWZA"}, {"class_roll": 62, "name": "UMME SALMA"}, {"class_roll": 63, "name": "MAISHA KASHFIA ZAMAN"}, {"class_roll": 64, "name": "SHAOMA SIDDIK AKHI"}, {"class_roll": 65, "name": "SANCHITA ROY DIYA"}, {"class_roll": 66, "name": "SHAH MUNAF WASIF SIDDIQUE ANAN"}, {"class_roll": 67, "name": "MORSALINA NUPUR"}, {"class_roll": 68, "name": "AYESHA SHIDDIKA"}, {"class_roll": 69, "name": "TASNIM JAHAN MARIA"}, {"class_roll": 70, "name": "KABBO PROSAD GUPTA"}, {"class_roll": 71, "name": "MD. MUNTASIR MAHMUD MUHI"}, {"class_roll": 72, "name": "TASNIM TABASSUM TISHA"}, {"class_roll": 73, "name": "MD. TANJIMUL ISLAM"}
-];
+// ============ ২) শিক্ষার্থী তালিকা — এখন সরাসরি ফায়ারবেস থেকে আসে, ম্যানুয়ালি যোগ করা হয় ============
+let students = []; // [{id, roll, name, mobile}]
 
 // ============ state ============
 let collectionsData = {};   // { roll: {amount, updatedBy, updatedAt} }
@@ -472,6 +484,14 @@ function startListeners() {
   if (listenersStarted) return;
   listenersStarted = true;
 
+  onSnapshot(query(collection(db, "students"), orderBy("roll")), (snap) => {
+    students = [];
+    snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+    renderStudentRows();
+    renderStudents();
+    renderSummary();
+  });
+
   onSnapshot(collection(db, "collections"), (snap) => {
     collectionsData = {};
     snap.forEach(d => collectionsData[d.id] = d.data());
@@ -498,25 +518,50 @@ function startListeners() {
     snap.forEach(d => activityData.push({ id: d.id, ...d.data() }));
     renderActivity();
   });
-
-  renderStudentRows(); // build the empty rows once
 }
+
+// ============ STUDENT MANAGEMENT (WRITES) ============
+window.addStudent = async () => {
+  const name = document.getElementById('new-student-name').value.trim();
+  const roll = parseInt(document.getElementById('new-student-roll').value);
+  const mobile = document.getElementById('new-student-mobile').value.trim();
+  if (!name || !roll) { alert("নাম ও রোল নম্বর দুটোই দাও।"); return; }
+  await setDoc(doc(db, "students", roll.toString()), {
+    name, roll, mobile: mobile || "", addedBy: currentTreasurerName, addedAt: serverTimestamp()
+  });
+  document.getElementById('new-student-name').value = "";
+  document.getElementById('new-student-roll').value = "";
+  document.getElementById('new-student-mobile').value = "";
+};
+
+window.deleteStudent = async (roll) => {
+  if (!confirm("এই শিক্ষার্থীকে তালিকা থেকে বাদ দিতে চাও?")) return;
+  await deleteDoc(doc(db, "students", roll.toString()));
+  try { await deleteDoc(doc(db, "collections", roll.toString())); } catch (e) {}
+};
 
 // ============ RENDERING ============
 function renderStudentRows() {
   const tbody = document.getElementById('student-body');
+  if (!students.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="activity-meta">এখনো কোনো শিক্ষার্থী যোগ করা হয়নি। উপরের ফর্ম দিয়ে যোগ করো।</td></tr>`;
+    return;
+  }
   tbody.innerHTML = students.map(s => `
-    <tr data-name="${s.name.toLowerCase()}" data-roll="${s.class_roll}">
-      <td class="num">${s.class_roll}</td>
+    <tr data-name="${(s.name || '').toLowerCase()}" data-roll="${s.roll}">
+      <td class="num">${s.roll}</td>
       <td>${s.name}</td>
-      <td><input type="number" class="coll-input" id="coll-${s.class_roll}" value="0" onchange="updateCollection(${s.class_roll}, this.value)"></td>
-      <td class="num" id="rem-${s.class_roll}">৳0</td>
-      <td class="activity-meta" id="upd-${s.class_roll}">—</td>
+      <td class="activity-meta">${s.mobile || '—'}</td>
+      <td><input type="number" class="coll-input" id="coll-${s.roll}" value="0" onchange="updateCollection(${s.roll}, this.value)"></td>
+      <td class="num" id="rem-${s.roll}">৳0</td>
+      <td class="activity-meta" id="upd-${s.roll}">—</td>
+      <td><button class="icon-btn" onclick="deleteStudent(${s.roll})">✕</button></td>
     </tr>
   `).join('');
 }
 
 function getEqualShare() {
+  if (!students.length) return 0;
   const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0);
   const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
   const netToSplit = Math.max(totalExpense - totalDonation, 0);
@@ -526,16 +571,18 @@ function getEqualShare() {
 function renderStudents() {
   const equalShare = getEqualShare();
   students.forEach(s => {
-    const rec = collectionsData[s.class_roll];
+    const rec = collectionsData[s.roll];
     const amount = rec ? (rec.amount || 0) : 0;
-    const input = document.getElementById(`coll-${s.class_roll}`);
+    const input = document.getElementById(`coll-${s.roll}`);
     if (input && document.activeElement !== input) input.value = amount;
     const remaining = amount - equalShare;
-    const remEl = document.getElementById(`rem-${s.class_roll}`);
-    remEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
-    remEl.className = "num " + (remaining >= 0 ? "due-pos" : "due-neg");
-    const updEl = document.getElementById(`upd-${s.class_roll}`);
-    if (rec && rec.updatedBy) {
+    const remEl = document.getElementById(`rem-${s.roll}`);
+    if (remEl) {
+      remEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
+      remEl.className = "num " + (remaining >= 0 ? "due-pos" : "due-neg");
+    }
+    const updEl = document.getElementById(`upd-${s.roll}`);
+    if (updEl && rec && rec.updatedBy) {
       const t = rec.updatedAt && rec.updatedAt.toDate ? rec.updatedAt.toDate().toLocaleDateString('bn-BD') : "";
       updEl.textContent = `${rec.updatedBy} ${t ? "· " + t : ""}`;
     }
@@ -543,7 +590,7 @@ function renderStudents() {
 }
 
 function renderSummary() {
-  const totalCollection = students.reduce((a, s) => a + ((collectionsData[s.class_roll] || {}).amount || 0), 0);
+  const totalCollection = students.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
   const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
   const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0);
   const balance = totalCollection + totalDonation - totalExpense;
@@ -563,7 +610,7 @@ function renderDonations() {
       <td>${d.note || "—"}</td>
       <td class="activity-meta">${d.addedBy || ""}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো কোনো অনুদান যোগ হয়নি।</td></tr>`;
+  }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো কোনো ফান্ড যোগ হয়নি।</td></tr>`;
 }
 
 function renderExpenses() {
@@ -594,6 +641,7 @@ function renderActivity() {
 window.filterStudents = () => {
   const q = document.getElementById('student-search').value.trim().toLowerCase();
   document.querySelectorAll('#student-body tr').forEach(tr => {
+    if (!tr.dataset.name) return;
     const match = tr.dataset.name.includes(q) || tr.dataset.roll.includes(q);
     tr.style.display = match ? "" : "none";
   });
@@ -602,7 +650,7 @@ window.filterStudents = () => {
 // ============ WRITES ============
 window.updateCollection = async (roll, amount) => {
   const amt = parseFloat(amount) || 0;
-  const student = students.find(s => s.class_roll === roll);
+  const student = students.find(s => s.roll === roll);
   await setDoc(doc(db, "collections", roll.toString()), {
     amount: amt, updatedBy: currentTreasurerName, updatedAt: serverTimestamp()
   }, { merge: true });
@@ -625,7 +673,7 @@ window.saveDonation = async () => {
   });
   await addDoc(collection(db, "activity"), {
     type: "donation", actor: currentTreasurerName,
-    detail: `${donorName || 'অজ্ঞাত দাতা'} থেকে ৳${amount.toFixed(2)} অনুদান যোগ হয়েছে`,
+    detail: `${donorName || 'অজ্ঞাত প্রদানকারী'} থেকে ৳${amount.toFixed(2)} ফান্ড যোগ হয়েছে`,
     amount, createdAt: serverTimestamp()
   });
   document.getElementById('donation-name').value = "";
@@ -676,87 +724,87 @@ window.downloadFullReport = () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   const equalShare = getEqualShare();
-  const totalCollection = students.reduce((a, s) => a + ((collectionsData[s.class_roll] || {}).amount || 0), 0);
+  const totalCollection = students.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
   const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
   const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0);
   const balance = totalCollection + totalDonation - totalExpense;
   const now = new Date();
 
   // Header
-  doc.setFontSize(18); doc.setTextColor(34, 48, 74);
+  doc.setFontSize(18); doc.setTextColor(30, 41, 59);
   doc.text("Class Treasury Ledger — Report", 14, 18);
-  doc.setFontSize(10); doc.setTextColor(90, 100, 120);
+  doc.setFontSize(10); doc.setTextColor(100, 116, 139);
   doc.text(`Prepared by: ${currentTreasurerName}   |   Generated: ${now.toLocaleString()}`, 14, 25);
 
   // Summary table
   doc.autoTable({
     startY: 32,
-    head: [["Total Collection", "Total Donations", "Total Expense", "Balance in Hand", "Per-student Share"]],
+    head: [["Total Collection", "Total Fund", "Total Expense", "Balance in Hand", "Per-student Share"]],
     body: [[
       `Tk ${totalCollection.toFixed(2)}`, `Tk ${totalDonation.toFixed(2)}`,
       `Tk ${totalExpense.toFixed(2)}`, `Tk ${balance.toFixed(2)}`, `Tk ${equalShare.toFixed(2)}`
     ]],
     theme: "grid",
-    headStyles: { fillColor: [34, 48, 74] },
+    headStyles: { fillColor: [30, 41, 59] },
     styles: { halign: "center", fontSize: 9 }
   });
 
   // Student ledger
-  doc.setFontSize(12); doc.setTextColor(34, 48, 74);
+  doc.setFontSize(12); doc.setTextColor(30, 41, 59);
   doc.text("Student Ledger", 14, doc.lastAutoTable.finalY + 10);
   const studentRows = students.map(s => {
-    const amt = (collectionsData[s.class_roll] || {}).amount || 0;
+    const amt = (collectionsData[s.roll] || {}).amount || 0;
     const rem = amt - equalShare;
-    return [s.class_roll, s.name, `Tk ${amt.toFixed(2)}`, `${rem >= 0 ? "" : "-"}Tk ${Math.abs(rem).toFixed(2)}`];
+    return [s.roll, s.name, s.mobile || "-", `Tk ${amt.toFixed(2)}`, `${rem >= 0 ? "" : "-"}Tk ${Math.abs(rem).toFixed(2)}`];
   });
   doc.autoTable({
     startY: doc.lastAutoTable.finalY + 14,
-    head: [["Roll", "Name", "Collected", "Due / Credit"]],
+    head: [["Roll", "Name", "Mobile", "Collected", "Due / Credit"]],
     body: studentRows,
     theme: "striped",
-    headStyles: { fillColor: [34, 48, 74] },
+    headStyles: { fillColor: [30, 41, 59] },
     styles: { fontSize: 8 },
     didParseCell: (data) => {
-      if (data.section === 'body' && data.column.index === 3) {
+      if (data.section === 'body' && data.column.index === 4) {
         const txt = data.cell.raw;
-        data.cell.styles.textColor = txt.startsWith('-') ? [155, 58, 58] : [46, 107, 79];
+        data.cell.styles.textColor = txt.startsWith('-') ? [220, 38, 38] : [22, 163, 74];
       }
     }
   });
 
-  // Donations
+  // Fund (donations)
   if (donationsData.length) {
-    doc.setFontSize(12); doc.setTextColor(34, 48, 74);
-    doc.text("Donations", 14, doc.lastAutoTable.finalY + 10);
+    doc.setFontSize(12); doc.setTextColor(30, 41, 59);
+    doc.text("Fund", 14, doc.lastAutoTable.finalY + 10);
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 14,
-      head: [["Donor", "Amount", "Note", "Added By"]],
+      head: [["Contributor", "Amount", "Note", "Added By"]],
       body: donationsData.map(d => [d.donorName || "Anonymous", `Tk ${d.amount.toFixed(2)}`, d.note || "-", d.addedBy || "-"]),
-      theme: "grid", headStyles: { fillColor: [180, 130, 58] }, styles: { fontSize: 8 }
+      theme: "grid", headStyles: { fillColor: [217, 119, 6] }, styles: { fontSize: 8 }
     });
   }
 
   // Expenses
   if (expensesData.length) {
-    doc.setFontSize(12); doc.setTextColor(34, 48, 74);
+    doc.setFontSize(12); doc.setTextColor(30, 41, 59);
     doc.text("Expenses", 14, doc.lastAutoTable.finalY + 10);
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 14,
       head: [["Date", "Description", "Amount", "Added By"]],
       body: expensesData.map(e => [e.date, e.description, `Tk ${e.amount.toFixed(2)}`, e.addedBy || "-"]),
-      theme: "grid", headStyles: { fillColor: [155, 58, 58] }, styles: { fontSize: 8 }
+      theme: "grid", headStyles: { fillColor: [220, 38, 38] }, styles: { fontSize: 8 }
     });
   }
 
-  // Footer stamp
+  // Footer
   const finalY = doc.lastAutoTable.finalY + 20;
-  doc.setDrawColor(180, 130, 58); doc.setLineWidth(0.8);
+  doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.8);
   doc.circle(30, finalY, 12);
-  doc.setFontSize(9); doc.setTextColor(180, 130, 58);
+  doc.setFontSize(9); doc.setTextColor(37, 99, 235);
   doc.text("Tk", 27, finalY + 2);
-  doc.setFontSize(9); doc.setTextColor(34, 48, 74);
+  doc.setFontSize(9); doc.setTextColor(30, 41, 59);
   doc.text(`Verified by: ${currentTreasurerName}`, 48, finalY - 2);
-  doc.setFontSize(8); doc.setTextColor(90, 100, 120);
+  doc.setFontSize(8); doc.setTextColor(100, 116, 139);
   doc.text(`Generated on ${now.toLocaleDateString()}`, 48, finalY + 4);
 
   doc.save(`Treasury_Report_${now.toISOString().slice(0,10)}.pdf`);
