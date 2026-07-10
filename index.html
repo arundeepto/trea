@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ট্রেজারি খাতা</title>
+<title>Printing Committee</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -181,13 +181,13 @@
 <!-- ============ SETUP OVERLAY (shown only if firebaseConfig is unfilled) ============ -->
 <div id="setup-overlay" class="setup-overlay hidden">
   <div class="setup-card">
-    <h2>🔧 প্রথমবার সেটআপ দরকার</h2>
-    <p>এই অ্যাপটা চালাতে নিজের একটা ফায়ারবেস প্রজেক্ট লাগবে। ধাপগুলো:</p>
-    <ol>
+    <h2></h2>
+    <p></p>
+    <!---ol>
       <li><a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase Console</a>-এ গিয়ে একটা প্রজেক্ট বানাও।</li>
       <li>Build → <b>Authentication</b> → Sign-in method → <b>Email/Password</b> চালু করো।</li>
       <li>Build → <b>Firestore Database</b> → একটা ডাটাবেস তৈরি করো (production mode)।</li>
-      <li>Firestore এর <b>Rules</b> ট্যাবে গিয়ে নিচেরটা বসাও (শুধু লগইন করা ট্রেজারারই লিখতে/পড়তে পারবে):
+      <li><b</b> 
         <pre>rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -202,47 +202,47 @@ service cloud.firestore {
     </ol>
     <p style="color:var(--ink-soft);font-size:.82rem;">এই ধাপগুলো একবারই করতে হবে। এরপর থেকে যে কেউ ট্রেজারার হিসেবে অ্যাকাউন্ট বানিয়ে লগইন করতে পারবে এবং সব হিসাব ফায়ারবেসে জমা থাকবে।</p>
   </div>
-</div>
+</div___>
 
 <!-- ============ AUTH SCREEN ============ -->
 <div id="auth-screen" class="auth-screen hidden">
   <div class="auth-card">
     <div class="auth-stamp"><div class="stamp">৳</div></div>
-    <h1>ট্রেজারি খাতা</h1>
-    <div class="sub">ক্লাস ট্রেজারারদের জন্য লগইন</div>
+    <h1>Printing Treasury</h1>
+    <div class="sub">Login</div>
 
     <div id="auth-error" class="auth-error hidden"></div>
 
     <!-- LOGIN FORM -->
     <div id="login-form">
       <div class="field" style="margin-bottom:10px;">
-        <label>ইমেইল</label>
+        <label>Email</label>
         <input type="email" id="login-email" placeholder="you@example.com">
       </div>
       <div class="field" style="margin-bottom:16px;">
-        <label>পাসওয়ার্ড</label>
+        <label>Password</label>
         <input type="password" id="login-password" placeholder="••••••••">
       </div>
       <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">লগইন করো</button>
-      <div class="auth-toggle">ট্রেজারার হিসেবে নতুন? <a onclick="toggleAuthMode()">নিবন্ধন করো</a></div>
+      <div class="auth-toggle">New Treasurer<a onclick="toggleAuthMode()">নিবন্ধন করো</a></div>
     </div>
 
     <!-- REGISTER FORM -->
     <div id="register-form" class="hidden">
       <div class="field" style="margin-bottom:10px;">
-        <label>তোমার নাম (রেকর্ডে এই নামই দেখাবে)</label>
+        <label>Name</label>
         <input type="text" id="reg-name" placeholder="যেমন: রাফিদ হাসান">
       </div>
       <div class="field" style="margin-bottom:10px;">
-        <label>ইমেইল</label>
+        <label>Email</label>
         <input type="email" id="reg-email" placeholder="you@example.com">
       </div>
       <div class="field" style="margin-bottom:16px;">
-        <label>পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)</label>
+        <label>Password</label>
         <input type="password" id="reg-password" placeholder="••••••••">
       </div>
       <button class="btn btn-gold" style="width:100%;" onclick="doRegister()">নিবন্ধন করে লগইন করো</button>
-      <div class="auth-toggle">আগে থেকে অ্যাকাউন্ট আছে? <a onclick="toggleAuthMode()">লগইন করো</a></div>
+      <div class="auth-toggle"> Have an Account? <a onclick="toggleAuthMode()">লগইন করো</a></div>
     </div>
   </div>
 </div>
@@ -252,13 +252,13 @@ service cloud.firestore {
 
   <div class="masthead">
     <div>
-      <h1>ট্রেজারি খাতা</h1>
-      <div class="sub">সব হিসাব ফায়ারবেসে নিরাপদে সংরক্ষিত হচ্ছে</div>
+      <h1>Arundeepto Printers</h1>
+      <div class="sub"></div>
     </div>
     <div class="stamp-wrap">
       <div class="who">
         <div class="name" id="current-user-name">—</div>
-        <div class="role">বর্তমান ট্রেজারার</div>
+        <div class="role">Executive</div>
       </div>
       <div class="stamp" id="current-user-stamp">?</div>
       <button class="logout-btn" onclick="doLogout()">লগআউট</button>
@@ -287,9 +287,9 @@ service cloud.firestore {
   <div class="panel">
     <h2>শিক্ষার্থী যোগ করো</h2>
     <div class="field-row">
-      <div class="field"><label>নাম</label><input type="text" id="new-student-name" placeholder="যেমন: রাফিদ হাসান"></div>
-      <div class="field"><label>রোল</label><input type="number" id="new-student-roll" placeholder="১"></div>
-      <div class="field"><label>মোবাইল নম্বর (ঐচ্ছিক)</label><input type="tel" id="new-student-mobile" placeholder="01XXXXXXXXX"></div>
+      <div class="field"><label>নাম</label><input type="text" id="new-student-name" placeholder=""></div>
+      <div class="field"><label>রোল</label><input type="number" id="new-student-roll" placeholder=""></div>
+      <div class="field"><label>মোবাইল নম্বর</label><input type="tel" id="new-student-mobile" placeholder=""></div>
     </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="addStudent()">শিক্ষার্থী যোগ করো</button></div>
   </div>
@@ -297,16 +297,16 @@ service cloud.firestore {
   <!-- fund (donation) -->
   <div class="panel">
     <h2>ফান্ড যোগ করো</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">শিক্ষার্থীর ব্যক্তিগত এন্ট্রি ছাড়াও, বাইরে থেকে কোনো ফান্ড পেলে এখানে যোগ করো — এটা মোট খরচের ভাগ কমিয়ে সবার উপকারে যাবে।</p>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;"></p>
     <div class="field-row">
-      <div class="field"><label>প্রদানকারীর নাম (ঐচ্ছিক)</label><input type="text" id="donation-name" placeholder="যেমন: অভিভাবক / প্রাক্তন শিক্ষার্থী"></div>
+      <div class="field"><label>Purpose</label><input type="text" id="donation-name" placeholder="যেমন: অভিভাবক / প্রাক্তন শিক্ষার্থী"></div>
       <div class="field"><label>পরিমাণ (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
       <div class="field"><label>নোট (ঐচ্ছিক)</label><input type="text" id="donation-note" placeholder="যেমন: ঈদ উপহার"></div>
     </div>
     <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">ফান্ড সেভ করো</button></div>
     <div class="table-scroll" style="margin-top:16px;">
       <table class="ledger">
-        <thead><tr><th>তারিখ</th><th>প্রদানকারী</th><th>পরিমাণ</th><th>নোট</th><th>যোগ করেছেন</th></tr></thead>
+        <thead><tr><th>তারিখ</th><th>Purpose</th><th>পরিমাণ</th><th>নোট</th><th>যোগ করেছেন</th></tr></thead>
         <tbody id="donation-list"></tbody>
       </table>
     </div>
@@ -330,10 +330,10 @@ service cloud.firestore {
 
   <!-- student ledger -->
   <div class="panel">
-    <h2>শিক্ষার্থী লেজার</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
+    <h2>Subscriber এর তালিকা</h2>
+    <!---style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
       হিসাব নিয়ম: (মোট খরচ − মোট ফান্ড) ÷ মোট শিক্ষার্থী = জনপ্রতি ভাগ। প্রতি শিক্ষার্থীর <b>বাকি/জমা</b> = তার কালেকশন − জনপ্রতি ভাগ। সবুজ মানে জমা আছে, লাল মানে বাকি আছে।
-    </p>
+  </p--->
     <input type="text" class="search-box" id="student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজো..." oninput="filterStudents()">
     <div class="table-scroll">
       <table class="ledger">
@@ -345,7 +345,7 @@ service cloud.firestore {
 
   <!-- activity feed -->
   <div class="panel">
-    <h2>সাম্প্রতিক কার্যক্রম</h2>
+    <h2>Activity</h2>
     <div id="activity-feed"></div>
   </div>
 
@@ -434,7 +434,7 @@ window.doLogin = async () => {
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (e) {
-    showAuthError("লগইন ব্যর্থ হয়েছে। ইমেইল/পাসওয়ার্ড আবার চেক করো।");
+    showAuthError("Failed");
   }
 };
 
@@ -443,21 +443,21 @@ window.doRegister = async () => {
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   if (!name || !email || !password) return showAuthError("সব ফিল্ড পূরণ করো।");
-  if (password.length < 6) return showAuthError("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।");
+  if (password.length < 6) return showAuthError("6 digit");
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
     // force refresh so onAuthStateChanged sees the updated displayName
     await auth.currentUser.reload();
   } catch (e) {
-    showAuthError("নিবন্ধন ব্যর্থ হয়েছে: এই ইমেইল হয়তো আগে থেকেই ব্যবহৃত।");
+    showAuthError("Failed");
   }
 };
 
 window.doLogout = async () => {
   await signOut(auth);
 };
-
+  
 function stampInitials(name) {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);
