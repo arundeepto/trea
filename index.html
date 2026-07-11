@@ -319,10 +319,23 @@ service cloud.firestore {
       <div class="field" style="flex:2;"><label>Description</label><input type="text" id="expense-desc" placeholder="e.g. Printing paper purchase"></div>
       <div class="field"><label>Amount (৳)</label><input type="number" id="expense-amount" placeholder="1000"></div>
     </div>
+    <div class="field-row" style="margin-top:10px;">
+      <div class="field">
+        <label>এই খরচ কার ঘাড়ে পড়বে?</label>
+        <select id="expense-charge-type" onchange="onExpenseChargeTypeChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);">
+          <option value="all">সবার সমান ভাগে (Equal split — all subscribers)</option>
+          <option value="individual">নির্দিষ্ট একজন সাবস্ক্রাইবারের ব্যক্তিগত হিসাব থেকে</option>
+        </select>
+      </div>
+      <div class="field hidden" id="expense-target-wrap">
+        <label>সাবস্ক্রাইবার নির্বাচন করুন</label>
+        <select id="expense-target-roll" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
+      </div>
+    </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
     <div class="table-scroll" style="margin-top:16px;">
       <table class="ledger">
-        <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Added By</th></tr></thead>
+        <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>চার্জ করা হয়েছে</th><th>Added By</th></tr></thead>
         <tbody id="expense-list"></tbody>
       </table>
     </div>
@@ -332,12 +345,12 @@ service cloud.firestore {
   <div class="panel">
     <h2>Subscriber List</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
-      Calculation rule: (Total Expense − Total Fund) ÷ Total Subscribers = Equal Share. Each subscriber's <b>Due/Credit</b> = their Collection − Equal Share. Green means credit, red means due.
+      Calculation rule: (Shared Expense − Total Fund) ÷ Total Subscribers = Equal Share. Each subscriber's <b>Due/Credit</b> = their Total Collected − Equal Share − their Personal Charges. Green means credit, red means due. Amounts entered below are <b>added</b> to the subscriber's running total — nothing gets overwritten.
     </p>
     <input type="text" class="search-box" id="student-search" placeholder="🔍 Search by name or roll..." oninput="filterStudents()">
     <div class="table-scroll">
       <table class="ledger">
-        <thead><tr><th>Roll</th><th>Name</th><th>Mobile</th><th>Collection (৳)</th><th>Due/Credit</th><th>Last Updated</th><th></th></tr></thead>
+        <thead><tr><th>Roll</th><th>Name</th><th>Mobile</th><th>মোট জমা (৳)</th><th>নতুন জমা যোগ করুন</th><th>Due/Credit</th><th>Last Updated</th><th></th></tr></thead>
         <tbody id="student-body"></tbody>
       </table>
     </div>
@@ -378,7 +391,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, addDoc,
-  query, orderBy, limit, serverTimestamp
+  query, orderBy, limit, serverTimestamp, where, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ============ 1) Your Firebase Config ============
@@ -405,7 +418,9 @@ const db = getFirestore(app);
 let students = []; // [{id, roll, name, mobile}]
 
 // ============ state ============
-let collectionsData = {};   // { roll: {amount, updatedBy, updatedAt} }
+let collectionsData = {};   // computed: { roll: {amount, updatedBy, updatedAt, paymentCount} }
+let legacyCollectionsData = {}; // old single-amount docs from "collections" (kept as a starting balance, never overwritten again)
+let paymentsData = {};       // { roll: [{id, amount, addedBy, addedAt}, ...] } — every entry is additive, nothing is ever lost
 let donationsData = [];     // [{id, donorName, amount, note, addedBy, addedAt}]
 let expensesData = [];      // [{id, description, amount, date, addedBy, addedAt}]
 let activityData = [];      // recent activity log
@@ -493,21 +508,36 @@ function startListeners() {
     students = [];
     snap.forEach(d => students.push({ id: d.id, ...d.data() }));
     renderStudentRows();
-    renderStudents();
+    renderExpenseTargetOptions();
+    recomputeCollections();
+    renderExpenses();
     renderSummary();
   });
 
+  // legacy single-amount records (from before the fix) — kept as a starting balance, never written to again
   onSnapshot(collection(db, "collections"), (snap) => {
-    collectionsData = {};
-    snap.forEach(d => collectionsData[d.id] = d.data());
-    renderStudents();
-    renderSummary();
+    legacyCollectionsData = {};
+    snap.forEach(d => legacyCollectionsData[d.id] = d.data());
+    recomputeCollections();
+  });
+
+  // every payment is its own document — adding a new one never overwrites or removes an earlier one
+  onSnapshot(query(collection(db, "payments"), orderBy("addedAt", "desc")), (snap) => {
+    paymentsData = {};
+    snap.forEach(d => {
+      const data = d.data();
+      const key = String(data.roll);
+      if (!paymentsData[key]) paymentsData[key] = [];
+      paymentsData[key].push({ id: d.id, ...data });
+    });
+    recomputeCollections();
   });
 
   onSnapshot(query(collection(db, "donations"), orderBy("addedAt", "desc")), (snap) => {
     donationsData = [];
     snap.forEach(d => donationsData.push({ id: d.id, ...d.data() }));
     renderDonations();
+    renderStudents(); // equal share depends on total fund
     renderSummary();
   });
 
@@ -515,6 +545,7 @@ function startListeners() {
     expensesData = [];
     snap.forEach(d => expensesData.push({ id: d.id, ...d.data() }));
     renderExpenses();
+    renderStudents(); // equal share & personal charges depend on expenses
     renderSummary();
   });
 
@@ -543,13 +574,17 @@ window.deleteStudent = async (roll) => {
   if (!confirm("Remove this subscriber from the list?")) return;
   await deleteDoc(doc(db, "students", roll.toString()));
   try { await deleteDoc(doc(db, "collections", roll.toString())); } catch (e) {}
+  try {
+    const paySnap = await getDocs(query(collection(db, "payments"), where("roll", "==", roll)));
+    await Promise.all(paySnap.docs.map(d => deleteDoc(d.ref)));
+  } catch (e) {}
 };
 
 // ============ RENDERING ============
 function renderStudentRows() {
   const tbody = document.getElementById('student-body');
   if (!students.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="activity-meta">No subscribers added yet. Use the form above to add one.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="activity-meta">No subscribers added yet. Use the form above to add one.</td></tr>`;
     return;
   }
   tbody.innerHTML = students.map(s => `
@@ -557,7 +592,13 @@ function renderStudentRows() {
       <td class="num">${s.roll}</td>
       <td>${s.name}</td>
       <td class="activity-meta">${s.mobile || '—'}</td>
-      <td><input type="number" class="coll-input" id="coll-${s.roll}" value="0" onchange="updateCollection(${s.roll}, this.value)"></td>
+      <td class="num" id="total-${s.roll}">৳0</td>
+      <td>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="number" class="coll-input" id="pay-${s.roll}" placeholder="৳ পরিমাণ" style="width:90px;" onkeydown="if(event.key==='Enter'){addPayment(${s.roll});}">
+          <button class="btn btn-outline" style="padding:7px 10px;font-size:.78rem;white-space:nowrap;" onclick="addPayment(${s.roll})">+ যোগ করুন</button>
+        </div>
+      </td>
       <td class="num" id="rem-${s.roll}">৳0</td>
       <td class="activity-meta" id="upd-${s.roll}">—</td>
       <td><button class="icon-btn" onclick="deleteStudent(${s.roll})">✕</button></td>
@@ -567,10 +608,20 @@ function renderStudentRows() {
 
 function getEqualShare() {
   if (!students.length) return 0;
-  const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0);
+  // Only expenses charged to "all" get split equally; individual/personal expenses are excluded here
+  // and instead deducted only from that specific subscriber (see getPersonalCharge).
+  const totalSharedExpense = expensesData
+    .filter(e => e.chargeType !== 'individual')
+    .reduce((a, e) => a + (e.amount || 0), 0);
   const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
-  const netToSplit = Math.max(totalExpense - totalDonation, 0);
+  const netToSplit = Math.max(totalSharedExpense - totalDonation, 0);
   return netToSplit / students.length;
+}
+
+function getPersonalCharge(roll) {
+  return expensesData
+    .filter(e => e.chargeType === 'individual' && e.targetRoll === roll)
+    .reduce((a, e) => a + (e.amount || 0), 0);
 }
 
 function renderStudents() {
@@ -578,18 +629,28 @@ function renderStudents() {
   students.forEach(s => {
     const rec = collectionsData[s.roll];
     const amount = rec ? (rec.amount || 0) : 0;
-    const input = document.getElementById(`coll-${s.roll}`);
-    if (input && document.activeElement !== input) input.value = amount;
-    const remaining = amount - equalShare;
+    const personalCharge = getPersonalCharge(s.roll);
+
+    const totalEl = document.getElementById(`total-${s.roll}`);
+    if (totalEl) totalEl.textContent = "৳" + amount.toFixed(2);
+
+    const remaining = amount - equalShare - personalCharge;
     const remEl = document.getElementById(`rem-${s.roll}`);
     if (remEl) {
+      const title = personalCharge > 0 ? `এর মধ্যে ব্যক্তিগত চার্জ: ৳${personalCharge.toFixed(2)}` : "";
+      remEl.title = title;
       remEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
       remEl.className = "num " + (remaining >= 0 ? "due-pos" : "due-neg");
     }
     const updEl = document.getElementById(`upd-${s.roll}`);
-    if (updEl && rec && rec.updatedBy) {
-      const t = rec.updatedAt && rec.updatedAt.toDate ? rec.updatedAt.toDate().toLocaleDateString('en-US') : "";
-      updEl.textContent = `${rec.updatedBy} ${t ? "· " + t : ""}`;
+    if (updEl) {
+      if (rec && rec.updatedBy) {
+        const t = rec.updatedAt && rec.updatedAt.toDate ? rec.updatedAt.toDate().toLocaleDateString('en-US') : "";
+        const count = rec.paymentCount ? ` (${rec.paymentCount} entries)` : "";
+        updEl.textContent = `${rec.updatedBy} ${t ? "· " + t : ""}${count}`;
+      } else {
+        updEl.textContent = "—";
+      }
     }
   });
 }
@@ -620,13 +681,17 @@ function renderDonations() {
 
 function renderExpenses() {
   document.getElementById('expense-list').innerHTML = expensesData.map(e => {
+    const chargedTo = e.chargeType === 'individual'
+      ? `${e.targetName || 'Roll ' + e.targetRoll} <span class="activity-meta">(ব্যক্তিগত)</span>`
+      : `সবার সমান ভাগে`;
     return `<tr>
       <td class="activity-meta">${e.date || ""}</td>
       <td>${e.description}</td>
       <td class="num">৳${(e.amount || 0).toFixed(2)}</td>
+      <td>${chargedTo}</td>
       <td class="activity-meta">${e.addedBy || ""}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="4" class="activity-meta">No expenses added yet.</td></tr>`;
+  }).join('') || `<tr><td colspan="5" class="activity-meta">No expenses added yet.</td></tr>`;
 }
 
 function renderActivity() {
@@ -643,6 +708,20 @@ function renderActivity() {
   }).join('') || `<div class="activity-meta">No activity yet.</div>`;
 }
 
+function renderExpenseTargetOptions() {
+  const sel = document.getElementById('expense-target-roll');
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = students.map(s => `<option value="${s.roll}">${s.name} (Roll ${s.roll})</option>`).join('')
+    || `<option value="">কোনো সাবস্ক্রাইবার নেই</option>`;
+  if (prev && students.some(s => String(s.roll) === prev)) sel.value = prev;
+}
+
+window.onExpenseChargeTypeChange = () => {
+  const type = document.getElementById('expense-charge-type').value;
+  document.getElementById('expense-target-wrap').classList.toggle('hidden', type !== 'individual');
+};
+
 window.filterStudents = () => {
   const q = document.getElementById('student-search').value.trim().toLowerCase();
   document.querySelectorAll('#student-body tr').forEach(tr => {
@@ -653,19 +732,60 @@ window.filterStudents = () => {
 };
 
 // ============ WRITES ============
-window.updateCollection = async (roll, amount) => {
-  const amt = parseFloat(amount) || 0;
+
+// Recompute each subscriber's running total from the legacy single-amount doc (if any, kept as
+// a starting balance) plus every additive payment ever recorded for that roll. This is the fix
+// for entries disappearing: nothing is ever overwritten, every entry only adds to the total.
+function recomputeCollections() {
+  collectionsData = {};
+  const rolls = new Set([
+    ...Object.keys(legacyCollectionsData),
+    ...Object.keys(paymentsData)
+  ]);
+  rolls.forEach(roll => {
+    const legacy = legacyCollectionsData[roll];
+    const pays = paymentsData[roll] || [];
+    const legacyAmt = legacy ? (legacy.amount || 0) : 0;
+    const paysAmt = pays.reduce((a, p) => a + (p.amount || 0), 0);
+
+    let latestBy = legacy ? legacy.updatedBy : null;
+    let latestAt = legacy ? legacy.updatedAt : null;
+    pays.forEach(p => {
+      const pTime = p.addedAt && p.addedAt.toDate ? p.addedAt.toDate() : null;
+      const latestTime = latestAt && latestAt.toDate ? latestAt.toDate() : null;
+      if (pTime && (!latestTime || pTime > latestTime)) {
+        latestAt = p.addedAt;
+        latestBy = p.addedBy;
+      }
+    });
+
+    collectionsData[roll] = {
+      amount: legacyAmt + paysAmt,
+      updatedBy: latestBy,
+      updatedAt: latestAt,
+      paymentCount: pays.length
+    };
+  });
+  renderStudents();
+  renderSummary();
+}
+
+window.addPayment = async (roll) => {
+  const input = document.getElementById(`pay-${roll}`);
+  const amt = parseFloat(input ? input.value : "");
+  if (!amt || amt <= 0) { alert("সঠিক পরিমাণ লিখুন।"); return; }
   const student = students.find(s => s.roll === roll);
-  await setDoc(doc(db, "collections", roll.toString()), {
-    amount: amt, updatedBy: currentTreasurerName, updatedAt: serverTimestamp()
-  }, { merge: true });
+  await addDoc(collection(db, "payments"), {
+    roll, amount: amt, addedBy: currentTreasurerName, addedAt: serverTimestamp()
+  });
   await addDoc(collection(db, "activity"), {
     type: "payment",
     actor: currentTreasurerName,
-    detail: `Collection for roll ${roll} (${student ? student.name : ''}) updated to ৳${amt.toFixed(2)}`,
+    detail: `${student ? student.name : 'Roll ' + roll} (Roll ${roll}) থেকে ৳${amt.toFixed(2)} নতুন জমা যোগ হয়েছে`,
     amount: amt,
     createdAt: serverTimestamp()
   });
+  if (input) input.value = "";
 };
 
 window.saveDonation = async () => {
@@ -690,17 +810,33 @@ window.saveExpense = async () => {
   const desc = document.getElementById('expense-desc').value.trim();
   const amount = parseFloat(document.getElementById('expense-amount').value);
   if (!desc || !amount || amount <= 0) { alert("Please enter a description and a valid amount."); return; }
+
+  const chargeType = document.getElementById('expense-charge-type').value; // 'all' | 'individual'
+  let targetRoll = null, targetName = null;
+  if (chargeType === 'individual') {
+    const rawRoll = document.getElementById('expense-target-roll').value;
+    targetRoll = rawRoll ? parseInt(rawRoll) : null;
+    const student = students.find(s => s.roll === targetRoll);
+    if (!targetRoll || !student) { alert("অনুগ্রহ করে একজন সাবস্ক্রাইবার নির্বাচন করুন।"); return; }
+    targetName = student.name;
+  }
+
   const date = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
   await addDoc(collection(db, "expenses"), {
-    description: desc, amount, date, addedBy: currentTreasurerName, addedAt: serverTimestamp()
+    description: desc, amount, date, addedBy: currentTreasurerName, addedAt: serverTimestamp(),
+    chargeType, targetRoll, targetName
   });
   await addDoc(collection(db, "activity"), {
     type: "expense", actor: currentTreasurerName,
-    detail: `Expense of ৳${amount.toFixed(2)} added for "${desc}"`,
+    detail: chargeType === 'individual'
+      ? `ব্যক্তিগত খরচ ৳${amount.toFixed(2)} "${desc}" — শুধু ${targetName} (Roll ${targetRoll}) এর হিসাব থেকে কাটা হয়েছে`
+      : `Expense of ৳${amount.toFixed(2)} added for "${desc}" (সবার মধ্যে সমান ভাগ)`,
     amount, createdAt: serverTimestamp()
   });
   document.getElementById('expense-desc').value = "";
   document.getElementById('expense-amount').value = "";
+  document.getElementById('expense-charge-type').value = "all";
+  onExpenseChargeTypeChange();
 };
 
 // ============ VOUCHER ============
@@ -759,7 +895,8 @@ window.downloadFullReport = () => {
   doc.text("Student Ledger", 14, doc.lastAutoTable.finalY + 10);
   const studentRows = students.map(s => {
     const amt = (collectionsData[s.roll] || {}).amount || 0;
-    const rem = amt - equalShare;
+    const personalCharge = getPersonalCharge(s.roll);
+    const rem = amt - equalShare - personalCharge;
     return [s.roll, s.name, s.mobile || "-", `Tk ${amt.toFixed(2)}`, `${rem >= 0 ? "" : "-"}Tk ${Math.abs(rem).toFixed(2)}`];
   });
   doc.autoTable({
@@ -795,8 +932,12 @@ window.downloadFullReport = () => {
     doc.text("Expenses", 14, doc.lastAutoTable.finalY + 10);
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 14,
-      head: [["Date", "Description", "Amount", "Added By"]],
-      body: expensesData.map(e => [e.date, e.description, `Tk ${e.amount.toFixed(2)}`, e.addedBy || "-"]),
+      head: [["Date", "Description", "Amount", "Charged To", "Added By"]],
+      body: expensesData.map(e => [
+        e.date, e.description, `Tk ${e.amount.toFixed(2)}`,
+        e.chargeType === 'individual' ? `${e.targetName || 'Roll ' + e.targetRoll} (personal)` : "All (equal split)",
+        e.addedBy || "-"
+      ]),
       theme: "grid", headStyles: { fillColor: [220, 38, 38] }, styles: { fontSize: 8 }
     });
   }
