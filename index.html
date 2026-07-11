@@ -191,8 +191,23 @@
         <pre>rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isTreasurer() {
+      return isSignedIn() &&
+        (!exists(/databases/$(database)/documents/users/$(request.auth.uid)) || myRole() == 'treasurer');
+    }
+
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == uid;
+    }
+
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read: if isSignedIn();
+      allow write: if isTreasurer();
     }
   }
 }</pre>
@@ -211,9 +226,14 @@ service cloud.firestore {
     <h1>Arundeepto Printers</h1>
     <div class="sub">Treasury Login</div>
 
+    <div class="btn-row" style="margin-bottom:16px;">
+      <button class="btn" id="role-tab-treasurer" style="flex:1;background:var(--ink);color:#fff;" onclick="setAuthRole('treasurer')">Treasurer</button>
+      <button class="btn" id="role-tab-subscriber" style="flex:1;background:none;border:1px solid var(--line-strong);color:var(--ink);" onclick="setAuthRole('subscriber')">Subscriber</button>
+    </div>
+
     <div id="auth-error" class="auth-error hidden"></div>
 
-    <!-- LOGIN FORM -->
+    <!-- LOGIN FORM (shared by both roles — role is detected automatically after sign-in) -->
     <div id="login-form">
       <div class="field" style="margin-bottom:10px;">
         <label>Email</label>
@@ -224,7 +244,7 @@ service cloud.firestore {
         <input type="password" id="login-password" placeholder="••••••••">
       </div>
       <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Log In</button>
-      <div class="auth-toggle">New Treasurer? <a onclick="toggleAuthMode()">Register</a></div>
+      <div class="auth-toggle"><span id="login-register-prompt">New Treasurer?</span> <a onclick="toggleAuthMode()">Register</a></div>
     </div>
 
     <!-- REGISTER FORM -->
@@ -232,6 +252,17 @@ service cloud.firestore {
       <div class="field" style="margin-bottom:10px;">
         <label>Name</label>
         <input type="text" id="reg-name" placeholder="e.g. John Smith">
+      </div>
+      <!-- subscriber-only fields: roll + mobile, used to match against the existing subscriber record -->
+      <div id="reg-subscriber-fields" class="hidden">
+        <div class="field" style="margin-bottom:10px;">
+          <label>Roll Number</label>
+          <input type="number" id="reg-roll" placeholder="e.g. 12">
+        </div>
+        <div class="field" style="margin-bottom:10px;">
+          <label>Mobile Number (Treasurer-এর খাতায় যেটা আছে)</label>
+          <input type="tel" id="reg-mobile" placeholder="e.g. 01700000000">
+        </div>
       </div>
       <div class="field" style="margin-bottom:10px;">
         <label>Email</label>
@@ -258,10 +289,28 @@ service cloud.firestore {
     <div class="stamp-wrap">
       <div class="who">
         <div class="name" id="current-user-name">—</div>
-        <div class="role">Treasurer</div>
+        <div class="role" id="current-user-role">Treasurer</div>
       </div>
       <div class="stamp" id="current-user-stamp">?</div>
       <button class="logout-btn" onclick="doLogout()">Log Out</button>
+    </div>
+  </div>
+
+  <!-- ============ SUBSCRIBER-ONLY: personal account panel ============ -->
+  <div class="panel subscriber-only hidden" id="subscriber-account-panel">
+    <h2>আপনার হিসাব</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 12px;" id="subscriber-account-sub">—</p>
+    <div class="summary-grid" style="margin-bottom:10px;">
+      <div class="sum-card green"><div class="label">আপনার মোট জমা</div><div class="val num" id="sub-total-collected">৳0</div></div>
+      <div class="sum-card"><div class="label">মাথাপিছু ভাগ</div><div class="val num" id="sub-equal-share">৳0</div></div>
+      <div class="sum-card red"><div class="label">ব্যক্তিগত চার্জ</div><div class="val num" id="sub-personal-charge">৳0</div></div>
+      <div class="sum-card"><div class="label">আপনার বকেয়া/জমা</div><div class="val num" id="sub-due-credit">৳0</div></div>
+    </div>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>তারিখ</th><th>জমার পরিমাণ</th><th>যোগ করেছেন</th></tr></thead>
+        <tbody id="sub-payment-history"></tbody>
+      </table>
     </div>
   </div>
 
@@ -274,7 +323,7 @@ service cloud.firestore {
   </div>
 
   <!-- report buttons -->
-  <div class="panel">
+  <div class="panel treasurer-only">
     <h2>Reports & Vouchers</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 6px;">Download the full statement as a PDF, or save an expense voucher as an image.</p>
     <div class="btn-row">
@@ -284,7 +333,7 @@ service cloud.firestore {
   </div>
 
   <!-- student management -->
-  <div class="panel">
+  <div class="panel treasurer-only">
     <h2>Add Subscriber</h2>
     <div class="field-row">
       <div class="field"><label>Name</label><input type="text" id="new-student-name" placeholder="e.g. John Smith"></div>
@@ -297,13 +346,15 @@ service cloud.firestore {
   <!-- fund (donation) -->
   <div class="panel">
     <h2>Add Fund</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">Record contributions received from parents, alumni, or other donors.</p>
-    <div class="field-row">
-      <div class="field"><label>Purpose</label><input type="text" id="donation-name" placeholder="e.g. Parent / Former Subscriber"></div>
-      <div class="field"><label>Amount (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
-      <div class="field"><label>Note (optional)</label><input type="text" id="donation-note" placeholder="e.g. Eid gift"></div>
+    <div class="treasurer-only">
+      <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">Record contributions received from parents, alumni, or other donors.</p>
+      <div class="field-row">
+        <div class="field"><label>Purpose</label><input type="text" id="donation-name" placeholder="e.g. Parent / Former Subscriber"></div>
+        <div class="field"><label>Amount (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
+        <div class="field"><label>Note (optional)</label><input type="text" id="donation-note" placeholder="e.g. Eid gift"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">Save Fund</button></div>
     </div>
-    <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">Save Fund</button></div>
     <div class="table-scroll" style="margin-top:16px;">
       <table class="ledger">
         <thead><tr><th>Date</th><th>Purpose</th><th>Amount</th><th>Note</th><th>Added By</th></tr></thead>
@@ -315,24 +366,26 @@ service cloud.firestore {
   <!-- expense -->
   <div class="panel">
     <h2>Add Expense</h2>
-    <div class="field-row">
-      <div class="field" style="flex:2;"><label>Description</label><input type="text" id="expense-desc" placeholder="e.g. Printing paper purchase"></div>
-      <div class="field"><label>Amount (৳)</label><input type="number" id="expense-amount" placeholder="1000"></div>
-    </div>
-    <div class="field-row" style="margin-top:10px;">
-      <div class="field">
-        <label>এই খরচ কার ঘাড়ে পড়বে?</label>
-        <select id="expense-charge-type" onchange="onExpenseChargeTypeChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);">
-          <option value="all">সবার সমান ভাগে (Equal split — all subscribers)</option>
-          <option value="individual">নির্দিষ্ট একজন সাবস্ক্রাইবারের ব্যক্তিগত হিসাব থেকে</option>
-        </select>
+    <div class="treasurer-only">
+      <div class="field-row">
+        <div class="field" style="flex:2;"><label>Description</label><input type="text" id="expense-desc" placeholder="e.g. Printing paper purchase"></div>
+        <div class="field"><label>Amount (৳)</label><input type="number" id="expense-amount" placeholder="1000"></div>
       </div>
-      <div class="field hidden" id="expense-target-wrap">
-        <label>সাবস্ক্রাইবার নির্বাচন করুন</label>
-        <select id="expense-target-roll" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
+      <div class="field-row" style="margin-top:10px;">
+        <div class="field">
+          <label>এই খরচ কার ঘাড়ে পড়বে?</label>
+          <select id="expense-charge-type" onchange="onExpenseChargeTypeChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);">
+            <option value="all">সবার সমান ভাগে (Equal split — all subscribers)</option>
+            <option value="individual">নির্দিষ্ট একজন সাবস্ক্রাইবারের ব্যক্তিগত হিসাব থেকে</option>
+          </select>
+        </div>
+        <div class="field hidden" id="expense-target-wrap">
+          <label>সাবস্ক্রাইবার নির্বাচন করুন</label>
+          <select id="expense-target-roll" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
+        </div>
       </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
     </div>
-    <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
     <div class="table-scroll" style="margin-top:16px;">
       <table class="ledger">
         <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>চার্জ করা হয়েছে</th><th>Added By</th></tr></thead>
@@ -342,7 +395,7 @@ service cloud.firestore {
   </div>
 
   <!-- student ledger -->
-  <div class="panel">
+  <div class="panel treasurer-only">
     <h2>Subscriber List</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
       Calculation rule: (Shared Expense − Total Fund) ÷ Total Subscribers = Equal Share. Each subscriber's <b>Due/Credit</b> = their Total Collected − Equal Share − their Personal Charges. Green means credit, red means due. Amounts entered below are <b>added</b> to the subscriber's running total — nothing gets overwritten.
@@ -357,7 +410,7 @@ service cloud.firestore {
   </div>
 
   <!-- activity feed -->
-  <div class="panel">
+  <div class="panel treasurer-only">
     <h2>Activity</h2>
     <div id="activity-feed"></div>
   </div>
@@ -387,11 +440,11 @@ service cloud.firestore {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, updateProfile, signOut
+  createUserWithEmailAndPassword, updateProfile, signOut, deleteUser
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, addDoc,
-  query, orderBy, limit, serverTimestamp, where, getDocs
+  query, orderBy, limit, serverTimestamp, where, getDocs, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ============ 1) Your Firebase Config ============
@@ -425,7 +478,10 @@ let donationsData = [];     // [{id, donorName, amount, note, addedBy, addedAt}]
 let expensesData = [];      // [{id, description, amount, date, addedBy, addedAt}]
 let activityData = [];      // recent activity log
 let currentTreasurerName = "";
+let currentUserRole = "treasurer";   // 'treasurer' | 'subscriber' — detected from users/{uid} after sign-in
+let currentSubscriberRoll = null;    // set when currentUserRole === 'subscriber'
 let isRegisterMode = false;
+let authRole = "treasurer";          // which role tab is selected on the register form
 
 // ============ AUTH ============
 function toggleAuthMode() {
@@ -435,6 +491,19 @@ function toggleAuthMode() {
   document.getElementById('auth-error').classList.add('hidden');
 }
 window.toggleAuthMode = toggleAuthMode;
+
+window.setAuthRole = (role) => {
+  authRole = role;
+  document.getElementById('role-tab-treasurer').style.background = role === 'treasurer' ? 'var(--ink)' : 'none';
+  document.getElementById('role-tab-treasurer').style.color = role === 'treasurer' ? '#fff' : 'var(--ink)';
+  document.getElementById('role-tab-treasurer').style.border = role === 'treasurer' ? 'none' : '1px solid var(--line-strong)';
+  document.getElementById('role-tab-subscriber').style.background = role === 'subscriber' ? 'var(--ink)' : 'none';
+  document.getElementById('role-tab-subscriber').style.color = role === 'subscriber' ? '#fff' : 'var(--ink)';
+  document.getElementById('role-tab-subscriber').style.border = role === 'subscriber' ? 'none' : '1px solid var(--line-strong)';
+  document.getElementById('reg-subscriber-fields').classList.toggle('hidden', role !== 'subscriber');
+  document.getElementById('login-register-prompt').textContent = role === 'subscriber' ? 'New Subscriber?' : 'New Treasurer?';
+  document.getElementById('auth-error').classList.add('hidden');
+};
 
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
@@ -459,16 +528,49 @@ window.doRegister = async () => {
   const password = document.getElementById('reg-password').value;
   if (!name || !email || !password) return showAuthError("Please fill in all fields.");
   if (password.length < 6) return showAuthError("Password must be at least 6 characters.");
+
+  let roll = null, mobile = "";
+  if (authRole === 'subscriber') {
+    roll = parseInt(document.getElementById('reg-roll').value);
+    mobile = document.getElementById('reg-mobile').value.trim();
+    if (!roll || !mobile) return showAuthError("Please enter your Roll Number and Mobile Number.");
+  }
+
+  let cred;
   try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    cred = await createUserWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    showAuthError("Registration failed. Please try again.");
+    return;
+  }
+
+  try {
+    if (authRole === 'subscriber') {
+      // verify this roll exists and the mobile number matches what the treasurer has on file
+      const studentSnap = await getDoc(doc(db, "students", roll.toString()));
+      if (!studentSnap.exists() || (studentSnap.data().mobile || "").trim() !== mobile) {
+        await deleteUser(cred.user);
+        showAuthError("এই Roll ও Mobile Number মিলছে না। Treasurer-এর সাথে যোগাযোগ করুন।");
+        return;
+      }
+      // prevent a second account from claiming the same roll
+      const existingSnap = await getDocs(query(collection(db, "users"), where("role", "==", "subscriber"), where("roll", "==", roll)));
+      if (!existingSnap.empty) {
+        await deleteUser(cred.user);
+        showAuthError("এই Roll নম্বরে ইতিমধ্যে একটি অ্যাকাউন্ট রেজিস্টার করা আছে।");
+        return;
+      }
+      await setDoc(doc(db, "users", cred.user.uid), {
+        role: "subscriber", roll, name, email, createdAt: serverTimestamp()
+      });
+    } else {
+      await setDoc(doc(db, "users", cred.user.uid), {
+        role: "treasurer", name, email, createdAt: serverTimestamp()
+      });
+    }
     await updateProfile(cred.user, { displayName: name });
-    // force refresh so onAuthStateChanged sees the updated displayName
-    await auth.currentUser.reload();
-    // onAuthStateChanged already fired (with the pre-update name) when the account
-    // was created, and reload() alone won't re-trigger it — so update the UI here too
-    currentTreasurerName = name;
-    document.getElementById('current-user-name').textContent = currentTreasurerName;
-    document.getElementById('current-user-stamp').textContent = stampInitials(currentTreasurerName);
+    // onAuthStateChanged already fired (before displayName/role were set), so refresh the UI here too
+    await applyLoggedInUser(cred.user);
   } catch (e) {
     showAuthError("Registration failed. Please try again.");
   }
@@ -477,21 +579,52 @@ window.doRegister = async () => {
 window.doLogout = async () => {
   await signOut(auth);
 };
-  
+
 function stampInitials(name) {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);
   return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
 }
 
+// Resolve the signed-in user's role and populate the header + role-based visibility.
+// A missing users/{uid} doc means this is a pre-existing account from before roles existed —
+// those are always treated as Treasurer accounts, so nothing breaks for current treasurers.
+async function applyLoggedInUser(user) {
+  let role = "treasurer", roll = null, name = user.displayName || user.email;
+  try {
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      role = data.role || "treasurer";
+      roll = data.roll || null;
+      name = data.name || name;
+    }
+  } catch (e) { /* fall back to treasurer defaults */ }
+
+  currentUserRole = role;
+  currentSubscriberRoll = roll;
+  currentTreasurerName = name;
+
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('current-user-name').textContent = name;
+  document.getElementById('current-user-role').textContent = role === 'subscriber' ? 'Subscriber' : 'Treasurer';
+  document.getElementById('current-user-stamp').textContent = stampInitials(name);
+
+  applyRoleVisibility();
+  startListeners();
+}
+
+function applyRoleVisibility() {
+  const isTreasurer = currentUserRole !== 'subscriber';
+  document.querySelectorAll('.treasurer-only').forEach(el => el.classList.toggle('hidden', !isTreasurer));
+  document.querySelectorAll('.subscriber-only').forEach(el => el.classList.toggle('hidden', isTreasurer));
+  if (!isTreasurer) renderSubscriberPanel();
+}
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    currentTreasurerName = user.displayName || user.email;
-    document.getElementById('auth-screen').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    document.getElementById('current-user-name').textContent = currentTreasurerName;
-    document.getElementById('current-user-stamp').textContent = stampInitials(currentTreasurerName);
-    startListeners();
+    applyLoggedInUser(user);
   } else {
     document.getElementById('app').classList.add('hidden');
     document.getElementById('auth-screen').classList.remove('hidden');
@@ -653,6 +786,46 @@ function renderStudents() {
       }
     }
   });
+  if (currentUserRole === 'subscriber') renderSubscriberPanel();
+}
+
+// ============ SUBSCRIBER DASHBOARD ============
+function renderSubscriberPanel() {
+  if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
+  const roll = currentSubscriberRoll;
+  const student = students.find(s => s.roll === roll);
+  const equalShare = getEqualShare();
+  const rec = collectionsData[roll];
+  const amount = rec ? (rec.amount || 0) : 0;
+  const personalCharge = getPersonalCharge(roll);
+  const remaining = amount - equalShare - personalCharge;
+
+  const subEl = document.getElementById('subscriber-account-sub');
+  if (subEl) subEl.textContent = student ? `${student.name} · Roll ${student.roll}${student.mobile ? ' · ' + student.mobile : ''}` : `Roll ${roll}`;
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('sub-total-collected', "৳" + amount.toFixed(2));
+  set('sub-equal-share', "৳" + equalShare.toFixed(2));
+  set('sub-personal-charge', "৳" + personalCharge.toFixed(2));
+  const dueEl = document.getElementById('sub-due-credit');
+  if (dueEl) {
+    dueEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
+    dueEl.parentElement.classList.toggle('green', remaining >= 0);
+    dueEl.parentElement.classList.toggle('red', remaining < 0);
+  }
+
+  const pays = (paymentsData[roll] || []).slice().sort((a, b) => {
+    const ta = a.addedAt && a.addedAt.toDate ? a.addedAt.toDate() : 0;
+    const tb = b.addedAt && b.addedAt.toDate ? b.addedAt.toDate() : 0;
+    return tb - ta;
+  });
+  const historyBody = document.getElementById('sub-payment-history');
+  if (historyBody) {
+    historyBody.innerHTML = pays.map(p => {
+      const t = p.addedAt && p.addedAt.toDate ? p.addedAt.toDate().toLocaleDateString('en-US') : "...";
+      return `<tr><td class="activity-meta">${t}</td><td class="num">৳${(p.amount || 0).toFixed(2)}</td><td class="activity-meta">${p.addedBy || ""}</td></tr>`;
+    }).join('') || `<tr><td colspan="3" class="activity-meta">এখনো কোনো জমা রেকর্ড করা হয়নি।</td></tr>`;
+  }
 }
 
 function renderSummary() {
@@ -681,9 +854,16 @@ function renderDonations() {
 
 function renderExpenses() {
   document.getElementById('expense-list').innerHTML = expensesData.map(e => {
-    const chargedTo = e.chargeType === 'individual'
-      ? `${e.targetName || 'Roll ' + e.targetRoll} <span class="activity-meta">(ব্যক্তিগত)</span>`
-      : `সবার সমান ভাগে`;
+    let chargedTo;
+    if (e.chargeType === 'individual') {
+      const isViewerTheTarget = currentUserRole === 'subscriber' && currentSubscriberRoll === e.targetRoll;
+      const canSeeName = currentUserRole !== 'subscriber' || isViewerTheTarget;
+      chargedTo = canSeeName
+        ? `${e.targetName || 'Roll ' + e.targetRoll} <span class="activity-meta">(ব্যক্তিগত)</span>`
+        : `<span class="activity-meta">ব্যক্তিগত (গোপনীয়)</span>`;
+    } else {
+      chargedTo = `সবার সমান ভাগে`;
+    }
     return `<tr>
       <td class="activity-meta">${e.date || ""}</td>
       <td>${e.description}</td>
