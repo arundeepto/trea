@@ -205,12 +205,11 @@ service cloud.firestore {
       allow write: if isSignedIn() && request.auth.uid == uid;
     }
 
-    // a subscriber may create sheet-print orders only for their own roll number;
+    // a subscriber may create sheet-print orders only under their own uid;
     // editing/deleting orders is still treasurer-only
     match /sheetOrders/{orderId} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn() &&
-        request.resource.data.roll == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roll;
+      allow create: if isSignedIn() && request.resource.data.orderedByUid == request.auth.uid;
       allow update, delete: if isTreasurer();
     }
 
@@ -311,9 +310,8 @@ service cloud.firestore {
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 12px;" id="subscriber-account-sub">—</p>
     <div class="summary-grid" style="margin-bottom:10px;">
       <div class="sum-card green"><div class="label">আপনার মোট জমা</div><div class="val num" id="sub-total-collected">৳0</div></div>
-      <div class="sum-card"><div class="label">মাথাপিছু ভাগ</div><div class="val num" id="sub-equal-share">৳0</div></div>
-      <div class="sum-card red"><div class="label">ব্যক্তিগত চার্জ</div><div class="val num" id="sub-personal-charge">৳0</div></div>
-      <div class="sum-card"><div class="label">আপনার বকেয়া/জমা</div><div class="val num" id="sub-due-credit">৳0</div></div>
+      <div class="sum-card red"><div class="label">আপনার মোট খরচ</div><div class="val num" id="sub-total-expense">৳0</div></div>
+      <div class="sum-card"><div class="label">বর্তমান ব্যালেন্স</div><div class="val num" id="sub-due-credit">৳0</div></div>
     </div>
     <div class="table-scroll">
       <table class="ledger">
@@ -348,7 +346,7 @@ service cloud.firestore {
   </div>
 
   <!-- summary cards -->
-  <div class="summary-grid">
+  <div class="summary-grid treasurer-only">
     <div class="sum-card green"><div class="label">Subscriber Collection</div><div class="val num" id="sum-collection">৳0</div></div>
     <div class="sum-card gold"><div class="label">Fund</div><div class="val num" id="sum-donation">৳0</div></div>
     <div class="sum-card red"><div class="label">Total Expense</div><div class="val num" id="sum-expense">৳0</div></div>
@@ -377,17 +375,15 @@ service cloud.firestore {
   </div>
 
   <!-- fund (donation) -->
-  <div class="panel">
+  <div class="panel treasurer-only">
     <h2>Add Fund</h2>
-    <div class="treasurer-only">
-      <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">Record contributions received from parents, alumni, or other donors.</p>
-      <div class="field-row">
-        <div class="field"><label>Purpose</label><input type="text" id="donation-name" placeholder="e.g. Parent / Former Subscriber"></div>
-        <div class="field"><label>Amount (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
-        <div class="field"><label>Note (optional)</label><input type="text" id="donation-note" placeholder="e.g. Eid gift"></div>
-      </div>
-      <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">Save Fund</button></div>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">Record contributions received from parents, alumni, or other donors.</p>
+    <div class="field-row">
+      <div class="field"><label>Purpose</label><input type="text" id="donation-name" placeholder="e.g. Parent / Former Subscriber"></div>
+      <div class="field"><label>Amount (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="donation-note" placeholder="e.g. Eid gift"></div>
     </div>
+    <div class="btn-row"><button class="btn btn-gold" onclick="saveDonation()">Save Fund</button></div>
     <div class="table-scroll" style="margin-top:16px;">
       <table class="ledger">
         <thead><tr><th>Date</th><th>Purpose</th><th>Amount</th><th>Note</th><th>Added By</th></tr></thead>
@@ -397,12 +393,11 @@ service cloud.firestore {
   </div>
 
   <!-- expense -->
-  <div class="panel">
+  <div class="panel treasurer-only">
     <h2>Add Expense</h2>
-    <div class="treasurer-only">
-      <div class="field-row">
-        <div class="field" style="flex:2;"><label>Description</label><input type="text" id="expense-desc" placeholder="e.g. Printing paper purchase"></div>
-        <div class="field"><label>Amount (৳)</label><input type="number" id="expense-amount" placeholder="1000"></div>
+    <div class="field-row">
+      <div class="field" style="flex:2;"><label>Description</label><input type="text" id="expense-desc" placeholder="e.g. Printing paper purchase"></div>
+      <div class="field"><label>Amount (৳)</label><input type="number" id="expense-amount" placeholder="1000"></div>
       </div>
       <div class="field-row" style="margin-top:10px;">
         <div class="field">
@@ -418,7 +413,6 @@ service cloud.firestore {
         </div>
       </div>
       <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
-    </div>
     <div class="table-scroll" style="margin-top:16px;">
       <table class="ledger">
         <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>চার্জ করা হয়েছে</th><th>Added By</th></tr></thead>
@@ -760,17 +754,21 @@ function startListeners() {
   });
 
   // lecture sheet catalog — read by everyone, managed by treasurer only
-  onSnapshot(query(collection(db, "sheets"), orderBy("addedAt", "desc")), (snap) => {
+  // (sorted client-side rather than via orderBy so a sheet never silently disappears
+  // from the subscriber's list if its addedAt hasn't resolved yet)
+  onSnapshot(collection(db, "sheets"), (snap) => {
     sheetsData = [];
     snap.forEach(d => sheetsData.push({ id: d.id, ...d.data() }));
+    sheetsData.sort((a, b) => (tsToDate(b.addedAt) || 0) - (tsToDate(a.addedAt) || 0));
     renderSheetCatalogTreasurer();
     renderSheetCatalogSubscriber();
   });
 
   // sheet print orders — each subscriber can create their own; treasurer sees everyone's
-  onSnapshot(query(collection(db, "sheetOrders"), orderBy("orderedAt", "desc")), (snap) => {
+  onSnapshot(collection(db, "sheetOrders"), (snap) => {
     sheetOrdersData = [];
     snap.forEach(d => sheetOrdersData.push({ id: d.id, ...d.data() }));
+    sheetOrdersData.sort((a, b) => (tsToDate(b.orderedAt) || 0) - (tsToDate(a.orderedAt) || 0));
     renderSheetOrdersTreasurer();
     renderSheetCatalogSubscriber();
     renderMySheetOrders();
@@ -961,8 +959,7 @@ function renderSubscriberPanel() {
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   set('sub-total-collected', "৳" + amount.toFixed(2));
-  set('sub-equal-share', "৳" + equalShare.toFixed(2));
-  set('sub-personal-charge', "৳" + personalCharge.toFixed(2));
+  set('sub-total-expense', "৳" + (equalShare + personalCharge).toFixed(2));
   const dueEl = document.getElementById('sub-due-credit');
   if (dueEl) {
     dueEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
@@ -1300,16 +1297,24 @@ window.addSheet = async () => {
   const title = document.getElementById('new-sheet-title').value.trim();
   const price = parseFloat(document.getElementById('new-sheet-price').value);
   if (!title || !price || price <= 0) { alert("Please enter a sheet name and a valid price."); return; }
-  await addDoc(collection(db, "sheets"), {
-    title, price, addedBy: currentTreasurerName, addedAt: serverTimestamp()
-  });
-  document.getElementById('new-sheet-title').value = "";
-  document.getElementById('new-sheet-price').value = "";
+  try {
+    await addDoc(collection(db, "sheets"), {
+      title, price, addedBy: currentTreasurerName, addedAt: serverTimestamp()
+    });
+    document.getElementById('new-sheet-title').value = "";
+    document.getElementById('new-sheet-price').value = "";
+  } catch (e) {
+    alert("শিট যোগ করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
 };
 
 window.deleteSheet = async (id) => {
   if (!confirm("এই শিটটি লিস্ট থেকে সরিয়ে দিতে চান?")) return;
-  await deleteDoc(doc(db, "sheets", id));
+  try {
+    await deleteDoc(doc(db, "sheets", id));
+  } catch (e) {
+    alert("শিট মুছে ফেলা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
 };
 
 // Subscriber confirms which checked sheets to order. Each order is its own document (a
@@ -1328,16 +1333,22 @@ window.confirmSheetOrders = async () => {
   const names = chosenSheets.map(s => `${s.title} (৳${s.price.toFixed(2)})`).join(', ');
   if (!confirm(`নিচের শিটগুলো প্রিন্টের জন্য অর্ডার করবেন? মোট ৳${total.toFixed(2)} আপনার হিসাব থেকে কাটা হবে।\n\n${names}`)) return;
 
+  const user = auth.currentUser;
   const student = students.find(s => s.roll === currentSubscriberRoll);
-  await Promise.all(chosenSheets.map(s => addDoc(collection(db, "sheetOrders"), {
-    roll: currentSubscriberRoll,
-    studentName: student ? student.name : currentTreasurerName,
-    sheetId: s.id,
-    sheetTitle: s.title,
-    price: s.price,
-    orderedAt: serverTimestamp(),
-    addedBy: currentTreasurerName
-  })));
+  try {
+    await Promise.all(chosenSheets.map(s => addDoc(collection(db, "sheetOrders"), {
+      roll: currentSubscriberRoll,
+      studentName: student ? student.name : currentTreasurerName,
+      sheetId: s.id,
+      sheetTitle: s.title,
+      price: s.price,
+      orderedAt: serverTimestamp(),
+      addedBy: currentTreasurerName,
+      orderedByUid: user ? user.uid : null
+    })));
+  } catch (e) {
+    alert("শিট অর্ডার করা যায়নি। কারণ: " + (e && e.message ? e.message : e) + "\n\nসম্ভবত Firestore Rules-এ sheetOrders এর জন্য সঠিক rule যোগ করা হয়নি।");
+  }
 };
 
 // ============ VOUCHER ============
