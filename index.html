@@ -205,6 +205,15 @@ service cloud.firestore {
       allow write: if isSignedIn() && request.auth.uid == uid;
     }
 
+    // a subscriber may create sheet-print orders only for their own roll number;
+    // editing/deleting orders is still treasurer-only
+    match /sheetOrders/{orderId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.roll == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roll;
+      allow update, delete: if isTreasurer();
+    }
+
     match /{document=**} {
       allow read: if isSignedIn();
       allow write: if isTreasurer();
@@ -312,6 +321,30 @@ service cloud.firestore {
         <tbody id="sub-payment-history"></tbody>
       </table>
     </div>
+
+    <h2 style="margin-top:20px;">কোন খাতে আপনার হিসাব থেকে খরচ হয়েছে</h2>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>তারিখ</th><th>খাত / বিবরণ</th><th>পরিমাণ</th></tr></thead>
+        <tbody id="sub-expense-breakdown"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ SUBSCRIBER-ONLY: lecture sheet ordering ============ -->
+  <div class="panel subscriber-only hidden">
+    <h2>লেকচার শিট</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">যে শিটগুলো প্রিন্ট করাতে চান, নিচ থেকে বেছে নিয়ে কনফার্ম করুন। কনফার্ম করার সাথে সাথেই দাম আপনার হিসাব থেকে ব্যক্তিগত চার্জ হিসেবে কেটে নেওয়া হবে।</p>
+    <div id="sheet-select-list"></div>
+    <div class="btn-row"><button class="btn btn-gold" onclick="confirmSheetOrders()">✓ নির্বাচিত শিট অর্ডার নিশ্চিত করুন</button></div>
+
+    <h2 style="margin-top:20px;">আপনার অর্ডারকৃত শিট</h2>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>তারিখ</th><th>শিট</th><th>মূল্য</th></tr></thead>
+        <tbody id="my-sheet-orders-body"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- summary cards -->
@@ -390,6 +423,42 @@ service cloud.firestore {
       <table class="ledger">
         <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>চার্জ করা হয়েছে</th><th>Added By</th></tr></thead>
         <tbody id="expense-list"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- lecture sheet catalog management -->
+  <div class="panel treasurer-only">
+    <h2>লেকচার শিট ব্যবস্থাপনা</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখানে যেসব শিট যোগ করবেন, সাবস্ক্রাইবাররা তাদের ড্যাশবোর্ড থেকে সেগুলো প্রিন্টের জন্য অর্ডার করতে পারবে।</p>
+    <div class="field-row">
+      <div class="field" style="flex:2;"><label>শিটের নাম</label><input type="text" id="new-sheet-title" placeholder="e.g. Chapter 4 - Algebra"></div>
+      <div class="field"><label>দাম (৳)</label><input type="number" id="new-sheet-price" placeholder="20"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="addSheet()">+ শিট যোগ করুন</button></div>
+    <div class="table-scroll" style="margin-top:16px;">
+      <table class="ledger">
+        <thead><tr><th>শিট</th><th>দাম</th><th>যোগ করেছেন</th><th></th></tr></thead>
+        <tbody id="sheet-catalog-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- lecture sheet print orders -->
+  <div class="panel treasurer-only">
+    <h2>শিট প্রিন্ট রিকোয়েস্ট (গ্রুপ করা)</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">একই শিট একাধিক সাবস্ক্রাইবার চাইলে এখানে একসাথে দেখা যাবে — ব্যাচে প্রিন্ট করার জন্য সুবিধাজনক।</p>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>শিট</th><th>মোট অনুরোধ</th><th>যারা চেয়েছেন</th><th>মোট আয়</th></tr></thead>
+        <tbody id="sheet-orders-grouped-body"></tbody>
+      </table>
+    </div>
+    <h2 style="margin-top:20px;">সব অর্ডার (বিস্তারিত)</h2>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>তারিখ</th><th>সাবস্ক্রাইবার</th><th>শিট</th><th>মূল্য</th></tr></thead>
+        <tbody id="sheet-orders-detail-body"></tbody>
       </table>
     </div>
   </div>
@@ -477,6 +546,8 @@ let paymentsData = {};       // { roll: [{id, amount, addedBy, addedAt}, ...] } 
 let donationsData = [];     // [{id, donorName, amount, note, addedBy, addedAt}]
 let expensesData = [];      // [{id, description, amount, date, addedBy, addedAt}]
 let activityData = [];      // recent activity log
+let sheetsData = [];        // [{id, title, price, addedBy, addedAt}] — lecture sheet catalog
+let sheetOrdersData = [];   // [{id, roll, studentName, sheetId, sheetTitle, price, orderedAt, addedBy}]
 let currentTreasurerName = "";
 let currentUserRole = "treasurer";   // 'treasurer' | 'subscriber' — detected from users/{uid} after sign-in
 let currentSubscriberRoll = null;    // set when currentUserRole === 'subscriber'
@@ -687,6 +758,25 @@ function startListeners() {
     snap.forEach(d => activityData.push({ id: d.id, ...d.data() }));
     renderActivity();
   });
+
+  // lecture sheet catalog — read by everyone, managed by treasurer only
+  onSnapshot(query(collection(db, "sheets"), orderBy("addedAt", "desc")), (snap) => {
+    sheetsData = [];
+    snap.forEach(d => sheetsData.push({ id: d.id, ...d.data() }));
+    renderSheetCatalogTreasurer();
+    renderSheetCatalogSubscriber();
+  });
+
+  // sheet print orders — each subscriber can create their own; treasurer sees everyone's
+  onSnapshot(query(collection(db, "sheetOrders"), orderBy("orderedAt", "desc")), (snap) => {
+    sheetOrdersData = [];
+    snap.forEach(d => sheetOrdersData.push({ id: d.id, ...d.data() }));
+    renderSheetOrdersTreasurer();
+    renderSheetCatalogSubscriber();
+    renderMySheetOrders();
+    renderStudents();        // sheet cost is now part of personal charge
+    renderSubscriberPanel();
+  });
 }
 
 // ============ SUBSCRIBER MANAGEMENT (WRITES) ============
@@ -739,27 +829,93 @@ function renderStudentRows() {
   `).join('');
 }
 
+// ---- helpers for time-aware equal-share splitting ----
+function tsToDate(ts) {
+  if (!ts) return null;
+  if (ts.toDate) return ts.toDate();
+  const d = new Date(ts);
+  return isNaN(d) ? null : d;
+}
+
+// Students who already existed (were added) at/by the given time. A student with no
+// addedAt (very old legacy record) is treated as always having been present.
+function eligibleStudentsAt(time) {
+  return students.filter(s => {
+    const addedAt = tsToDate(s.addedAt);
+    if (!addedAt) return true;
+    return !time || addedAt <= time;
+  });
+}
+
+// BUGFIX: previously a single global equal-share (totalSharedExpense / students.length) was
+// used for every subscriber. That meant adding a NEW subscriber instantly increased the
+// divisor and silently pulled everyone's (including the new subscriber's) share down while
+// retroactively charging the new subscriber for expenses recorded before they even joined.
+// Fix: each shared ("সবার সমান ভাগে") expense is split only among the subscribers who were
+// already on the list at the moment that expense was recorded. A subscriber added later is
+// simply not included in that split at all. Fund/donation offsets are applied chronologically
+// (oldest shared expense first) so a fund doesn't retroactively erase a cost that had already
+// been fully allocated before the fund arrived.
+function getSharedExpenseNetCosts() {
+  const donationEvents = donationsData.map(d => ({ type: 'donation', amount: d.amount || 0, time: tsToDate(d.addedAt) || new Date(0) }));
+  const expenseEvents = expensesData
+    .filter(e => e.chargeType !== 'individual')
+    .map(e => ({ type: 'expense', id: e.id, amount: e.amount || 0, time: tsToDate(e.addedAt) || new Date(0) }));
+  const events = [...donationEvents, ...expenseEvents].sort((a, b) => a.time - b.time);
+  let pool = 0;
+  const netCostById = {};
+  events.forEach(ev => {
+    if (ev.type === 'donation') { pool += ev.amount; return; }
+    const offset = Math.min(pool, ev.amount);
+    pool -= offset;
+    netCostById[ev.id] = ev.amount - offset;
+  });
+  return netCostById;
+}
+
+// Per-student equal share — only counts shared expenses recorded on/after the student's own
+// join date, split only among the subscribers who existed at that expense's time.
+function getEqualShareForStudent(roll) {
+  const student = students.find(s => s.roll === roll);
+  if (!student) return 0;
+  const joinTime = tsToDate(student.addedAt); // null = legacy, always included
+  const netCostById = getSharedExpenseNetCosts();
+  let share = 0;
+  expensesData
+    .filter(e => e.chargeType !== 'individual')
+    .forEach(e => {
+      const eTime = tsToDate(e.addedAt) || new Date(0);
+      if (joinTime && eTime < joinTime) return; // subscriber wasn't added yet — not charged
+      const net = netCostById[e.id] || 0;
+      if (net <= 0) return;
+      const eligible = eligibleStudentsAt(eTime);
+      const count = eligible.length || 1;
+      share += net / count;
+    });
+  return share;
+}
+
+// kept for places that need a rough overall average (e.g. PDF summary row) — NOT used for
+// any individual subscriber's actual due/credit calculation anymore.
 function getEqualShare() {
   if (!students.length) return 0;
-  // Only expenses charged to "all" get split equally; individual/personal expenses are excluded here
-  // and instead deducted only from that specific subscriber (see getPersonalCharge).
-  const totalSharedExpense = expensesData
-    .filter(e => e.chargeType !== 'individual')
-    .reduce((a, e) => a + (e.amount || 0), 0);
-  const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
-  const netToSplit = Math.max(totalSharedExpense - totalDonation, 0);
-  return netToSplit / students.length;
+  const total = students.reduce((a, s) => a + getEqualShareForStudent(s.roll), 0);
+  return total / students.length;
 }
 
 function getPersonalCharge(roll) {
-  return expensesData
+  const individualExpenses = expensesData
     .filter(e => e.chargeType === 'individual' && e.targetRoll === roll)
     .reduce((a, e) => a + (e.amount || 0), 0);
+  const sheetCharges = sheetOrdersData
+    .filter(o => o.roll === roll)
+    .reduce((a, o) => a + (o.price || 0), 0);
+  return individualExpenses + sheetCharges;
 }
 
 function renderStudents() {
-  const equalShare = getEqualShare();
   students.forEach(s => {
+    const equalShare = getEqualShareForStudent(s.roll);
     const rec = collectionsData[s.roll];
     const amount = rec ? (rec.amount || 0) : 0;
     const personalCharge = getPersonalCharge(s.roll);
@@ -794,7 +950,7 @@ function renderSubscriberPanel() {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   const roll = currentSubscriberRoll;
   const student = students.find(s => s.roll === roll);
-  const equalShare = getEqualShare();
+  const equalShare = getEqualShareForStudent(roll);
   const rec = collectionsData[roll];
   const amount = rec ? (rec.amount || 0) : 0;
   const personalCharge = getPersonalCharge(roll);
@@ -826,6 +982,7 @@ function renderSubscriberPanel() {
       return `<tr><td class="activity-meta">${t}</td><td class="num">৳${(p.amount || 0).toFixed(2)}</td><td class="activity-meta">${p.addedBy || ""}</td></tr>`;
     }).join('') || `<tr><td colspan="3" class="activity-meta">এখনো কোনো জমা রেকর্ড করা হয়নি।</td></tr>`;
   }
+  renderSubscriberExpenseBreakdown();
 }
 
 function renderSummary() {
@@ -886,6 +1043,125 @@ function renderActivity() {
       </div>
     </div>`;
   }).join('') || `<div class="activity-meta">No activity yet.</div>`;
+}
+
+// ============ LECTURE SHEETS (RENDER) ============
+
+// Treasurer: the catalog list (title, price, delete button)
+function renderSheetCatalogTreasurer() {
+  const tbody = document.getElementById('sheet-catalog-body');
+  if (!tbody) return;
+  tbody.innerHTML = sheetsData.map(s => `
+    <tr>
+      <td>${s.title}</td>
+      <td class="num">৳${(s.price || 0).toFixed(2)}</td>
+      <td class="activity-meta">${s.addedBy || ''}</td>
+      <td><button class="icon-btn" onclick="deleteSheet('${s.id}')">✕</button></td>
+    </tr>
+  `).join('') || `<tr><td colspan="4" class="activity-meta">এখনো কোনো লেকচার শিট যোগ করা হয়নি।</td></tr>`;
+}
+
+// Subscriber: selectable list of sheets with checkboxes, disabled/checked for already-ordered ones
+function renderSheetCatalogSubscriber() {
+  const box = document.getElementById('sheet-select-list');
+  if (!box || currentUserRole !== 'subscriber') return;
+  const myOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
+  if (!sheetsData.length) {
+    box.innerHTML = `<div class="activity-meta">এখনো কোনো লেকচার শিট যোগ করা হয়নি।</div>`;
+    return;
+  }
+  box.innerHTML = sheetsData.map(s => {
+    const ordered = myOrderedIds.has(s.id);
+    return `
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.9rem;">
+        <input type="checkbox" class="sheet-check" value="${s.id}" ${ordered ? 'checked disabled' : ''} style="width:16px;height:16px;">
+        <span style="flex:1;">${s.title}</span>
+        <span class="num" style="color:var(--ink-soft);">৳${(s.price || 0).toFixed(2)}</span>
+        ${ordered ? '<span class="activity-meta" style="color:var(--green);">✓ অর্ডার করা হয়েছে</span>' : ''}
+      </label>`;
+  }).join('');
+}
+
+// Subscriber: their own order history
+function renderMySheetOrders() {
+  const tbody = document.getElementById('my-sheet-orders-body');
+  if (!tbody || currentUserRole !== 'subscriber') return;
+  const mine = sheetOrdersData.filter(o => o.roll === currentSubscriberRoll);
+  tbody.innerHTML = mine.map(o => {
+    const t = o.orderedAt && o.orderedAt.toDate ? o.orderedAt.toDate().toLocaleDateString('en-US') : '...';
+    return `<tr><td class="activity-meta">${t}</td><td>${o.sheetTitle}</td><td class="num">৳${(o.price || 0).toFixed(2)}</td></tr>`;
+  }).join('') || `<tr><td colspan="3" class="activity-meta">এখনো কোনো শিট অর্ডার করা হয়নি।</td></tr>`;
+}
+
+// Treasurer: detailed list of every order + a grouped view so a sheet requested by
+// several subscribers at once is immediately visible for batch printing.
+function renderSheetOrdersTreasurer() {
+  const detailBody = document.getElementById('sheet-orders-detail-body');
+  const groupedBody = document.getElementById('sheet-orders-grouped-body');
+  if (!detailBody || !groupedBody) return;
+
+  detailBody.innerHTML = sheetOrdersData.map(o => {
+    const t = o.orderedAt && o.orderedAt.toDate ? o.orderedAt.toDate().toLocaleString('en-US') : '...';
+    return `<tr>
+      <td class="activity-meta">${t}</td>
+      <td>${o.studentName || '—'} <span class="activity-meta">(Roll ${o.roll})</span></td>
+      <td>${o.sheetTitle}</td>
+      <td class="num">৳${(o.price || 0).toFixed(2)}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="4" class="activity-meta">এখনো কোনো অর্ডার আসেনি।</td></tr>`;
+
+  const groups = {};
+  sheetOrdersData.forEach(o => {
+    const key = o.sheetId || o.sheetTitle;
+    if (!groups[key]) groups[key] = { title: o.sheetTitle, price: o.price, names: [], total: 0 };
+    groups[key].names.push(`${o.studentName || 'Roll ' + o.roll} (Roll ${o.roll})`);
+    groups[key].total += (o.price || 0);
+  });
+  const groupList = Object.values(groups).sort((a, b) => b.names.length - a.names.length);
+  groupedBody.innerHTML = groupList.map(g => `
+    <tr>
+      <td>${g.title}</td>
+      <td class="num">${g.names.length}</td>
+      <td style="font-size:.8rem;color:var(--ink-soft);">${g.names.join(', ')}</td>
+      <td class="num">৳${g.total.toFixed(2)}</td>
+    </tr>
+  `).join('') || `<tr><td colspan="4" class="activity-meta">এখনো কোনো অর্ডার আসেনি।</td></tr>`;
+}
+
+// Subscriber: "কোন খাতে খরচ হচ্ছে" — everything currently counted in their due/credit,
+// broken down by purpose (their slice of each shared expense, any personal charges, sheet orders)
+function renderSubscriberExpenseBreakdown() {
+  const tbody = document.getElementById('sub-expense-breakdown');
+  if (!tbody || currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
+  const roll = currentSubscriberRoll;
+  const student = students.find(s => s.roll === roll);
+  const joinTime = student ? tsToDate(student.addedAt) : null;
+  const netCostById = getSharedExpenseNetCosts();
+
+  const rows = [];
+  expensesData.filter(e => e.chargeType !== 'individual').forEach(e => {
+    const eTime = tsToDate(e.addedAt) || new Date(0);
+    if (joinTime && eTime < joinTime) return;
+    const net = netCostById[e.id] || 0;
+    if (net <= 0) return;
+    const count = eligibleStudentsAt(eTime).length || 1;
+    rows.push({ time: eTime, purpose: e.description, tag: 'সবার সমান ভাগে', amount: net / count });
+  });
+  expensesData.filter(e => e.chargeType === 'individual' && e.targetRoll === roll).forEach(e => {
+    rows.push({ time: tsToDate(e.addedAt) || new Date(0), purpose: e.description, tag: 'ব্যক্তিগত খরচ', amount: e.amount || 0 });
+  });
+  sheetOrdersData.filter(o => o.roll === roll).forEach(o => {
+    rows.push({ time: tsToDate(o.orderedAt) || new Date(0), purpose: `শিট প্রিন্ট: ${o.sheetTitle}`, tag: 'লেকচার শিট', amount: o.price || 0 });
+  });
+  rows.sort((a, b) => b.time - a.time);
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td class="activity-meta">${r.time.toLocaleDateString('en-US')}</td>
+      <td>${r.purpose || '—'} <span class="activity-meta">(${r.tag})</span></td>
+      <td class="num due-neg">৳${r.amount.toFixed(2)}</td>
+    </tr>
+  `).join('') || `<tr><td colspan="3" class="activity-meta">এখনো আপনার হিসাব থেকে কোনো খরচ কাটা হয়নি।</td></tr>`;
 }
 
 function renderExpenseTargetOptions() {
@@ -1019,6 +1295,51 @@ window.saveExpense = async () => {
   onExpenseChargeTypeChange();
 };
 
+// ============ LECTURE SHEETS (WRITES) ============
+window.addSheet = async () => {
+  const title = document.getElementById('new-sheet-title').value.trim();
+  const price = parseFloat(document.getElementById('new-sheet-price').value);
+  if (!title || !price || price <= 0) { alert("Please enter a sheet name and a valid price."); return; }
+  await addDoc(collection(db, "sheets"), {
+    title, price, addedBy: currentTreasurerName, addedAt: serverTimestamp()
+  });
+  document.getElementById('new-sheet-title').value = "";
+  document.getElementById('new-sheet-price').value = "";
+};
+
+window.deleteSheet = async (id) => {
+  if (!confirm("এই শিটটি লিস্ট থেকে সরিয়ে দিতে চান?")) return;
+  await deleteDoc(doc(db, "sheets", id));
+};
+
+// Subscriber confirms which checked sheets to order. Each order is its own document (a
+// subscriber can only ever create orders for their own roll — enforced by Firestore rules),
+// and its price is automatically added to that subscriber's personal charge (see getPersonalCharge).
+window.confirmSheetOrders = async () => {
+  if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
+  const alreadyOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
+  const checked = Array.from(document.querySelectorAll('.sheet-check:checked'))
+    .map(cb => cb.value)
+    .filter(id => !alreadyOrderedIds.has(id));
+  if (!checked.length) { alert("অর্ডার করার জন্য নতুন কোনো শিট বাছাই করা হয়নি।"); return; }
+
+  const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
+  const total = chosenSheets.reduce((a, s) => a + (s.price || 0), 0);
+  const names = chosenSheets.map(s => `${s.title} (৳${s.price.toFixed(2)})`).join(', ');
+  if (!confirm(`নিচের শিটগুলো প্রিন্টের জন্য অর্ডার করবেন? মোট ৳${total.toFixed(2)} আপনার হিসাব থেকে কাটা হবে।\n\n${names}`)) return;
+
+  const student = students.find(s => s.roll === currentSubscriberRoll);
+  await Promise.all(chosenSheets.map(s => addDoc(collection(db, "sheetOrders"), {
+    roll: currentSubscriberRoll,
+    studentName: student ? student.name : currentTreasurerName,
+    sheetId: s.id,
+    sheetTitle: s.title,
+    price: s.price,
+    orderedAt: serverTimestamp(),
+    addedBy: currentTreasurerName
+  })));
+};
+
 // ============ VOUCHER ============
 window.openVoucherModal = () => {
   const box = document.getElementById('voucher-box');
@@ -1044,7 +1365,7 @@ window.openVoucherModal = () => {
 window.downloadFullReport = () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  const equalShare = getEqualShare();
+  const avgEqualShare = getEqualShare();
   const totalCollection = students.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
   const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
   const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0);
@@ -1060,10 +1381,10 @@ window.downloadFullReport = () => {
   // Summary table
   doc.autoTable({
     startY: 32,
-    head: [["Total Collection", "Total Fund", "Total Expense", "Balance in Hand", "Per-student Share"]],
+    head: [["Total Collection", "Total Fund", "Total Expense", "Balance in Hand", "Avg Per-student Share"]],
     body: [[
       `Tk ${totalCollection.toFixed(2)}`, `Tk ${totalDonation.toFixed(2)}`,
-      `Tk ${totalExpense.toFixed(2)}`, `Tk ${balance.toFixed(2)}`, `Tk ${equalShare.toFixed(2)}`
+      `Tk ${totalExpense.toFixed(2)}`, `Tk ${balance.toFixed(2)}`, `Tk ${avgEqualShare.toFixed(2)}`
     ]],
     theme: "grid",
     headStyles: { fillColor: [30, 41, 59] },
@@ -1076,7 +1397,7 @@ window.downloadFullReport = () => {
   const studentRows = students.map(s => {
     const amt = (collectionsData[s.roll] || {}).amount || 0;
     const personalCharge = getPersonalCharge(s.roll);
-    const rem = amt - equalShare - personalCharge;
+    const rem = amt - getEqualShareForStudent(s.roll) - personalCharge;
     return [s.roll, s.name, s.mobile || "-", `Tk ${amt.toFixed(2)}`, `${rem >= 0 ? "" : "-"}Tk ${Math.abs(rem).toFixed(2)}`];
   });
   doc.autoTable({
