@@ -202,6 +202,10 @@ service cloud.firestore {
     function isGirlsAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && myRole() == 'girls_admin';
     }
+    function isFemaleRoll(roll) {
+      return exists(/databases/$(database)/documents/students/$(string(roll))) &&
+        get(/databases/$(database)/documents/students/$(string(roll))).data.gender == 'female';
+    }
 
     match /users/{uid} {
       allow read: if isSignedIn();
@@ -216,6 +220,22 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.orderedByUid == request.auth.uid;
       allow update: if isTreasurer() || isGirlsAdmin();
       allow delete: if isTreasurer();
+    }
+
+    // the girls' admin may add a payment ONLY for a subscriber whose gender is 'female';
+    // the treasurer may add a payment for anyone
+    match /payments/{paymentId} {
+      allow read: if isSignedIn();
+      allow create: if isTreasurer() ||
+        (isGirlsAdmin() && isFemaleRoll(request.resource.data.roll));
+      allow update, delete: if isTreasurer();
+    }
+
+    // activity log entries — treasurer always, girls' admin only for her own actions
+    match /activity/{activityId} {
+      allow read: if isSignedIn();
+      allow create: if isTreasurer() || isGirlsAdmin();
+      allow update, delete: if isTreasurer();
     }
 
     match /{document=**} {
@@ -357,6 +377,28 @@ service cloud.firestore {
     <div class="summary-grid" style="margin-bottom:10px;">
       <div class="sum-card"><div class="label">মেয়ে সাবস্ক্রাইবার</div><div class="val num" id="girls-count">0</div></div>
       <div class="sum-card green"><div class="label">মেয়েদের মোট জমা</div><div class="val num" id="girls-total-collected">৳0</div></div>
+    </div>
+
+    <h2 style="margin-top:20px;">টাকা জমা যোগ করুন (শুধু মেয়ে সাবস্ক্রাইবার)</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখানে শুধু মেয়ে সাবস্ক্রাইবারদের তালিকা দেখা যাবে — তাদের জমা এখান থেকে যোগ করা যাবে।</p>
+    <input type="text" class="search-box" id="girls-admin-student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজুন..." oninput="filterGirlsAdminStudents()">
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>Roll</th><th>Name</th><th>মোট জমা (৳)</th><th>নতুন জমা যোগ করুন</th></tr></thead>
+        <tbody id="girls-admin-student-body"></tbody>
+      </table>
+    </div>
+
+    <h2 style="margin-top:20px;">আপনার ব্যক্তিগত শিট অর্ডার</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এটা আপনার নিজের (এডমিনের) শিট অর্ডার — কোনো সাবস্ক্রাইবারের হিসাব থেকে এর দাম কাটা হবে না।</p>
+    <div id="girls-admin-sheet-select-list"></div>
+    <div class="btn-row"><button class="btn btn-gold" onclick="confirmGirlsAdminPersonalOrder()">✓ নির্বাচিত শিট অর্ডার নিশ্চিত করুন</button></div>
+    <h2 style="margin-top:20px;">আপনার অর্ডারকৃত শিট</h2>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>তারিখ</th><th>শিট</th><th>মূল্য</th><th>ব্যাচ</th><th>স্ট্যাটাস</th></tr></thead>
+        <tbody id="girls-admin-my-orders-body"></tbody>
+      </table>
     </div>
 
     <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট — মেয়েদের শিট</h2>
@@ -845,6 +887,7 @@ function startListeners() {
     sheetsData.sort((a, b) => (tsToDate(b.addedAt) || 0) - (tsToDate(a.addedAt) || 0));
     renderSheetCatalogTreasurer();
     renderSheetCatalogSubscriber();
+    renderGirlsAdminSheetCatalog();
   });
 
   // sheet print orders — each subscriber can create their own; treasurer/girls-admin see everyone's
@@ -1206,6 +1249,11 @@ function orderStatusLabel(o) {
     : (o.printed ? '<span style="color:var(--gold);font-weight:600;">প্রিন্ট সম্পন্ন</span>' : '<span class="activity-meta">পেন্ডিং</span>');
 }
 
+// A personal (girls-admin, no-charge) order has no roll — label it clearly instead of "Roll null"
+function orderRollTag(o) {
+  return o.personal ? '(এডমিন - ব্যক্তিগত)' : `(Roll ${o.roll})`;
+}
+
 window.onOrderDateFilterChange = () => {
   const sel = document.getElementById('order-date-select');
   currentOrderDateFilter = sel ? sel.value : null;
@@ -1246,7 +1294,7 @@ function renderSheetOrdersTreasurer() {
     const genderLabel = o.gender === 'female' ? 'মেয়ে' : (o.gender === 'male' ? 'ছেলে' : '—');
     return `<tr>
       <td class="activity-meta">${t}</td>
-      <td>${o.studentName || '—'} <span class="activity-meta">(Roll ${o.roll})</span></td>
+      <td>${o.studentName || '—'} <span class="activity-meta">${orderRollTag(o)}</span></td>
       <td class="activity-meta">${genderLabel}</td>
       <td>${o.sheetTitle}</td>
       <td class="num">৳${(o.price || 0).toFixed(2)}</td>
@@ -1258,7 +1306,7 @@ function renderSheetOrdersTreasurer() {
   batchOrders.forEach(o => {
     const key = o.sheetId || o.sheetTitle;
     if (!groups[key]) groups[key] = { title: o.sheetTitle, price: o.price, names: [], total: 0 };
-    groups[key].names.push(`${o.studentName || 'Roll ' + o.roll} (Roll ${o.roll})`);
+    groups[key].names.push(`${o.studentName || 'Unknown'} ${orderRollTag(o)}`);
     groups[key].total += (o.price || 0);
   });
   const groupList = Object.values(groups).sort((a, b) => b.names.length - a.names.length);
@@ -1286,7 +1334,7 @@ function renderSheetOrdersTreasurer() {
       const genderLabel = o.gender === 'female' ? 'মেয়ে' : (o.gender === 'male' ? 'ছেলে' : '—');
       return `<tr>
         <td><input type="checkbox" ${o.received ? 'checked' : ''} onchange="toggleOrderReceived('${o.id}', this.checked)" style="width:16px;height:16px;"></td>
-        <td>${o.studentName || '—'} <span class="activity-meta">(Roll ${o.roll})</span></td>
+        <td>${o.studentName || '—'} <span class="activity-meta">${orderRollTag(o)}</span></td>
         <td class="activity-meta">${genderLabel}</td>
         <td>${o.sheetTitle}</td>
         <td>${o.received ? `<span class="activity-meta">${o.receivedBy || ''} ${o.receivedAt && o.receivedAt.toDate ? '· ' + o.receivedAt.toDate().toLocaleDateString('en-US') : ''}</span>` : '<span class="activity-meta">এখনো বুঝে পায়নি</span>'}</td>
@@ -1331,12 +1379,149 @@ function getGirlsTotals() {
   return { count: femaleStudents.length, totalCollected };
 }
 
+// Girls admin: payment-entry table, restricted to female subscribers only (also enforced server-side)
+function renderGirlsAdminStudentRows() {
+  const tbody = document.getElementById('girls-admin-student-body');
+  if (!tbody) return;
+  const femaleStudents = students.filter(s => s.gender === 'female');
+  if (!femaleStudents.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="activity-meta">এখনো কোনো মেয়ে সাবস্ক্রাইবার যোগ করা হয়নি।</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = femaleStudents.map(s => {
+    const amt = (collectionsData[s.roll] || {}).amount || 0;
+    return `
+    <tr data-name="${(s.name || '').toLowerCase()}" data-roll="${s.roll}">
+      <td class="num">${s.roll}</td>
+      <td>${s.name}</td>
+      <td class="num">৳${amt.toFixed(2)}</td>
+      <td>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="number" class="coll-input" id="girls-pay-${s.roll}" placeholder="৳ পরিমাণ" style="width:90px;" onkeydown="if(event.key==='Enter'){addPaymentGirlsAdmin(${s.roll});}">
+          <button class="btn btn-outline" style="padding:7px 10px;font-size:.78rem;white-space:nowrap;" onclick="addPaymentGirlsAdmin(${s.roll})">+ যোগ করুন</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.filterGirlsAdminStudents = () => {
+  const q = document.getElementById('girls-admin-student-search').value.trim().toLowerCase();
+  document.querySelectorAll('#girls-admin-student-body tr').forEach(tr => {
+    if (!tr.dataset.name) return;
+    const match = tr.dataset.name.includes(q) || tr.dataset.roll.includes(q);
+    tr.style.display = match ? "" : "none";
+  });
+};
+
+window.addPaymentGirlsAdmin = async (roll) => {
+  const student = students.find(s => s.roll === roll);
+  if (!student || student.gender !== 'female') { alert("শুধু মেয়ে সাবস্ক্রাইবারের জমা এখান থেকে যোগ করা যাবে।"); return; }
+  const input = document.getElementById(`girls-pay-${roll}`);
+  const amt = parseFloat(input ? input.value : "");
+  if (!amt || amt <= 0) { alert("সঠিক পরিমাণ লিখুন।"); return; }
+  try {
+    await addDoc(collection(db, "payments"), {
+      roll, amount: amt, addedBy: currentTreasurerName, addedAt: serverTimestamp()
+    });
+    await addDoc(collection(db, "activity"), {
+      type: "payment", actor: currentTreasurerName,
+      detail: `${student.name} (Roll ${roll}) থেকে ৳${amt.toFixed(2)} নতুন জমা যোগ হয়েছে (মেয়েদের এডমিন)`,
+      amount: amt, createdAt: serverTimestamp()
+    });
+    if (input) input.value = "";
+  } catch (e) {
+    alert("জমা যোগ করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
+};
+
+// Girls admin: her own personal sheet catalog — selecting & confirming here never charges
+// any subscriber (order docs are created with roll: null, personal: true)
+function renderGirlsAdminSheetCatalog() {
+  const box = document.getElementById('girls-admin-sheet-select-list');
+  if (!box || currentUserRole !== 'girls_admin') return;
+  const uid = auth.currentUser ? auth.currentUser.uid : null;
+  const myOrderedIds = new Set(sheetOrdersData.filter(o => o.personal && o.orderedByUid === uid).map(o => o.sheetId));
+  if (!sheetsData.length) {
+    box.innerHTML = `<div class="activity-meta">এখনো কোনো লেকচার শিট যোগ করা হয়নি।</div>`;
+    return;
+  }
+  box.innerHTML = sheetsData.map(s => {
+    const ordered = myOrderedIds.has(s.id);
+    return `
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.9rem;">
+        <input type="checkbox" class="girls-admin-sheet-check" value="${s.id}" ${ordered ? 'checked disabled' : ''} style="width:16px;height:16px;">
+        <span style="flex:1;">${s.title}</span>
+        <span class="num" style="color:var(--ink-soft);">৳${(s.price || 0).toFixed(2)}</span>
+        ${ordered ? '<span class="activity-meta" style="color:var(--green);">✓ অর্ডার করা হয়েছে</span>' : ''}
+      </label>`;
+  }).join('');
+}
+
+window.confirmGirlsAdminPersonalOrder = async () => {
+  if (currentUserRole !== 'girls_admin') return;
+  const uid = auth.currentUser ? auth.currentUser.uid : null;
+  const alreadyOrderedIds = new Set(sheetOrdersData.filter(o => o.personal && o.orderedByUid === uid).map(o => o.sheetId));
+  const checked = Array.from(document.querySelectorAll('.girls-admin-sheet-check:checked'))
+    .map(cb => cb.value)
+    .filter(id => !alreadyOrderedIds.has(id));
+  if (!checked.length) { alert("অর্ডার করার জন্য নতুন কোনো শিট বাছাই করা হয়নি।"); return; }
+
+  const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
+  const names = chosenSheets.map(s => s.title).join(', ');
+  const businessDate = currentBusinessDateKey();
+  const cutoffNote = isPastCutoffNow()
+    ? `\n\n⏰ বিকাল ৩টা পার হয়ে গেছে, তাই এই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`
+    : `\n\nএই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`;
+  if (!confirm(`নিচের শিটগুলো আপনার ব্যক্তিগত অর্ডার হিসেবে বসাতে চান? এতে কোনো সাবস্ক্রাইবারের হিসাব থেকে টাকা কাটা হবে না।\n\n${names}${cutoffNote}`)) return;
+
+  try {
+    await Promise.all(chosenSheets.map(s => addDoc(collection(db, "sheetOrders"), {
+      roll: null,
+      studentName: currentTreasurerName + " (মেয়েদের এডমিন)",
+      gender: null,
+      personal: true,
+      sheetId: s.id,
+      sheetTitle: s.title,
+      price: s.price,
+      orderedAt: serverTimestamp(),
+      businessDate,
+      printed: false, printedAt: null, printedBy: null,
+      received: false, receivedAt: null, receivedBy: null,
+      addedBy: currentTreasurerName,
+      orderedByUid: uid
+    })));
+  } catch (e) {
+    alert("শিট অর্ডার করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
+};
+
+// Girls admin: her own personal order history
+function renderGirlsAdminMyOrders() {
+  const tbody = document.getElementById('girls-admin-my-orders-body');
+  if (!tbody || currentUserRole !== 'girls_admin') return;
+  const uid = auth.currentUser ? auth.currentUser.uid : null;
+  const mine = sheetOrdersData.filter(o => o.personal && o.orderedByUid === uid);
+  tbody.innerHTML = mine.map(o => {
+    const t = o.orderedAt && o.orderedAt.toDate ? o.orderedAt.toDate().toLocaleDateString('en-US') : '...';
+    const batch = o.businessDate ? formatBusinessDateLabel(o.businessDate) : '—';
+    const status = o.received
+      ? '<span style="color:var(--green);font-weight:600;">✓ গৃহীত</span>'
+      : (o.printed ? '<span style="color:var(--gold);font-weight:600;">প্রিন্ট সম্পন্ন</span>' : '<span class="activity-meta">পেন্ডিং</span>');
+    return `<tr><td class="activity-meta">${t}</td><td>${o.sheetTitle}</td><td class="num">৳${(o.price || 0).toFixed(2)} <span class="activity-meta">(চার্জবিহীন)</span></td><td class="activity-meta">${batch}</td><td>${status}</td></tr>`;
+  }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো কোনো ব্যক্তিগত শিট অর্ডার করা হয়নি।</td></tr>`;
+}
+
 function renderGirlsAdminPanel() {
   if (currentUserRole !== 'girls_admin') return;
   const { count, totalCollected } = getGirlsTotals();
   const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   setText('girls-count', count);
   setText('girls-total-collected', "৳" + totalCollected.toFixed(2));
+
+  renderGirlsAdminStudentRows();
+  renderGirlsAdminSheetCatalog();
+  renderGirlsAdminMyOrders();
 
   const tbody = document.getElementById('girls-received-body');
   if (!tbody) return;
