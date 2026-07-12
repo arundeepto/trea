@@ -69,6 +69,23 @@
   }
   .logout-btn:hover{background:var(--bg);}
 
+  /* ---------- nav bar (per-role dashboard tabs) ---------- */
+  .nav-bar{
+    position:sticky;top:0;z-index:20;
+    display:flex;gap:6px;overflow-x:auto;
+    background:var(--bg);padding:10px 0 14px;margin-bottom:6px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .nav-bar::-webkit-scrollbar{display:none;}
+  .nav-tab-btn{
+    flex:none;padding:9px 16px;border-radius:999px;border:1px solid var(--line-strong);
+    background:var(--panel);color:var(--ink-soft);font-family:inherit;font-size:.85rem;
+    font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s ease;
+  }
+  .nav-tab-btn:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .nav-tab-btn.active{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .tab-inactive{display:none !important;}
+
   /* ---------- cards ---------- */
   .panel{
     background:var(--panel);border:1px solid var(--line);border-radius:10px;
@@ -330,8 +347,11 @@ service cloud.firestore {
     </div>
   </div>
 
+  <!-- ============ NAV BAR: tabs differ per role, filled in by JS ============ -->
+  <div class="nav-bar" id="nav-bar"></div>
+
   <!-- ============ SUBSCRIBER-ONLY: personal account panel ============ -->
-  <div class="panel subscriber-only hidden" id="subscriber-account-panel">
+  <div class="panel subscriber-only hidden" id="subscriber-account-panel" data-tab="dashboard">
     <h2>আপনার হিসাব</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 12px;" id="subscriber-account-sub">—</p>
     <div class="summary-grid" style="margin-bottom:10px;">
@@ -356,7 +376,7 @@ service cloud.firestore {
   </div>
 
   <!-- ============ SUBSCRIBER-ONLY: lecture sheet ordering ============ -->
-  <div class="panel subscriber-only hidden">
+  <div class="panel subscriber-only hidden" data-tab="sheets">
     <h2>লেকচার শিট</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">যে শিটগুলো প্রিন্ট করাতে চান, নিচ থেকে বেছে নিয়ে কনফার্ম করুন। কনফার্ম করার সাথে সাথেই দাম আপনার হিসাব থেকে ব্যক্তিগত চার্জ হিসেবে কেটে নেওয়া হবে।</p>
     <div id="sheet-select-list"></div>
@@ -372,33 +392,11 @@ service cloud.firestore {
   </div>
 
   <!-- ============ GIRLS-ADMIN-ONLY: dashboard ============ -->
-  <div class="panel girls-admin-only hidden" id="girls-admin-panel">
+  <div class="panel girls-admin-only hidden" id="girls-admin-panel" data-tab="dashboard">
     <h2>মেয়েদের হিসাব — সংক্ষিপ্ত</h2>
     <div class="summary-grid" style="margin-bottom:10px;">
       <div class="sum-card"><div class="label">মেয়ে সাবস্ক্রাইবার</div><div class="val num" id="girls-count">0</div></div>
       <div class="sum-card green"><div class="label">মেয়েদের মোট জমা</div><div class="val num" id="girls-total-collected">৳0</div></div>
-    </div>
-
-    <h2 style="margin-top:20px;">টাকা জমা যোগ করুন (শুধু মেয়ে সাবস্ক্রাইবার)</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখানে শুধু মেয়ে সাবস্ক্রাইবারদের তালিকা দেখা যাবে — তাদের জমা এখান থেকে যোগ করা যাবে।</p>
-    <input type="text" class="search-box" id="girls-admin-student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজুন..." oninput="filterGirlsAdminStudents()">
-    <div class="table-scroll">
-      <table class="ledger">
-        <thead><tr><th>Roll</th><th>Name</th><th>মোট জমা (৳)</th><th>নতুন জমা যোগ করুন</th></tr></thead>
-        <tbody id="girls-admin-student-body"></tbody>
-      </table>
-    </div>
-
-    <h2 style="margin-top:20px;">আপনার ব্যক্তিগত শিট অর্ডার</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এটা আপনার নিজের (এডমিনের) শিট অর্ডার — কোনো সাবস্ক্রাইবারের হিসাব থেকে এর দাম কাটা হবে না।</p>
-    <div id="girls-admin-sheet-select-list"></div>
-    <div class="btn-row"><button class="btn btn-gold" onclick="confirmGirlsAdminPersonalOrder()">✓ নির্বাচিত শিট অর্ডার নিশ্চিত করুন</button></div>
-    <h2 style="margin-top:20px;">আপনার অর্ডারকৃত শিট</h2>
-    <div class="table-scroll">
-      <table class="ledger">
-        <thead><tr><th>তারিখ</th><th>শিট</th><th>মূল্য</th><th>ব্যাচ</th><th>স্ট্যাটাস</th></tr></thead>
-        <tbody id="girls-admin-my-orders-body"></tbody>
-      </table>
     </div>
 
     <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট — মেয়েদের শিট</h2>
@@ -411,8 +409,36 @@ service cloud.firestore {
     </div>
   </div>
 
+  <!-- ============ GIRLS-ADMIN-ONLY: payments (female subscribers only) ============ -->
+  <div class="panel girls-admin-only hidden" data-tab="payments">
+    <h2>টাকা জমা যোগ করুন (শুধু মেয়ে সাবস্ক্রাইবার)</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখানে শুধু মেয়ে সাবস্ক্রাইবারদের তালিকা দেখা যাবে — তাদের জমা এখান থেকে যোগ করা যাবে।</p>
+    <input type="text" class="search-box" id="girls-admin-student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজুন..." oninput="filterGirlsAdminStudents()">
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>Roll</th><th>Name</th><th>মোট জমা (৳)</th><th>নতুন জমা যোগ করুন</th></tr></thead>
+        <tbody id="girls-admin-student-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ GIRLS-ADMIN-ONLY: her own free personal sheet order ============ -->
+  <div class="panel girls-admin-only hidden" data-tab="sheets">
+    <h2>আপনার ব্যক্তিগত শিট অর্ডার</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এটা আপনার নিজের (এডমিনের) শিট অর্ডার — কোনো সাবস্ক্রাইবারের হিসাব থেকে এর দাম কাটা হবে না।</p>
+    <div id="girls-admin-sheet-select-list"></div>
+    <div class="btn-row"><button class="btn btn-gold" onclick="confirmGirlsAdminPersonalOrder()">✓ নির্বাচিত শিট অর্ডার নিশ্চিত করুন</button></div>
+    <h2 style="margin-top:20px;">আপনার অর্ডারকৃত শিট</h2>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>তারিখ</th><th>শিট</th><th>মূল্য</th><th>ব্যাচ</th><th>স্ট্যাটাস</th></tr></thead>
+        <tbody id="girls-admin-my-orders-body"></tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- summary cards -->
-  <div class="summary-grid treasurer-only">
+  <div class="summary-grid treasurer-only" data-tab="dashboard">
     <div class="sum-card green"><div class="label">Subscriber Collection</div><div class="val num" id="sum-collection">৳0</div></div>
     <div class="sum-card gold"><div class="label">Fund</div><div class="val num" id="sum-donation">৳0</div></div>
     <div class="sum-card red"><div class="label">Total Expense</div><div class="val num" id="sum-expense">৳0</div></div>
@@ -420,7 +446,7 @@ service cloud.firestore {
   </div>
 
   <!-- report buttons -->
-  <div class="panel treasurer-only">
+  <div class="panel treasurer-only" data-tab="dashboard">
     <h2>Reports & Vouchers</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 6px;">Download the full statement as a PDF, or save an expense voucher as an image.</p>
     <div class="btn-row">
@@ -430,7 +456,7 @@ service cloud.firestore {
   </div>
 
   <!-- student management -->
-  <div class="panel treasurer-only">
+  <div class="panel treasurer-only" data-tab="subscribers">
     <h2>Add Subscriber</h2>
     <div class="field-row">
       <div class="field"><label>Name</label><input type="text" id="new-student-name" placeholder="e.g. John Smith"></div>
@@ -448,7 +474,7 @@ service cloud.firestore {
   </div>
 
   <!-- fund (donation) -->
-  <div class="panel treasurer-only">
+  <div class="panel treasurer-only" data-tab="fund">
     <h2>Add Fund</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">Record contributions received from parents, alumni, or other donors.</p>
     <div class="field-row">
@@ -466,7 +492,7 @@ service cloud.firestore {
   </div>
 
   <!-- expense -->
-  <div class="panel treasurer-only">
+  <div class="panel treasurer-only" data-tab="expense">
     <h2>Add Expense</h2>
     <div class="field-row">
       <div class="field" style="flex:2;"><label>Description</label><input type="text" id="expense-desc" placeholder="e.g. Printing paper purchase"></div>
@@ -495,7 +521,7 @@ service cloud.firestore {
   </div>
 
   <!-- lecture sheet catalog management -->
-  <div class="panel treasurer-only">
+  <div class="panel treasurer-only" data-tab="sheets">
     <h2>লেকচার শিট ব্যবস্থাপনা</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখানে যেসব শিট যোগ করবেন, সাবস্ক্রাইবাররা তাদের ড্যাশবোর্ড থেকে সেগুলো প্রিন্টের জন্য অর্ডার করতে পারবে।</p>
     <div class="field-row">
@@ -512,7 +538,7 @@ service cloud.firestore {
   </div>
 
   <!-- lecture sheet print orders -->
-  <div class="panel treasurer-only">
+  <div class="panel treasurer-only" data-tab="sheets">
     <h2>শিট প্রিন্ট রিকোয়েস্ট (ব্যাচ অনুযায়ী)</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">প্রতিদিন বিকাল ৩টা পর্যন্ত অর্ডার নেওয়া হয়; তারপরের অর্ডার পরের দিনের ব্যাচে যোগ হয়। একই শিট একাধিক সাবস্ক্রাইবার চাইলে এখানে একসাথে দেখা যাবে — ব্যাচে প্রিন্ট করার জন্য সুবিধাজনক।</p>
 
@@ -553,7 +579,7 @@ service cloud.firestore {
   </div>
 
   <!-- student ledger -->
-  <div class="panel treasurer-only">
+  <div class="panel treasurer-only" data-tab="subscribers">
     <h2>Subscriber List</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
       Calculation rule: (Shared Expense − Total Fund) ÷ Total Subscribers = Equal Share. Each subscriber's <b>Due/Credit</b> = their Total Collected − Equal Share − their Personal Charges. Green means credit, red means due. Amounts entered below are <b>added</b> to the subscriber's running total — nothing gets overwritten.
@@ -568,7 +594,7 @@ service cloud.firestore {
   </div>
 
   <!-- activity feed -->
-  <div class="panel treasurer-only">
+  <div class="panel treasurer-only" data-tab="activity">
     <h2>Activity</h2>
     <div id="activity-feed"></div>
   </div>
@@ -645,6 +671,7 @@ let currentSubscriberRoll = null;    // set when currentUserRole === 'subscriber
 let isRegisterMode = false;
 let authRole = "treasurer";          // which role tab is selected on the register form
 let currentOrderDateFilter = null;   // businessDate key currently selected in the treasurer's order panel
+let currentActiveTab = null;         // which nav-bar tab is currently open
 
 // ============ ORDER CUTOFF: daily orders are taken until 3:00 PM (15:00) local time ============
 // Anything ordered after the cutoff is bucketed into the NEXT day's order batch.
@@ -763,6 +790,7 @@ window.doRegister = async () => {
 };
 
 window.doLogout = async () => {
+  currentActiveTab = null;
   await signOut(auth);
 };
 
@@ -802,11 +830,57 @@ async function applyLoggedInUser(user) {
   startListeners();
 }
 
+// ============ NAV BAR: separate dashboard tabs per role ============
+const TABS_BY_ROLE = {
+  treasurer: [
+    { id: 'dashboard', label: '📊 ড্যাশবোর্ড' },
+    { id: 'subscribers', label: '👥 সাবস্ক্রাইবার' },
+    { id: 'fund', label: '💰 ফান্ড' },
+    { id: 'expense', label: '🧾 খরচ' },
+    { id: 'sheets', label: '📄 শিট ও অর্ডার' },
+    { id: 'activity', label: '🕘 কার্যক্রম' }
+  ],
+  subscriber: [
+    { id: 'dashboard', label: '📊 আপনার হিসাব' },
+    { id: 'sheets', label: '📄 শিট অর্ডার' }
+  ],
+  girls_admin: [
+    { id: 'dashboard', label: '📊 সংক্ষিপ্ত' },
+    { id: 'payments', label: '💰 জমা যোগ করুন' },
+    { id: 'sheets', label: '📄 ব্যক্তিগত অর্ডার' }
+  ]
+};
+
+window.setActiveTab = (tabId) => {
+  currentActiveTab = tabId;
+  document.querySelectorAll('[data-tab]').forEach(el => {
+    el.classList.toggle('tab-inactive', el.dataset.tab !== tabId);
+  });
+  document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tabid === tabId);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+function renderNavBar() {
+  const nav = document.getElementById('nav-bar');
+  if (!nav) return;
+  const tabs = TABS_BY_ROLE[currentUserRole] || [];
+  nav.innerHTML = tabs.map(t =>
+    `<button class="nav-tab-btn" data-tabid="${t.id}" onclick="setActiveTab('${t.id}')">${t.label}</button>`
+  ).join('');
+  if (!tabs.find(t => t.id === currentActiveTab)) {
+    currentActiveTab = tabs.length ? tabs[0].id : null;
+  }
+  if (currentActiveTab) window.setActiveTab(currentActiveTab);
+}
+
 function applyRoleVisibility() {
   const role = currentUserRole; // 'treasurer' | 'subscriber' | 'girls_admin'
   document.querySelectorAll('.treasurer-only').forEach(el => el.classList.toggle('hidden', role !== 'treasurer'));
   document.querySelectorAll('.subscriber-only').forEach(el => el.classList.toggle('hidden', role !== 'subscriber'));
   document.querySelectorAll('.girls-admin-only').forEach(el => el.classList.toggle('hidden', role !== 'girls_admin'));
+  renderNavBar();
   if (role === 'subscriber') renderSubscriberPanel();
   if (role === 'girls_admin') renderGirlsAdminPanel();
 }
