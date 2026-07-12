@@ -400,10 +400,10 @@ service cloud.firestore {
     </div>
 
     <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট — মেয়েদের শিট</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">ট্রেজারার প্রিন্ট সম্পন্ন করার পর এখানে মেয়েদের শিট দেখা যাবে। যে সাবস্ক্রাইবার শিট বুঝে পেয়েছে, তার পাশে টিক দিন — এটাই রিসিভের রেকর্ড হিসেবে থেকে যাবে।</p>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">ট্রেজারার প্রিন্ট সম্পন্ন করার পর এখানে মেয়েদের শিট দেখা যাবে — তারিখ ও শিটের নাম অনুযায়ী সাজানো। যে সাবস্ক্রাইবার শিট বুঝে পেয়েছে, তার পাশে টিক দিন — এটাই রিসিভের রেকর্ড হিসেবে থেকে যাবে।</p>
     <div class="table-scroll">
       <table class="ledger">
-        <thead><tr><th></th><th>সাবস্ক্রাইবার</th><th>শিট</th><th>ব্যাচ</th><th>প্রাপ্তি তথ্য</th></tr></thead>
+        <thead><tr><th></th><th>সাবস্ক্রাইবার</th><th>প্রাপ্তি তথ্য</th></tr></thead>
         <tbody id="girls-received-body"></tbody>
       </table>
     </div>
@@ -568,11 +568,11 @@ service cloud.firestore {
       </table>
     </div>
 
-    <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">প্রিন্ট সম্পন্ন হওয়ার পর সাবস্ক্রাইবার শিট বুঝে পেলে এখানে টিক দিন। ছেলে ও মেয়ে — উভয় গ্রুপের শিটের জন্যই ট্রেজারার এখান থেকে টিক দিতে পারবেন।</p>
+    <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট — সব ব্যাচ</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">প্রিন্ট সম্পন্ন হওয়া সব অর্ডার এখানে তারিখ ও শিটের নাম অনুযায়ী সাজানো (উপরের ব্যাচ-ফিল্টার এখানে প্রযোজ্য নয়)। সাবস্ক্রাইবার শিট বুঝে পেলে এখানে টিক দিন। ছেলে ও মেয়ে — উভয় গ্রুপের শিটের জন্যই ট্রেজারার এখান থেকে টিক দিতে পারবেন।</p>
     <div class="table-scroll">
       <table class="ledger">
-        <thead><tr><th></th><th>সাবস্ক্রাইবার</th><th>জেন্ডার</th><th>শিট</th><th>প্রাপ্তি তথ্য</th></tr></thead>
+        <thead><tr><th></th><th>সাবস্ক্রাইবার</th><th>জেন্ডার</th><th>প্রাপ্তি তথ্য</th></tr></thead>
         <tbody id="order-received-body"></tbody>
       </table>
     </div>
@@ -1328,6 +1328,54 @@ function orderRollTag(o) {
   return o.personal ? '(এডমিন - ব্যক্তিগত)' : `(Roll ${o.roll})`;
 }
 
+// Shared "received" checklist renderer — used by both the treasurer's panel (all genders) and
+// the girls-admin panel (female only). Grouped by batch date, then by sheet name.
+// IMPORTANT: the sort key never depends on o.received — earlier this list re-sorted "pending
+// first" on every tick, so the instant someone checked a box the whole list reshuffled under
+// their finger and they'd end up mis-tapping a *different* row right after. Sorting only by
+// date/sheet/name keeps every row's position fixed regardless of its checked state.
+function renderGroupedReceivedChecklist(orders, tbodyId, showGenderCol) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  const colspan = showGenderCol ? 4 : 3;
+  if (!orders.length) {
+    tbody.innerHTML = `<tr><td colspan="${colspan}" class="activity-meta">এখনো কোনো অর্ডার প্রিন্ট সম্পন্ন হয়নি।</td></tr>`;
+    return;
+  }
+  const sorted = [...orders].sort((a, b) => {
+    const dcmp = (b.businessDate || '').localeCompare(a.businessDate || ''); // newest batch first
+    if (dcmp !== 0) return dcmp;
+    const scmp = (a.sheetTitle || '').localeCompare(b.sheetTitle || '', 'bn');
+    if (scmp !== 0) return scmp;
+    return (a.studentName || '').localeCompare(b.studentName || '', 'bn');
+  });
+
+  let html = '';
+  let lastDate = null, lastSheet = null;
+  sorted.forEach(o => {
+    if (o.businessDate !== lastDate) {
+      html += `<tr><td colspan="${colspan}" style="background:var(--bg);font-weight:700;padding:10px 8px 6px;">📅 ${o.businessDate ? formatBusinessDateLabel(o.businessDate) : 'তারিখ নেই'}</td></tr>`;
+      lastDate = o.businessDate;
+      lastSheet = null; // force sheet header to reprint under the new date
+    }
+    if (o.sheetTitle !== lastSheet) {
+      html += `<tr><td colspan="${colspan}" style="color:var(--ink-soft);font-size:.82rem;font-weight:600;padding:6px 8px 6px 20px;">📄 ${o.sheetTitle}</td></tr>`;
+      lastSheet = o.sheetTitle;
+    }
+    const genderLabel = o.gender === 'female' ? 'মেয়ে' : (o.gender === 'male' ? 'ছেলে' : '—');
+    const info = o.received
+      ? `<span class="activity-meta">${o.receivedBy || ''} ${o.receivedAt && o.receivedAt.toDate ? '· ' + o.receivedAt.toDate().toLocaleDateString('en-US') : ''}</span>`
+      : '<span class="activity-meta">এখনো বুঝে পায়নি</span>';
+    html += `<tr>
+      <td style="padding-left:20px;"><input type="checkbox" ${o.received ? 'checked' : ''} onchange="toggleOrderReceived('${o.id}', this.checked)" style="width:16px;height:16px;"></td>
+      <td>${o.studentName || '—'} <span class="activity-meta">${orderRollTag(o)}</span></td>
+      ${showGenderCol ? `<td class="activity-meta">${genderLabel}</td>` : ''}
+      <td>${info}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
 window.onOrderDateFilterChange = () => {
   const sel = document.getElementById('order-date-select');
   currentOrderDateFilter = sel ? sel.value : null;
@@ -1340,7 +1388,6 @@ window.onOrderDateFilterChange = () => {
 function renderSheetOrdersTreasurer() {
   const detailBody = document.getElementById('sheet-orders-detail-body');
   const groupedBody = document.getElementById('sheet-orders-grouped-body');
-  const receivedBody = document.getElementById('order-received-body');
   const dateSelect = document.getElementById('order-date-select');
   if (!detailBody || !groupedBody || !dateSelect) return;
 
@@ -1401,20 +1448,10 @@ function renderSheetOrdersTreasurer() {
     markBtn.textContent = pendingPrintCount === 0 ? '✓ এই ব্যাচ প্রিন্ট সম্পন্ন' : `✓ প্রিন্ট সম্পন্ন চিহ্নিত করুন (${pendingPrintCount})`;
   }
 
-  // received checklist — every printed order in this batch, both genders, treasurer can tick either
-  if (receivedBody) {
-    const printedOrders = batchOrders.filter(o => o.printed);
-    receivedBody.innerHTML = printedOrders.map(o => {
-      const genderLabel = o.gender === 'female' ? 'মেয়ে' : (o.gender === 'male' ? 'ছেলে' : '—');
-      return `<tr>
-        <td><input type="checkbox" ${o.received ? 'checked' : ''} onchange="toggleOrderReceived('${o.id}', this.checked)" style="width:16px;height:16px;"></td>
-        <td>${o.studentName || '—'} <span class="activity-meta">${orderRollTag(o)}</span></td>
-        <td class="activity-meta">${genderLabel}</td>
-        <td>${o.sheetTitle}</td>
-        <td>${o.received ? `<span class="activity-meta">${o.receivedBy || ''} ${o.receivedAt && o.receivedAt.toDate ? '· ' + o.receivedAt.toDate().toLocaleDateString('en-US') : ''}</span>` : '<span class="activity-meta">এখনো বুঝে পায়নি</span>'}</td>
-      </tr>`;
-    }).join('') || `<tr><td colspan="5" class="activity-meta">এই ব্যাচের কোনো অর্ডার এখনো প্রিন্ট সম্পন্ন হয়নি।</td></tr>`;
-  }
+  // received checklist — every printed order across ALL batches, both genders, grouped by
+  // date then sheet name (see renderGroupedReceivedChecklist for why it never resorts by
+  // received status)
+  renderGroupedReceivedChecklist(sheetOrdersData.filter(o => o.printed), 'order-received-body', true);
 }
 
 // Wrappers so inline onclick (which runs outside module scope) can reach the
@@ -1597,24 +1634,8 @@ function renderGirlsAdminPanel() {
   renderGirlsAdminSheetCatalog();
   renderGirlsAdminMyOrders();
 
-  const tbody = document.getElementById('girls-received-body');
-  if (!tbody) return;
-  const printedGirlsOrders = sheetOrdersData
-    .filter(o => o.gender === 'female' && o.printed)
-    .sort((a, b) => (a.received === b.received) ? 0 : (a.received ? 1 : -1)); // pending first
-  tbody.innerHTML = printedGirlsOrders.map(o => {
-    const batch = o.businessDate ? formatBusinessDateLabel(o.businessDate) : '—';
-    const info = o.received
-      ? `<span class="activity-meta">${o.receivedBy || ''} ${o.receivedAt && o.receivedAt.toDate ? '· ' + o.receivedAt.toDate().toLocaleDateString('en-US') : ''}</span>`
-      : '<span class="activity-meta">এখনো বুঝে পায়নি</span>';
-    return `<tr>
-      <td><input type="checkbox" ${o.received ? 'checked' : ''} onchange="toggleOrderReceived('${o.id}', this.checked)" style="width:16px;height:16px;"></td>
-      <td>${o.studentName || '—'} <span class="activity-meta">(Roll ${o.roll})</span></td>
-      <td>${o.sheetTitle}</td>
-      <td class="activity-meta">${batch}</td>
-      <td>${info}</td>
-    </tr>`;
-  }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো মেয়েদের কোনো অর্ডার প্রিন্ট সম্পন্ন হয়নি।</td></tr>`;
+  const printedGirlsOrders = sheetOrdersData.filter(o => o.gender === 'female' && o.printed);
+  renderGroupedReceivedChecklist(printedGirlsOrders, 'girls-received-body', false);
 }
 
 // ============ ORDERS PDF (treasurer) ============
