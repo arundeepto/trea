@@ -199,6 +199,9 @@ service cloud.firestore {
       return isSignedIn() &&
         (!exists(/databases/$(database)/documents/users/$(request.auth.uid)) || myRole() == 'treasurer');
     }
+    function isGirlsAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && myRole() == 'girls_admin';
+    }
 
     match /users/{uid} {
       allow read: if isSignedIn();
@@ -206,11 +209,13 @@ service cloud.firestore {
     }
 
     // a subscriber may create sheet-print orders only under their own uid;
-    // editing/deleting orders is still treasurer-only
+    // the treasurer can edit/delete anything; the girls' admin may only update
+    // (to mark "received") — not delete
     match /sheetOrders/{orderId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.orderedByUid == request.auth.uid;
-      allow update, delete: if isTreasurer();
+      allow update: if isTreasurer() || isGirlsAdmin();
+      allow delete: if isTreasurer();
     }
 
     match /{document=**} {
@@ -237,6 +242,7 @@ service cloud.firestore {
     <div class="btn-row" style="margin-bottom:16px;">
       <button class="btn" id="role-tab-treasurer" style="flex:1;background:var(--ink);color:#fff;" onclick="setAuthRole('treasurer')">Treasurer</button>
       <button class="btn" id="role-tab-subscriber" style="flex:1;background:none;border:1px solid var(--line-strong);color:var(--ink);" onclick="setAuthRole('subscriber')">Subscriber</button>
+      <button class="btn" id="role-tab-girls_admin" style="flex:1;background:none;border:1px solid var(--line-strong);color:var(--ink);font-size:.78rem;" onclick="setAuthRole('girls_admin')">মেয়েদের এডমিন</button>
     </div>
 
     <div id="auth-error" class="auth-error hidden"></div>
@@ -339,8 +345,26 @@ service cloud.firestore {
     <h2 style="margin-top:20px;">আপনার অর্ডারকৃত শিট</h2>
     <div class="table-scroll">
       <table class="ledger">
-        <thead><tr><th>তারিখ</th><th>শিট</th><th>মূল্য</th></tr></thead>
+        <thead><tr><th>তারিখ</th><th>শিট</th><th>মূল্য</th><th>ব্যাচ</th><th>স্ট্যাটাস</th></tr></thead>
         <tbody id="my-sheet-orders-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ GIRLS-ADMIN-ONLY: dashboard ============ -->
+  <div class="panel girls-admin-only hidden" id="girls-admin-panel">
+    <h2>মেয়েদের হিসাব — সংক্ষিপ্ত</h2>
+    <div class="summary-grid" style="margin-bottom:10px;">
+      <div class="sum-card"><div class="label">মেয়ে সাবস্ক্রাইবার</div><div class="val num" id="girls-count">0</div></div>
+      <div class="sum-card green"><div class="label">মেয়েদের মোট জমা</div><div class="val num" id="girls-total-collected">৳0</div></div>
+    </div>
+
+    <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট — মেয়েদের শিট</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">ট্রেজারার প্রিন্ট সম্পন্ন করার পর এখানে মেয়েদের শিট দেখা যাবে। যে সাবস্ক্রাইবার শিট বুঝে পেয়েছে, তার পাশে টিক দিন — এটাই রিসিভের রেকর্ড হিসেবে থেকে যাবে।</p>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th></th><th>সাবস্ক্রাইবার</th><th>শিট</th><th>ব্যাচ</th><th>প্রাপ্তি তথ্য</th></tr></thead>
+        <tbody id="girls-received-body"></tbody>
       </table>
     </div>
   </div>
@@ -370,6 +394,13 @@ service cloud.firestore {
       <div class="field"><label>Name</label><input type="text" id="new-student-name" placeholder="e.g. John Smith"></div>
       <div class="field"><label>Roll</label><input type="number" id="new-student-roll" placeholder="e.g. 12"></div>
       <div class="field"><label>Mobile Number</label><input type="tel" id="new-student-mobile" placeholder="e.g. 01700000000"></div>
+      <div class="field">
+        <label>জেন্ডার</label>
+        <select id="new-student-gender" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);">
+          <option value="male">ছেলে</option>
+          <option value="female">মেয়ে</option>
+        </select>
+      </div>
     </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="addStudent()">Add Subscriber</button></div>
   </div>
@@ -440,19 +471,41 @@ service cloud.firestore {
 
   <!-- lecture sheet print orders -->
   <div class="panel treasurer-only">
-    <h2>শিট প্রিন্ট রিকোয়েস্ট (গ্রুপ করা)</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">একই শিট একাধিক সাবস্ক্রাইবার চাইলে এখানে একসাথে দেখা যাবে — ব্যাচে প্রিন্ট করার জন্য সুবিধাজনক।</p>
+    <h2>শিট প্রিন্ট রিকোয়েস্ট (ব্যাচ অনুযায়ী)</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">প্রতিদিন বিকাল ৩টা পর্যন্ত অর্ডার নেওয়া হয়; তারপরের অর্ডার পরের দিনের ব্যাচে যোগ হয়। একই শিট একাধিক সাবস্ক্রাইবার চাইলে এখানে একসাথে দেখা যাবে — ব্যাচে প্রিন্ট করার জন্য সুবিধাজনক।</p>
+
+    <div class="field-row" style="align-items:flex-end;margin-bottom:14px;">
+      <div class="field" style="max-width:280px;">
+        <label>অর্ডার ব্যাচ (তারিখ)</label>
+        <select id="order-date-select" onchange="onOrderDateFilterChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
+      </div>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn btn-outline" onclick="downloadCurrentBatchPDF()">📄 এই ব্যাচের অর্ডার PDF</button>
+        <button class="btn btn-gold" id="mark-printed-btn" onclick="markCurrentBatchPrinted()">✓ প্রিন্ট সম্পন্ন চিহ্নিত করুন</button>
+      </div>
+    </div>
+
     <div class="table-scroll">
       <table class="ledger">
         <thead><tr><th>শিট</th><th>মোট অনুরোধ</th><th>যারা চেয়েছেন</th><th>মোট আয়</th></tr></thead>
         <tbody id="sheet-orders-grouped-body"></tbody>
       </table>
     </div>
-    <h2 style="margin-top:20px;">সব অর্ডার (বিস্তারিত)</h2>
+
+    <h2 style="margin-top:20px;">এই ব্যাচের অর্ডার (বিস্তারিত)</h2>
     <div class="table-scroll">
       <table class="ledger">
-        <thead><tr><th>তারিখ</th><th>সাবস্ক্রাইবার</th><th>শিট</th><th>মূল্য</th></tr></thead>
+        <thead><tr><th>তারিখ</th><th>সাবস্ক্রাইবার</th><th>জেন্ডার</th><th>শিট</th><th>মূল্য</th><th>স্ট্যাটাস</th></tr></thead>
         <tbody id="sheet-orders-detail-body"></tbody>
+      </table>
+    </div>
+
+    <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">প্রিন্ট সম্পন্ন হওয়ার পর সাবস্ক্রাইবার শিট বুঝে পেলে এখানে টিক দিন। ছেলে ও মেয়ে — উভয় গ্রুপের শিটের জন্যই ট্রেজারার এখান থেকে টিক দিতে পারবেন।</p>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th></th><th>সাবস্ক্রাইবার</th><th>জেন্ডার</th><th>শিট</th><th>প্রাপ্তি তথ্য</th></tr></thead>
+        <tbody id="order-received-body"></tbody>
       </table>
     </div>
   </div>
@@ -466,7 +519,7 @@ service cloud.firestore {
     <input type="text" class="search-box" id="student-search" placeholder="🔍 Search by name or roll..." oninput="filterStudents()">
     <div class="table-scroll">
       <table class="ledger">
-        <thead><tr><th>Roll</th><th>Name</th><th>Mobile</th><th>মোট জমা (৳)</th><th>নতুন জমা যোগ করুন</th><th>Due/Credit</th><th>Last Updated</th><th></th></tr></thead>
+        <thead><tr><th>Roll</th><th>Name</th><th>Mobile</th><th>জেন্ডার</th><th>মোট জমা (৳)</th><th>নতুন জমা যোগ করুন</th><th>Due/Credit</th><th>Last Updated</th><th></th></tr></thead>
         <tbody id="student-body"></tbody>
       </table>
     </div>
@@ -506,7 +559,7 @@ import {
   createUserWithEmailAndPassword, updateProfile, signOut, deleteUser
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot, addDoc,
+  getFirestore, doc, setDoc, deleteDoc, updateDoc, collection, onSnapshot, addDoc,
   query, orderBy, limit, serverTimestamp, where, getDocs, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -541,12 +594,32 @@ let donationsData = [];     // [{id, donorName, amount, note, addedBy, addedAt}]
 let expensesData = [];      // [{id, description, amount, date, addedBy, addedAt}]
 let activityData = [];      // recent activity log
 let sheetsData = [];        // [{id, title, price, addedBy, addedAt}] — lecture sheet catalog
-let sheetOrdersData = [];   // [{id, roll, studentName, sheetId, sheetTitle, price, orderedAt, addedBy}]
+// [{id, roll, studentName, sheetId, sheetTitle, price, orderedAt, addedBy, businessDate, gender,
+//   printed, printedAt, printedBy, received, receivedAt, receivedBy}]
+let sheetOrdersData = [];
 let currentTreasurerName = "";
-let currentUserRole = "treasurer";   // 'treasurer' | 'subscriber' — detected from users/{uid} after sign-in
+let currentUserRole = "treasurer";   // 'treasurer' | 'subscriber' | 'girls_admin' — detected from users/{uid} after sign-in
 let currentSubscriberRoll = null;    // set when currentUserRole === 'subscriber'
 let isRegisterMode = false;
 let authRole = "treasurer";          // which role tab is selected on the register form
+let currentOrderDateFilter = null;   // businessDate key currently selected in the treasurer's order panel
+
+// ============ ORDER CUTOFF: daily orders are taken until 3:00 PM (15:00) local time ============
+// Anything ordered after the cutoff is bucketed into the NEXT day's order batch.
+const ORDER_CUTOFF_HOUR = 15;
+
+function businessDateKeyOf(date) {
+  const d = new Date(date);
+  if (d.getHours() >= ORDER_CUTOFF_HOUR) d.setDate(d.getDate() + 1);
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function currentBusinessDateKey() { return businessDateKeyOf(new Date()); }
+function isPastCutoffNow() { return new Date().getHours() >= ORDER_CUTOFF_HOUR; }
+function formatBusinessDateLabel(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+}
 
 // ============ AUTH ============
 function toggleAuthMode() {
@@ -559,14 +632,16 @@ window.toggleAuthMode = toggleAuthMode;
 
 window.setAuthRole = (role) => {
   authRole = role;
-  document.getElementById('role-tab-treasurer').style.background = role === 'treasurer' ? 'var(--ink)' : 'none';
-  document.getElementById('role-tab-treasurer').style.color = role === 'treasurer' ? '#fff' : 'var(--ink)';
-  document.getElementById('role-tab-treasurer').style.border = role === 'treasurer' ? 'none' : '1px solid var(--line-strong)';
-  document.getElementById('role-tab-subscriber').style.background = role === 'subscriber' ? 'var(--ink)' : 'none';
-  document.getElementById('role-tab-subscriber').style.color = role === 'subscriber' ? '#fff' : 'var(--ink)';
-  document.getElementById('role-tab-subscriber').style.border = role === 'subscriber' ? 'none' : '1px solid var(--line-strong)';
+  ['treasurer', 'subscriber', 'girls_admin'].forEach(r => {
+    const btn = document.getElementById('role-tab-' + r);
+    if (!btn) return;
+    btn.style.background = role === r ? 'var(--ink)' : 'none';
+    btn.style.color = role === r ? '#fff' : 'var(--ink)';
+    btn.style.border = role === r ? 'none' : '1px solid var(--line-strong)';
+  });
   document.getElementById('reg-subscriber-fields').classList.toggle('hidden', role !== 'subscriber');
-  document.getElementById('login-register-prompt').textContent = role === 'subscriber' ? 'New Subscriber?' : 'New Treasurer?';
+  document.getElementById('login-register-prompt').textContent =
+    role === 'subscriber' ? 'New Subscriber?' : (role === 'girls_admin' ? 'New Girls Admin?' : 'New Treasurer?');
   document.getElementById('auth-error').classList.add('hidden');
 };
 
@@ -628,6 +703,10 @@ window.doRegister = async () => {
       await setDoc(doc(db, "users", cred.user.uid), {
         role: "subscriber", roll, name, email, createdAt: serverTimestamp()
       });
+    } else if (authRole === 'girls_admin') {
+      await setDoc(doc(db, "users", cred.user.uid), {
+        role: "girls_admin", name, email, createdAt: serverTimestamp()
+      });
     } else {
       await setDoc(doc(db, "users", cred.user.uid), {
         role: "treasurer", name, email, createdAt: serverTimestamp()
@@ -673,7 +752,8 @@ async function applyLoggedInUser(user) {
   document.getElementById('auth-screen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('current-user-name').textContent = name;
-  document.getElementById('current-user-role').textContent = role === 'subscriber' ? 'Subscriber' : 'Treasurer';
+  document.getElementById('current-user-role').textContent =
+    role === 'subscriber' ? 'Subscriber' : (role === 'girls_admin' ? 'মেয়েদের এডমিন' : 'Treasurer');
   document.getElementById('current-user-stamp').textContent = stampInitials(name);
 
   applyRoleVisibility();
@@ -681,10 +761,12 @@ async function applyLoggedInUser(user) {
 }
 
 function applyRoleVisibility() {
-  const isTreasurer = currentUserRole !== 'subscriber';
-  document.querySelectorAll('.treasurer-only').forEach(el => el.classList.toggle('hidden', !isTreasurer));
-  document.querySelectorAll('.subscriber-only').forEach(el => el.classList.toggle('hidden', isTreasurer));
-  if (!isTreasurer) renderSubscriberPanel();
+  const role = currentUserRole; // 'treasurer' | 'subscriber' | 'girls_admin'
+  document.querySelectorAll('.treasurer-only').forEach(el => el.classList.toggle('hidden', role !== 'treasurer'));
+  document.querySelectorAll('.subscriber-only').forEach(el => el.classList.toggle('hidden', role !== 'subscriber'));
+  document.querySelectorAll('.girls-admin-only').forEach(el => el.classList.toggle('hidden', role !== 'girls_admin'));
+  if (role === 'subscriber') renderSubscriberPanel();
+  if (role === 'girls_admin') renderGirlsAdminPanel();
 }
 
 onAuthStateChanged(auth, (user) => {
@@ -710,6 +792,7 @@ function startListeners() {
     recomputeCollections();
     renderExpenses();
     renderSummary();
+    renderGirlsAdminPanel();
   });
 
   // legacy single-amount records (from before the fix) — kept as a starting balance, never written to again
@@ -764,7 +847,7 @@ function startListeners() {
     renderSheetCatalogSubscriber();
   });
 
-  // sheet print orders — each subscriber can create their own; treasurer sees everyone's
+  // sheet print orders — each subscriber can create their own; treasurer/girls-admin see everyone's
   onSnapshot(collection(db, "sheetOrders"), (snap) => {
     sheetOrdersData = [];
     snap.forEach(d => sheetOrdersData.push({ id: d.id, ...d.data() }));
@@ -774,6 +857,7 @@ function startListeners() {
     renderMySheetOrders();
     renderStudents();        // sheet cost is now part of personal charge
     renderSubscriberPanel();
+    renderGirlsAdminPanel();
   });
 }
 
@@ -782,13 +866,23 @@ window.addStudent = async () => {
   const name = document.getElementById('new-student-name').value.trim();
   const roll = parseInt(document.getElementById('new-student-roll').value);
   const mobile = document.getElementById('new-student-mobile').value.trim();
+  const gender = document.getElementById('new-student-gender').value; // 'male' | 'female'
   if (!name || !roll) { alert("Please enter both name and roll number."); return; }
   await setDoc(doc(db, "students", roll.toString()), {
-    name, roll, mobile: mobile || "", addedBy: currentTreasurerName, addedAt: serverTimestamp()
+    name, roll, mobile: mobile || "", gender, addedBy: currentTreasurerName, addedAt: serverTimestamp()
   });
   document.getElementById('new-student-name').value = "";
   document.getElementById('new-student-roll').value = "";
   document.getElementById('new-student-mobile').value = "";
+};
+
+// Fix/adjust the gender on an existing subscriber (e.g. legacy records added before this field existed)
+window.updateStudentGender = async (roll, gender) => {
+  try {
+    await updateDoc(doc(db, "students", roll.toString()), { gender });
+  } catch (e) {
+    alert("জেন্ডার আপডেট করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
 };
 
 window.deleteStudent = async (roll) => {
@@ -805,7 +899,7 @@ window.deleteStudent = async (roll) => {
 function renderStudentRows() {
   const tbody = document.getElementById('student-body');
   if (!students.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="activity-meta">No subscribers added yet. Use the form above to add one.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="activity-meta">No subscribers added yet. Use the form above to add one.</td></tr>`;
     return;
   }
   tbody.innerHTML = students.map(s => `
@@ -813,6 +907,12 @@ function renderStudentRows() {
       <td class="num">${s.roll}</td>
       <td>${s.name}</td>
       <td class="activity-meta">${s.mobile || '—'}</td>
+      <td>
+        <select onchange="updateStudentGender(${s.roll}, this.value)" style="padding:5px 7px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.8rem;color:var(--ink);">
+          <option value="male" ${s.gender === 'female' ? '' : 'selected'}>ছেলে</option>
+          <option value="female" ${s.gender === 'female' ? 'selected' : ''}>মেয়ে</option>
+        </select>
+      </td>
       <td class="num" id="total-${s.roll}">৳0</td>
       <td>
         <div style="display:flex;gap:6px;align-items:center;">
@@ -1086,29 +1186,76 @@ function renderMySheetOrders() {
   const mine = sheetOrdersData.filter(o => o.roll === currentSubscriberRoll);
   tbody.innerHTML = mine.map(o => {
     const t = o.orderedAt && o.orderedAt.toDate ? o.orderedAt.toDate().toLocaleDateString('en-US') : '...';
-    return `<tr><td class="activity-meta">${t}</td><td>${o.sheetTitle}</td><td class="num">৳${(o.price || 0).toFixed(2)}</td></tr>`;
-  }).join('') || `<tr><td colspan="3" class="activity-meta">এখনো কোনো শিট অর্ডার করা হয়নি।</td></tr>`;
+    const batch = o.businessDate ? formatBusinessDateLabel(o.businessDate) : '—';
+    const status = o.received
+      ? '<span style="color:var(--green);font-weight:600;">✓ গৃহীত</span>'
+      : (o.printed ? '<span style="color:var(--gold);font-weight:600;">প্রিন্ট সম্পন্ন</span>' : '<span class="activity-meta">পেন্ডিং</span>');
+    return `<tr><td class="activity-meta">${t}</td><td>${o.sheetTitle}</td><td class="num">৳${(o.price || 0).toFixed(2)}</td><td class="activity-meta">${batch}</td><td>${status}</td></tr>`;
+  }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো কোনো শিট অর্ডার করা হয়নি।</td></tr>`;
 }
 
-// Treasurer: detailed list of every order + a grouped view so a sheet requested by
-// several subscribers at once is immediately visible for batch printing.
+// ---- batch date list & filter (treasurer's order panel) ----
+function getDistinctBusinessDates() {
+  const set = new Set(sheetOrdersData.map(o => o.businessDate).filter(Boolean));
+  return Array.from(set).sort().reverse(); // newest first
+}
+
+function orderStatusLabel(o) {
+  return o.received
+    ? '<span style="color:var(--green);font-weight:600;">✓ গৃহীত</span>'
+    : (o.printed ? '<span style="color:var(--gold);font-weight:600;">প্রিন্ট সম্পন্ন</span>' : '<span class="activity-meta">পেন্ডিং</span>');
+}
+
+window.onOrderDateFilterChange = () => {
+  const sel = document.getElementById('order-date-select');
+  currentOrderDateFilter = sel ? sel.value : null;
+  renderSheetOrdersTreasurer();
+};
+
+// Treasurer: batch-date picker + grouped view + detailed view (both scoped to the selected
+// batch) + a received checklist so a sheet requested by several subscribers at once is
+// immediately visible for batch printing.
 function renderSheetOrdersTreasurer() {
   const detailBody = document.getElementById('sheet-orders-detail-body');
   const groupedBody = document.getElementById('sheet-orders-grouped-body');
-  if (!detailBody || !groupedBody) return;
+  const receivedBody = document.getElementById('order-received-body');
+  const dateSelect = document.getElementById('order-date-select');
+  if (!detailBody || !groupedBody || !dateSelect) return;
 
-  detailBody.innerHTML = sheetOrdersData.map(o => {
+  const dates = getDistinctBusinessDates();
+  const today = currentBusinessDateKey();
+  if (!dates.includes(today)) dates.unshift(today); // always allow picking today's (possibly empty) batch
+  dates.sort().reverse();
+
+  if (!currentOrderDateFilter || !dates.includes(currentOrderDateFilter)) {
+    currentOrderDateFilter = dates.includes(today) ? today : dates[0];
+  }
+  const prevVal = dateSelect.value;
+  dateSelect.innerHTML = dates.map(d => {
+    const count = sheetOrdersData.filter(o => o.businessDate === d).length;
+    const label = `${formatBusinessDateLabel(d)}${d === today ? ' (আজ)' : ''} — ${count} অর্ডার`;
+    return `<option value="${d}">${label}</option>`;
+  }).join('');
+  dateSelect.value = currentOrderDateFilter;
+  if (dateSelect.value !== currentOrderDateFilter) dateSelect.selectedIndex = 0; // fallback safety
+
+  const batchOrders = sheetOrdersData.filter(o => o.businessDate === currentOrderDateFilter);
+
+  detailBody.innerHTML = batchOrders.map(o => {
     const t = o.orderedAt && o.orderedAt.toDate ? o.orderedAt.toDate().toLocaleString('en-US') : '...';
+    const genderLabel = o.gender === 'female' ? 'মেয়ে' : (o.gender === 'male' ? 'ছেলে' : '—');
     return `<tr>
       <td class="activity-meta">${t}</td>
       <td>${o.studentName || '—'} <span class="activity-meta">(Roll ${o.roll})</span></td>
+      <td class="activity-meta">${genderLabel}</td>
       <td>${o.sheetTitle}</td>
       <td class="num">৳${(o.price || 0).toFixed(2)}</td>
+      <td>${orderStatusLabel(o)}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="4" class="activity-meta">এখনো কোনো অর্ডার আসেনি।</td></tr>`;
+  }).join('') || `<tr><td colspan="6" class="activity-meta">এই ব্যাচে এখনো কোনো অর্ডার আসেনি।</td></tr>`;
 
   const groups = {};
-  sheetOrdersData.forEach(o => {
+  batchOrders.forEach(o => {
     const key = o.sheetId || o.sheetTitle;
     if (!groups[key]) groups[key] = { title: o.sheetTitle, price: o.price, names: [], total: 0 };
     groups[key].names.push(`${o.studentName || 'Roll ' + o.roll} (Roll ${o.roll})`);
@@ -1122,8 +1269,143 @@ function renderSheetOrdersTreasurer() {
       <td style="font-size:.8rem;color:var(--ink-soft);">${g.names.join(', ')}</td>
       <td class="num">৳${g.total.toFixed(2)}</td>
     </tr>
-  `).join('') || `<tr><td colspan="4" class="activity-meta">এখনো কোনো অর্ডার আসেনি।</td></tr>`;
+  `).join('') || `<tr><td colspan="4" class="activity-meta">এই ব্যাচে এখনো কোনো অর্ডার আসেনি।</td></tr>`;
+
+  const markBtn = document.getElementById('mark-printed-btn');
+  if (markBtn) {
+    const pendingPrintCount = batchOrders.filter(o => !o.printed).length;
+    markBtn.disabled = pendingPrintCount === 0;
+    markBtn.style.opacity = pendingPrintCount === 0 ? '.55' : '1';
+    markBtn.textContent = pendingPrintCount === 0 ? '✓ এই ব্যাচ প্রিন্ট সম্পন্ন' : `✓ প্রিন্ট সম্পন্ন চিহ্নিত করুন (${pendingPrintCount})`;
+  }
+
+  // received checklist — every printed order in this batch, both genders, treasurer can tick either
+  if (receivedBody) {
+    const printedOrders = batchOrders.filter(o => o.printed);
+    receivedBody.innerHTML = printedOrders.map(o => {
+      const genderLabel = o.gender === 'female' ? 'মেয়ে' : (o.gender === 'male' ? 'ছেলে' : '—');
+      return `<tr>
+        <td><input type="checkbox" ${o.received ? 'checked' : ''} onchange="toggleOrderReceived('${o.id}', this.checked)" style="width:16px;height:16px;"></td>
+        <td>${o.studentName || '—'} <span class="activity-meta">(Roll ${o.roll})</span></td>
+        <td class="activity-meta">${genderLabel}</td>
+        <td>${o.sheetTitle}</td>
+        <td>${o.received ? `<span class="activity-meta">${o.receivedBy || ''} ${o.receivedAt && o.receivedAt.toDate ? '· ' + o.receivedAt.toDate().toLocaleDateString('en-US') : ''}</span>` : '<span class="activity-meta">এখনো বুঝে পায়নি</span>'}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="5" class="activity-meta">এই ব্যাচের কোনো অর্ডার এখনো প্রিন্ট সম্পন্ন হয়নি।</td></tr>`;
+  }
 }
+
+// Wrappers so inline onclick (which runs outside module scope) can reach the
+// module-scoped currentOrderDateFilter variable safely.
+window.markCurrentBatchPrinted = () => window.markOrdersPrinted(currentOrderDateFilter);
+window.downloadCurrentBatchPDF = () => window.downloadOrdersPDF(currentOrderDateFilter);
+
+window.markOrdersPrinted = async (businessDate) => {
+  if (!businessDate) return;
+  const toMark = sheetOrdersData.filter(o => o.businessDate === businessDate && !o.printed);
+  if (!toMark.length) { alert("এই ব্যাচের সব অর্ডার ইতিমধ্যে প্রিন্ট সম্পন্ন চিহ্নিত করা আছে।"); return; }
+  if (!confirm(`${formatBusinessDateLabel(businessDate)} ব্যাচের ${toMark.length}টি অর্ডার প্রিন্ট সম্পন্ন হিসেবে চিহ্নিত করবেন?`)) return;
+  try {
+    await Promise.all(toMark.map(o => updateDoc(doc(db, "sheetOrders", o.id), {
+      printed: true, printedAt: serverTimestamp(), printedBy: currentTreasurerName
+    })));
+  } catch (e) {
+    alert("প্রিন্ট স্ট্যাটাস আপডেট করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
+};
+
+window.toggleOrderReceived = async (orderId, checked) => {
+  try {
+    await updateDoc(doc(db, "sheetOrders", orderId), checked
+      ? { received: true, receivedAt: serverTimestamp(), receivedBy: currentTreasurerName }
+      : { received: false, receivedAt: null, receivedBy: null });
+  } catch (e) {
+    alert("প্রাপ্তি স্ট্যাটাস আপডেট করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
+};
+
+// ============ GIRLS ADMIN DASHBOARD ============
+function getGirlsTotals() {
+  const femaleStudents = students.filter(s => s.gender === 'female');
+  const totalCollected = femaleStudents.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
+  return { count: femaleStudents.length, totalCollected };
+}
+
+function renderGirlsAdminPanel() {
+  if (currentUserRole !== 'girls_admin') return;
+  const { count, totalCollected } = getGirlsTotals();
+  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setText('girls-count', count);
+  setText('girls-total-collected', "৳" + totalCollected.toFixed(2));
+
+  const tbody = document.getElementById('girls-received-body');
+  if (!tbody) return;
+  const printedGirlsOrders = sheetOrdersData
+    .filter(o => o.gender === 'female' && o.printed)
+    .sort((a, b) => (a.received === b.received) ? 0 : (a.received ? 1 : -1)); // pending first
+  tbody.innerHTML = printedGirlsOrders.map(o => {
+    const batch = o.businessDate ? formatBusinessDateLabel(o.businessDate) : '—';
+    const info = o.received
+      ? `<span class="activity-meta">${o.receivedBy || ''} ${o.receivedAt && o.receivedAt.toDate ? '· ' + o.receivedAt.toDate().toLocaleDateString('en-US') : ''}</span>`
+      : '<span class="activity-meta">এখনো বুঝে পায়নি</span>';
+    return `<tr>
+      <td><input type="checkbox" ${o.received ? 'checked' : ''} onchange="toggleOrderReceived('${o.id}', this.checked)" style="width:16px;height:16px;"></td>
+      <td>${o.studentName || '—'} <span class="activity-meta">(Roll ${o.roll})</span></td>
+      <td>${o.sheetTitle}</td>
+      <td class="activity-meta">${batch}</td>
+      <td>${info}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো মেয়েদের কোনো অর্ডার প্রিন্ট সম্পন্ন হয়নি।</td></tr>`;
+}
+
+// ============ ORDERS PDF (treasurer) ============
+window.downloadOrdersPDF = (businessDate) => {
+  if (!businessDate) return;
+  const orders = sheetOrdersData.filter(o => o.businessDate === businessDate);
+  if (!orders.length) { alert("এই ব্যাচে কোনো অর্ডার নেই।"); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const now = new Date();
+
+  doc.setFontSize(16); doc.setTextColor(30, 41, 59);
+  doc.text(`Sheet Print Orders — ${formatBusinessDateLabel(businessDate)}`, 14, 18);
+  doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+  doc.text(`Treasurer: ${currentTreasurerName}   |   Generated: ${now.toLocaleString()}`, 14, 24);
+
+  const groups = {};
+  orders.forEach(o => {
+    const key = o.sheetId || o.sheetTitle;
+    if (!groups[key]) groups[key] = { title: o.sheetTitle, price: o.price, count: 0, total: 0 };
+    groups[key].count += 1;
+    groups[key].total += (o.price || 0);
+  });
+  doc.autoTable({
+    startY: 30,
+    head: [["Sheet", "Requests", "Unit Price", "Subtotal"]],
+    body: Object.values(groups).map(g => [g.title, String(g.count), `Tk ${g.price.toFixed(2)}`, `Tk ${g.total.toFixed(2)}`]),
+    theme: "grid", headStyles: { fillColor: [30, 41, 59] }, styles: { fontSize: 9 }
+  });
+
+  doc.setFontSize(12); doc.setTextColor(30, 41, 59);
+  doc.text("Order Detail", 14, doc.lastAutoTable.finalY + 10);
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 14,
+    head: [["Roll", "Subscriber", "Gender", "Sheet", "Price"]],
+    body: orders.map(o => [
+      String(o.roll), o.studentName || '-', o.gender === 'female' ? 'F' : (o.gender === 'male' ? 'M' : '-'),
+      o.sheetTitle, `Tk ${(o.price || 0).toFixed(2)}`
+    ]),
+    theme: "striped", headStyles: { fillColor: [30, 41, 59] }, styles: { fontSize: 8 }
+  });
+
+  const total = orders.reduce((a, o) => a + (o.price || 0), 0);
+  const finalY = doc.lastAutoTable.finalY + 12;
+  doc.setFontSize(10); doc.setTextColor(30, 41, 59);
+  doc.text(`Total: Tk ${total.toFixed(2)}   (${orders.length} orders)`, 14, finalY);
+
+  doc.save(`Sheet_Orders_${businessDate}.pdf`);
+};
 
 // Subscriber: "কোন খাতে খরচ হচ্ছে" — everything currently counted in their due/credit,
 // broken down by purpose (their slice of each shared expense, any personal charges, sheet orders)
@@ -1221,6 +1503,7 @@ function recomputeCollections() {
   });
   renderStudents();
   renderSummary();
+  renderGirlsAdminPanel();
 }
 
 window.addPayment = async (roll) => {
@@ -1331,7 +1614,11 @@ window.confirmSheetOrders = async () => {
   const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
   const total = chosenSheets.reduce((a, s) => a + (s.price || 0), 0);
   const names = chosenSheets.map(s => `${s.title} (৳${s.price.toFixed(2)})`).join(', ');
-  if (!confirm(`নিচের শিটগুলো প্রিন্টের জন্য অর্ডার করবেন? মোট ৳${total.toFixed(2)} আপনার হিসাব থেকে কাটা হবে।\n\n${names}`)) return;
+  const businessDate = currentBusinessDateKey();
+  const cutoffNote = isPastCutoffNow()
+    ? `\n\n⏰ বিকাল ৩টা পার হয়ে গেছে, তাই এই অর্ডারটি আজকের নয় — ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`
+    : `\n\nএই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে (প্রতিদিন বিকাল ৩টা পর্যন্ত অর্ডার নেওয়া হয়)।`;
+  if (!confirm(`নিচের শিটগুলো প্রিন্টের জন্য অর্ডার করবেন? মোট ৳${total.toFixed(2)} আপনার হিসাব থেকে কাটা হবে।\n\n${names}${cutoffNote}`)) return;
 
   const user = auth.currentUser;
   const student = students.find(s => s.roll === currentSubscriberRoll);
@@ -1339,10 +1626,14 @@ window.confirmSheetOrders = async () => {
     await Promise.all(chosenSheets.map(s => addDoc(collection(db, "sheetOrders"), {
       roll: currentSubscriberRoll,
       studentName: student ? student.name : currentTreasurerName,
+      gender: (student && student.gender) || 'unspecified',
       sheetId: s.id,
       sheetTitle: s.title,
       price: s.price,
       orderedAt: serverTimestamp(),
+      businessDate,
+      printed: false, printedAt: null, printedBy: null,
+      received: false, receivedAt: null, receivedBy: null,
       addedBy: currentTreasurerName,
       orderedByUid: user ? user.uid : null
     })));
