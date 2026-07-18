@@ -83,21 +83,22 @@
     font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s ease;
   }
   .nav-tab-btn:hover{border-color:var(--ink-soft);color:var(--ink);}
-  .nav-tab-btn.active{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .nav-tab-btn.active{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 2px 8px rgba(30,41,59,0.25);}
   .tab-inactive{display:none !important;}
 
   /* ---------- cards ---------- */
   .panel{
-    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
     padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px;
   }
-  .panel h2{font-size:1rem;margin:0 0 12px;font-weight:600;}
+  .panel h2{font-size:1rem;margin:0 0 12px;font-weight:600;letter-spacing:-.01em;}
 
   .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
   .sum-card{
-    background:var(--panel);border:1px solid var(--line);border-radius:10px;
-    padding:14px 16px;box-shadow:var(--shadow);
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;box-shadow:var(--shadow);transition:box-shadow .15s ease;
   }
+  .sum-card:hover{box-shadow:0 4px 16px rgba(15,23,42,0.1);}
   .sum-card .label{font-size:.72rem;color:var(--ink-soft);}
   .sum-card .val{font-size:1.3rem;font-weight:700;margin-top:4px;}
   .sum-card.green .val{color:var(--green);}
@@ -110,21 +111,23 @@
   .field{flex:1;min-width:140px;}
   label{font-size:.78rem;color:var(--ink-soft);display:block;margin-bottom:4px;}
   input[type=text],input[type=number],input[type=email],input[type=password],input[type=tel]{
-    width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;
+    width:100%;padding:9px 12px;border:1px solid var(--line-strong);border-radius:8px;
     background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);
+    transition:border-color .15s ease, box-shadow .15s ease;
   }
-  input:focus{border-color:var(--accent);}
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
   .btn{
-    border:none;border-radius:6px;padding:9px 16px;font-size:.88rem;font-weight:600;
-    cursor:pointer;transition:opacity .1s ease;
+    border:none;border-radius:8px;padding:10px 16px;font-size:.88rem;font-weight:600;
+    cursor:pointer;transition:background-color .15s ease, opacity .1s ease, transform .1s ease;
   }
-  .btn:active{opacity:.85;}
+  .btn:active{opacity:.85;transform:translateY(1px);}
+  .btn:disabled{cursor:not-allowed;}
   .btn-primary{background:var(--ink);color:#fff;}
   .btn-primary:hover{background:#334155;}
   .btn-gold{background:var(--gold);color:#fff;}
   .btn-gold:hover{background:#B45F04;}
   .btn-outline{background:none;border:1px solid var(--line-strong);color:var(--ink);}
-  .btn-outline:hover{background:var(--bg);}
+  .btn-outline:hover{background:var(--bg);border-color:var(--ink-soft);}
   .btn-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
 
   /* ---------- table ---------- */
@@ -160,21 +163,27 @@
   /* ---------- auth screen ---------- */
   .auth-screen{
     min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:radial-gradient(circle at 50% 0%, #EEF3FC 0%, var(--bg) 60%);
   }
   .auth-card{
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    box-shadow:var(--shadow);padding:32px 28px;max-width:380px;width:100%;
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 8px 30px rgba(15,23,42,0.08);padding:36px 30px;max-width:380px;width:100%;
   }
-  .auth-card h1{font-size:1.35rem;margin:0 0 4px;text-align:center;}
-  .auth-card .sub{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-bottom:20px;}
-  .auth-toggle{text-align:center;margin-top:14px;font-size:.85rem;}
+  .auth-card h1{font-size:1.3rem;margin:0 0 4px;text-align:center;font-weight:700;letter-spacing:-.01em;}
+  .auth-card .sub{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-bottom:22px;}
+  .auth-toggle{text-align:center;margin-top:16px;font-size:.85rem;color:var(--ink-soft);}
   .auth-toggle a{color:var(--accent);cursor:pointer;font-weight:600;text-decoration:none;}
+  .auth-toggle a:hover{text-decoration:underline;}
   .auth-error{
-    background:var(--red-bg);color:var(--red);border-radius:6px;padding:8px 12px;
-    font-size:.82rem;margin-bottom:12px;
+    background:var(--red-bg);color:var(--red);border-radius:8px;padding:9px 12px;
+    font-size:.82rem;margin-bottom:14px;
   }
-  .auth-stamp{display:flex;justify-content:center;margin-bottom:16px;}
-  .auth-stamp .stamp{width:52px;height:52px;font-size:1.15rem;}
+  .auth-stamp{display:flex;justify-content:center;margin-bottom:18px;}
+  .auth-stamp .stamp{
+    width:54px;height:54px;font-size:1.2rem;
+    background:linear-gradient(135deg, var(--accent), #1D4ED8);
+    box-shadow:0 4px 14px rgba(37,99,235,0.35);
+  }
 
   /* ---------- setup overlay ---------- */
   .setup-overlay{
@@ -224,9 +233,19 @@ service cloud.firestore {
         get(/databases/$(database)/documents/students/$(string(roll))).data.gender == 'female';
     }
 
+    // A new sign-up may create their OWN profile doc, but only with role "pending" — nobody
+    // can hand themselves a role from the browser. Afterwards they may update harmless fields
+    // (like their name) but can never change their own role/roll. Only the treasurer, or you
+    // manually from the Firebase Console (which isn't subject to these rules), can promote
+    // someone to treasurer / subscriber / girls_admin.
     match /users/{uid} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn() && request.auth.uid == uid
+                    && request.resource.data.role == 'pending';
+      allow update: if isSignedIn() && request.auth.uid == uid
+                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.roll == resource.data.roll;
+      allow write: if isTreasurer();
     }
 
     // a subscriber may create sheet-print orders only under their own uid;
@@ -265,7 +284,7 @@ service cloud.firestore {
       <li>Project settings → General → scroll down to "Your apps" → add a Web app and copy the <code>firebaseConfig</code> object.</li>
       <li>In this file, paste your own config in place of <code>firebaseConfig</code> at the start of the <code>&lt;script type="module"&gt;</code> block, then save/upload the file again.</li>
     </ol>
-    <p style="color:var(--ink-soft);font-size:.82rem;">These steps only need to be done once. After that, anyone can register as a Treasurer, log in, and all records will be stored in Firebase.</p>
+    <p style="color:var(--ink-soft);font-size:.82rem;">These steps only need to be done once. After that, anyone can register with just a name, email, and password. New accounts start as <b>"Pending"</b> and see a waiting screen. To activate someone: open Firestore → <code>users</code> collection → find their document (match by email) → set <code>role</code> to <code>treasurer</code>, <code>subscriber</code>, or <code>girls_admin</code>. For a <code>subscriber</code>, also add a <code>roll</code> field (number) matching their entry in the <code>students</code> collection.</p>
   </div>
 </div>
 
@@ -276,56 +295,54 @@ service cloud.firestore {
     <h1>Arundeepto Printers</h1>
     <div class="sub">Treasury Login</div>
 
-    <div class="btn-row" style="margin-bottom:16px;">
-      <button class="btn" id="role-tab-treasurer" style="flex:1;background:var(--ink);color:#fff;" onclick="setAuthRole('treasurer')">Treasurer</button>
-      <button class="btn" id="role-tab-subscriber" style="flex:1;background:none;border:1px solid var(--line-strong);color:var(--ink);" onclick="setAuthRole('subscriber')">Subscriber</button>
-      <button class="btn" id="role-tab-girls_admin" style="flex:1;background:none;border:1px solid var(--line-strong);color:var(--ink);font-size:.78rem;" onclick="setAuthRole('girls_admin')">মেয়েদের এডমিন</button>
-    </div>
-
     <div id="auth-error" class="auth-error hidden"></div>
 
-    <!-- LOGIN FORM (shared by both roles — role is detected automatically after sign-in) -->
+    <!-- LOGIN FORM -->
     <div id="login-form">
       <div class="field" style="margin-bottom:10px;">
         <label>Email</label>
-        <input type="email" id="login-email" placeholder="you@example.com">
+        <input type="email" id="login-email" placeholder="you@example.com" autocomplete="username">
       </div>
       <div class="field" style="margin-bottom:16px;">
         <label>Password</label>
-        <input type="password" id="login-password" placeholder="••••••••">
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter'){doLogin();}">
       </div>
       <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Log In</button>
-      <div class="auth-toggle"><span id="login-register-prompt">New Treasurer?</span> <a onclick="toggleAuthMode()">Register</a></div>
+      <div class="auth-toggle">New here? <a onclick="toggleAuthMode()">Create an account</a></div>
     </div>
 
-    <!-- REGISTER FORM -->
+    <!-- REGISTER FORM — just the basics; access level is granted afterwards by the business owner -->
     <div id="register-form" class="hidden">
       <div class="field" style="margin-bottom:10px;">
         <label>Name</label>
         <input type="text" id="reg-name" placeholder="e.g. John Smith">
       </div>
-      <!-- subscriber-only fields: roll + mobile, used to match against the existing subscriber record -->
-      <div id="reg-subscriber-fields" class="hidden">
-        <div class="field" style="margin-bottom:10px;">
-          <label>Roll Number</label>
-          <input type="number" id="reg-roll" placeholder="e.g. 12">
-        </div>
-        <div class="field" style="margin-bottom:10px;">
-          <label>Mobile Number (Treasurer-এর খাতায় যেটা আছে)</label>
-          <input type="tel" id="reg-mobile" placeholder="e.g. 01700000000">
-        </div>
-      </div>
       <div class="field" style="margin-bottom:10px;">
         <label>Email</label>
-        <input type="email" id="reg-email" placeholder="you@example.com">
+        <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="username">
       </div>
-      <div class="field" style="margin-bottom:16px;">
+      <div class="field" style="margin-bottom:14px;">
         <label>Password</label>
-        <input type="password" id="reg-password" placeholder="••••••••">
+        <input type="password" id="reg-password" placeholder="At least 6 characters" autocomplete="new-password" onkeydown="if(event.key==='Enter'){doRegister();}">
       </div>
-      <button class="btn btn-gold" style="width:100%;" onclick="doRegister()">Register & Log In</button>
+      <p style="font-size:.78rem;color:var(--ink-soft);margin:0 0 14px;">অ্যাকাউন্ট তৈরির পর অ্যাক্সেসের জন্য অপেক্ষা করতে হবে — Treasurer আপনার অ্যাকাউন্টটি সক্রিয় করে দেবেন।</p>
+      <button class="btn btn-gold" style="width:100%;" onclick="doRegister()">Create Account</button>
       <div class="auth-toggle">Already have an account? <a onclick="toggleAuthMode()">Log In</a></div>
     </div>
+  </div>
+</div>
+
+<!-- ============ PENDING-APPROVAL SCREEN (shown after login until an admin sets a role) ============ -->
+<div id="pending-screen" class="auth-screen hidden">
+  <div class="auth-card" style="text-align:center;">
+    <div class="auth-stamp"><div class="stamp">⏳</div></div>
+    <h1>অ্যাক্সেসের অপেক্ষায়</h1>
+    <div class="sub" style="margin-bottom:4px;">Waiting for Access</div>
+    <p style="font-size:.88rem;color:var(--ink-soft);line-height:1.6;margin:14px 0 20px;">
+      আপনার অ্যাকাউন্ট (<b id="pending-email">—</b>) তৈরি হয়েছে, কিন্তু এখনো কোনো ভূমিকা (role) নির্ধারণ করা হয়নি।
+      Treasurer-কে জানান — তিনি আপনাকে Subscriber, Treasurer, বা মেয়েদের এডমিন হিসেবে সক্রিয় করে দেবেন।
+    </p>
+    <button class="btn btn-outline" style="width:100%;" onclick="doLogout()">Log Out</button>
   </div>
 </div>
 
@@ -335,7 +352,7 @@ service cloud.firestore {
   <div class="masthead">
     <div>
       <h1>Arundeepto Printers</h1>
-      <div class="sub">Subscriber Treasury Dashboard</div>
+      <div class="sub" id="masthead-sub">Treasury Dashboard</div>
     </div>
     <div class="stamp-wrap">
       <div class="who">
@@ -669,7 +686,6 @@ let currentTreasurerName = "";
 let currentUserRole = "treasurer";   // 'treasurer' | 'subscriber' | 'girls_admin' — detected from users/{uid} after sign-in
 let currentSubscriberRoll = null;    // set when currentUserRole === 'subscriber'
 let isRegisterMode = false;
-let authRole = "treasurer";          // which role tab is selected on the register form
 let currentOrderDateFilter = null;   // businessDate key currently selected in the treasurer's order panel
 let currentActiveTab = null;         // which nav-bar tab is currently open
 
@@ -699,21 +715,6 @@ function toggleAuthMode() {
 }
 window.toggleAuthMode = toggleAuthMode;
 
-window.setAuthRole = (role) => {
-  authRole = role;
-  ['treasurer', 'subscriber', 'girls_admin'].forEach(r => {
-    const btn = document.getElementById('role-tab-' + r);
-    if (!btn) return;
-    btn.style.background = role === r ? 'var(--ink)' : 'none';
-    btn.style.color = role === r ? '#fff' : 'var(--ink)';
-    btn.style.border = role === r ? 'none' : '1px solid var(--line-strong)';
-  });
-  document.getElementById('reg-subscriber-fields').classList.toggle('hidden', role !== 'subscriber');
-  document.getElementById('login-register-prompt').textContent =
-    role === 'subscriber' ? 'New Subscriber?' : (role === 'girls_admin' ? 'New Girls Admin?' : 'New Treasurer?');
-  document.getElementById('auth-error').classList.add('hidden');
-};
-
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
   el.textContent = msg;
@@ -727,7 +728,9 @@ window.doLogin = async () => {
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (e) {
-    showAuthError("Login failed. Please check your email and password.");
+    showAuthError(e && (e.code === 'auth/invalid-email')
+      ? "সঠিক ইমেইল ঠিকানা দিন।"
+      : "Login failed. Please check your email and password.");
   }
 };
 
@@ -738,56 +741,39 @@ window.doRegister = async () => {
   if (!name || !email || !password) return showAuthError("Please fill in all fields.");
   if (password.length < 6) return showAuthError("Password must be at least 6 characters.");
 
-  let roll = null, mobile = "";
-  if (authRole === 'subscriber') {
-    roll = parseInt(document.getElementById('reg-roll').value);
-    mobile = document.getElementById('reg-mobile').value.trim();
-    if (!roll || !mobile) return showAuthError("Please enter your Roll Number and Mobile Number.");
-  }
-
   let cred;
   try {
     cred = await createUserWithEmailAndPassword(auth, email, password);
   } catch (e) {
-    showAuthError("Registration failed. Please try again.");
+    showAuthError(friendlyAuthError(e));
     return;
   }
 
   try {
-    if (authRole === 'subscriber') {
-      // verify this roll exists and the mobile number matches what the treasurer has on file
-      const studentSnap = await getDoc(doc(db, "students", roll.toString()));
-      if (!studentSnap.exists() || (studentSnap.data().mobile || "").trim() !== mobile) {
-        await deleteUser(cred.user);
-        showAuthError("এই Roll ও Mobile Number মিলছে না। Treasurer-এর সাথে যোগাযোগ করুন।");
-        return;
-      }
-      // prevent a second account from claiming the same roll
-      const existingSnap = await getDocs(query(collection(db, "users"), where("role", "==", "subscriber"), where("roll", "==", roll)));
-      if (!existingSnap.empty) {
-        await deleteUser(cred.user);
-        showAuthError("এই Roll নম্বরে ইতিমধ্যে একটি অ্যাকাউন্ট রেজিস্টার করা আছে।");
-        return;
-      }
-      await setDoc(doc(db, "users", cred.user.uid), {
-        role: "subscriber", roll, name, email, createdAt: serverTimestamp()
-      });
-    } else if (authRole === 'girls_admin') {
-      await setDoc(doc(db, "users", cred.user.uid), {
-        role: "girls_admin", name, email, createdAt: serverTimestamp()
-      });
-    } else {
-      await setDoc(doc(db, "users", cred.user.uid), {
-        role: "treasurer", name, email, createdAt: serverTimestamp()
-      });
-    }
+    // Every new account starts as "pending" — no role, no access — until the owner assigns
+    // one manually in the Firebase console (see the setup guide). This is the ONLY role a
+    // client is ever allowed to write for itself; Firestore rules enforce that.
+    await setDoc(doc(db, "users", cred.user.uid), {
+      role: "pending", roll: null, name, email, createdAt: serverTimestamp()
+    });
     await updateProfile(cred.user, { displayName: name });
-    // onAuthStateChanged already fired (before displayName/role were set), so refresh the UI here too
+    // onAuthStateChanged already fired (before the profile doc/displayName were set), so
+    // refresh the UI here too.
     await applyLoggedInUser(cred.user);
   } catch (e) {
-    showAuthError("Registration failed. Please try again.");
+    // Roll back the auth account so nobody is left signed in without a profile doc.
+    try { await deleteUser(cred.user); } catch (_) {}
+    showAuthError("অ্যাকাউন্ট তৈরি সম্পন্ন হয়নি। আবার চেষ্টা করুন।");
   }
 };
+
+function friendlyAuthError(e) {
+  const code = e && e.code;
+  if (code === 'auth/email-already-in-use') return "এই ইমেইলে ইতিমধ্যে একটি অ্যাকাউন্ট আছে। Log In করুন।";
+  if (code === 'auth/invalid-email') return "সঠিক ইমেইল ঠিকানা দিন।";
+  if (code === 'auth/weak-password') return "Password must be at least 6 characters.";
+  return "Registration failed. Please try again.";
+}
 
 window.doLogout = async () => {
   currentActiveTab = null;
@@ -820,11 +806,22 @@ async function applyLoggedInUser(user) {
   currentTreasurerName = name;
 
   document.getElementById('auth-screen').classList.add('hidden');
+
+  if (role === 'pending') {
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('pending-email').textContent = user.email || name;
+    document.getElementById('pending-screen').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('pending-screen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
+
   document.getElementById('current-user-name').textContent = name;
   document.getElementById('current-user-role').textContent =
     role === 'subscriber' ? 'Subscriber' : (role === 'girls_admin' ? 'মেয়েদের এডমিন' : 'Treasurer');
   document.getElementById('current-user-stamp').textContent = stampInitials(name);
+  document.getElementById('masthead-sub').textContent =
+    role === 'subscriber' ? 'Subscriber Dashboard' : (role === 'girls_admin' ? 'মেয়েদের এডমিন ড্যাশবোর্ড' : 'Treasury Dashboard');
 
   applyRoleVisibility();
   startListeners();
@@ -890,6 +887,7 @@ onAuthStateChanged(auth, (user) => {
     applyLoggedInUser(user);
   } else {
     document.getElementById('app').classList.add('hidden');
+    document.getElementById('pending-screen').classList.add('hidden');
     document.getElementById('auth-screen').classList.remove('hidden');
   }
 });
