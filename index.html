@@ -381,6 +381,41 @@
     <div class="btn-row"><button class="btn btn-primary" onclick="addStudent()">Add Subscriber</button></div>
   </div>
 
+  <!-- login accounts (create + manage — replaces manual Firebase Console work) -->
+  <div class="panel treasurer-only" data-tab="users">
+    <h2>নতুন লগইন অ্যাকাউন্ট তৈরি করুন</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখান থেকেই Treasurer, মেয়েদের এডমিন, বা Subscriber-এর জন্য লগইন অ্যাকাউন্ট তৈরি করুন — Firebase Console-এ আলাদা করে কিছু করা লাগবে না।</p>
+    <div class="field-row">
+      <div class="field"><label>নাম</label><input type="text" id="new-user-name" placeholder="e.g. Rahim Uddin"></div>
+      <div class="field"><label>ইমেইল</label><input type="email" id="new-user-email" placeholder="e.g. rahim@example.com"></div>
+      <div class="field"><label>পাসওয়ার্ড</label><input type="password" id="new-user-password" placeholder="কমপক্ষে ৬ অক্ষর"></div>
+    </div>
+    <div class="field-row" style="margin-top:10px;">
+      <div class="field">
+        <label>ভূমিকা (Role)</label>
+        <select id="new-user-role" onchange="onNewUserRoleChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);">
+          <option value="treasurer">Treasurer</option>
+          <option value="girls_admin">মেয়েদের এডমিন</option>
+          <option value="subscriber">Subscriber</option>
+        </select>
+      </div>
+      <div class="field hidden" id="new-user-roll-wrap">
+        <label>কোন সাবস্ক্রাইবার (Roll)</label>
+        <select id="new-user-roll" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" id="add-user-btn" onclick="addUserAccount()">🔑 অ্যাকাউন্ট তৈরি করুন</button></div>
+
+    <h2 style="margin-top:22px;">সব লগইন অ্যাকাউন্ট</h2>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>নাম</th><th>ইমেইল</th><th>ভূমিকা</th><th>Roll</th><th></th></tr></thead>
+        <tbody id="users-list-body"></tbody>
+      </table>
+    </div>
+    <p style="color:var(--ink-soft);font-size:.78rem;margin-top:8px;">"অ্যাক্সেস বাতিল" চাপলে শুধু অ্যাপের অ্যাক্সেস বন্ধ হবে (আবার Waiting screen-এ চলে যাবে) — ইমেইল/পাসওয়ার্ড দিয়ে Firebase-এর Auth অ্যাকাউন্টটি রয়ে যাবে, ফলে চাইলে পরে আবার নতুন role দিয়ে সক্রিয় করা যাবে।</p>
+  </div>
+
   <!-- fund (donation) -->
   <div class="panel treasurer-only" data-tab="fund">
     <h2>Add Fund</h2>
@@ -529,9 +564,10 @@
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut,
+  createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, deleteDoc, updateDoc, collection, onSnapshot, addDoc,
@@ -566,6 +602,7 @@ let sheetsData = [];        // [{id, title, price, addedBy, addedAt}] — lectur
 // [{id, roll, studentName, sheetId, sheetTitle, price, orderedAt, addedBy, businessDate, gender,
 //   printed, printedAt, printedBy, received, receivedAt, receivedBy}]
 let sheetOrdersData = [];
+let usersData = [];         // [{id(=uid), role, roll, name, email}] — login accounts, treasurer-managed
 let currentTreasurerName = "";
 let currentUserRole = "treasurer";   // 'treasurer' | 'subscriber' | 'girls_admin' — detected from users/{uid} after sign-in
 let currentSubscriberRoll = null;    // set when currentUserRole === 'subscriber'
@@ -671,6 +708,7 @@ const TABS_BY_ROLE = {
   treasurer: [
     { id: 'dashboard', label: '📊 ড্যাশবোর্ড' },
     { id: 'subscribers', label: '👥 সাবস্ক্রাইবার' },
+    { id: 'users', label: '🔑 লগইন অ্যাকাউন্ট' },
     { id: 'fund', label: '💰 ফান্ড' },
     { id: 'expense', label: '🧾 খরচ' },
     { id: 'sheets', label: '📄 শিট ও অর্ডার' },
@@ -742,10 +780,19 @@ function startListeners() {
     snap.forEach(d => students.push({ id: d.id, ...d.data() }));
     renderStudentRows();
     renderExpenseTargetOptions();
+    renderNewUserRollOptions();
     recomputeCollections();
     renderExpenses();
     renderSummary();
     renderGirlsAdminPanel();
+  });
+
+  // login accounts — treasurer-only tab; lets the treasurer create/manage accounts without
+  // touching the Firebase Console directly
+  onSnapshot(collection(db, "users"), (snap) => {
+    usersData = [];
+    snap.forEach(d => usersData.push({ id: d.id, ...d.data() }));
+    renderUsersList();
   });
 
   // legacy single-amount records (from before the fix) — kept as a starting balance, never written to again
@@ -1572,6 +1619,107 @@ function renderExpenseTargetOptions() {
 window.onExpenseChargeTypeChange = () => {
   const type = document.getElementById('expense-charge-type').value;
   document.getElementById('expense-target-wrap').classList.toggle('hidden', type !== 'individual');
+};
+
+// ============ LOGIN ACCOUNTS (treasurer creates/manages users directly from the app) ============
+function roleLabel(role) {
+  return role === 'subscriber' ? 'Subscriber' : (role === 'girls_admin' ? 'মেয়েদের এডমিন' : (role === 'treasurer' ? 'Treasurer' : 'Pending'));
+}
+
+function renderNewUserRollOptions() {
+  const sel = document.getElementById('new-user-roll');
+  if (!sel) return;
+  const prev = sel.value;
+  const takenRolls = new Set(usersData.filter(u => u.role === 'subscriber' && u.roll != null).map(u => String(u.roll)));
+  sel.innerHTML = students.map(s =>
+    `<option value="${s.roll}" ${takenRolls.has(String(s.roll)) ? 'disabled' : ''}>${s.name} (Roll ${s.roll})${takenRolls.has(String(s.roll)) ? ' — আগে থেকেই অ্যাকাউন্ট আছে' : ''}</option>`
+  ).join('') || `<option value="">কোনো সাবস্ক্রাইবার নেই — আগে "সাবস্ক্রাইবার" ট্যাব থেকে যোগ করুন</option>`;
+  if (prev && students.some(s => String(s.roll) === prev)) sel.value = prev;
+}
+
+window.onNewUserRoleChange = () => {
+  const role = document.getElementById('new-user-role').value;
+  document.getElementById('new-user-roll-wrap').classList.toggle('hidden', role !== 'subscriber');
+};
+
+// Creates the Firebase Auth account AND the matching Firestore users/{uid} role doc in one
+// go, so the treasurer never has to open the Firebase Console. A brand-new, throwaway
+// secondary app instance is used for the sign-up call — the client SDK auto-signs-in as
+// whichever account was just created on a given auth instance, so without this isolation the
+// treasurer would get bumped out of their own session every time they added someone.
+window.addUserAccount = async () => {
+  const name = document.getElementById('new-user-name').value.trim();
+  const email = document.getElementById('new-user-email').value.trim();
+  const password = document.getElementById('new-user-password').value;
+  const role = document.getElementById('new-user-role').value;
+  const rollRaw = document.getElementById('new-user-roll').value;
+  const roll = role === 'subscriber' ? parseInt(rollRaw) : null;
+
+  if (!name || !email || !password) { alert("নাম, ইমেইল ও পাসওয়ার্ড — সবগুলো দিন।"); return; }
+  if (password.length < 6) { alert("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।"); return; }
+  if (role === 'subscriber' && !roll) { alert("Subscriber এর জন্য একজন সাবস্ক্রাইবার (Roll) নির্বাচন করুন।"); return; }
+  if (role === 'subscriber' && usersData.some(u => u.role === 'subscriber' && u.roll === roll)) {
+    alert("এই সাবস্ক্রাইবারের জন্য আগে থেকেই একটি অ্যাকাউন্ট আছে।"); return;
+  }
+
+  const btn = document.getElementById('add-user-btn');
+  if (btn) { btn.disabled = true; btn.textContent = "তৈরি হচ্ছে…"; }
+
+  const secondaryApp = initializeApp(firebaseConfig, "secondary-" + Date.now());
+  const secondaryAuth = getAuth(secondaryApp);
+  try {
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+    await setDoc(doc(db, "users", cred.user.uid), {
+      role, roll, name, email, createdAt: serverTimestamp(), addedBy: currentTreasurerName
+    });
+    try { await signOut(secondaryAuth); } catch (_) {}
+    alert(`✓ ${name} এর অ্যাকাউন্ট তৈরি হয়েছে এবং "${roleLabel(role)}" হিসেবে সক্রিয় করা হয়েছে।`);
+    document.getElementById('new-user-name').value = "";
+    document.getElementById('new-user-email').value = "";
+    document.getElementById('new-user-password').value = "";
+  } catch (e) {
+    const code = e && e.code;
+    let msg = "অ্যাকাউন্ট তৈরি করা যায়নি। কারণ: " + (e && e.message ? e.message : e);
+    if (code === 'auth/email-already-in-use') msg = "এই ইমেইলে ইতিমধ্যে একটি অ্যাকাউন্ট আছে।";
+    if (code === 'auth/invalid-email') msg = "সঠিক ইমেইল ঠিকানা দিন।";
+    alert(msg);
+  } finally {
+    try { await deleteApp(secondaryApp); } catch (_) {}
+    if (btn) { btn.disabled = false; btn.textContent = "🔑 অ্যাকাউন্ট তৈরি করুন"; }
+  }
+};
+
+function renderUsersList() {
+  const tbody = document.getElementById('users-list-body');
+  if (!tbody) return;
+  if (!usersData.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="activity-meta">এখনো কোনো লগইন অ্যাকাউন্ট তৈরি করা হয়নি।</td></tr>`;
+    renderNewUserRollOptions();
+    return;
+  }
+  const sorted = [...usersData].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'bn'));
+  tbody.innerHTML = sorted.map(u => `
+    <tr>
+      <td>${u.name || '—'}</td>
+      <td class="activity-meta">${u.email || '—'}</td>
+      <td>${roleLabel(u.role)}</td>
+      <td class="num">${u.role === 'subscriber' && u.roll != null ? u.roll : '—'}</td>
+      <td><button class="icon-btn" onclick="revokeUserAccess('${u.id}', '${(u.name || u.email || '').replace(/'/g, "")}')">অ্যাক্সেস বাতিল</button></td>
+    </tr>
+  `).join('');
+  renderNewUserRollOptions();
+}
+
+// Deletes only the Firestore role doc — the Firebase Auth account itself is left intact so it
+// can be re-activated later with a fresh role, and so nobody is silently locked out of email
+// re-use. Once the doc is gone, applyLoggedInUser() falls back to "pending" for that account.
+window.revokeUserAccess = async (uid, label) => {
+  if (!confirm(`${label} এর অ্যাক্সেস বাতিল করতে চান? (পুনরায় role দিয়ে সক্রিয় করা যাবে)`)) return;
+  try {
+    await deleteDoc(doc(db, "users", uid));
+  } catch (e) {
+    alert("অ্যাক্সেস বাতিল করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
 };
 
 window.filterStudents = () => {
