@@ -220,6 +220,30 @@
         <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter'){doLogin();}">
       </div>
       <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Log In</button>
+      <div class="auth-toggle">Subscriber, first time here? <a onclick="showRegisterForm()">Register with your Roll</a></div>
+    </div>
+
+    <!-- REGISTER FORM (subscriber self-registration — Treasurer must add Name + Roll first) -->
+    <div id="register-form" class="hidden">
+      <p style="color:var(--ink-soft);font-size:.8rem;margin:-6px 0 14px;">Treasurer আপনার নাম ও Roll যোগ করার পরই আপনি এখান থেকে নিজের ইমেইল ও পাসওয়ার্ড সেট করে অ্যাকাউন্ট চালু করতে পারবেন।</p>
+      <div class="field" style="margin-bottom:10px;">
+        <label>Roll</label>
+        <input type="number" id="reg-roll" placeholder="e.g. 12">
+      </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="username">
+      </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="কমপক্ষে ৬ অক্ষর" autocomplete="new-password">
+      </div>
+      <div class="field" style="margin-bottom:16px;">
+        <label>Confirm Password</label>
+        <input type="password" id="reg-confirm-password" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter'){doRegister();}">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" id="register-btn" onclick="doRegister()">Register</button>
+      <div class="auth-toggle">Already registered? <a onclick="showLoginForm()">Log in</a></div>
     </div>
   </div>
 </div>
@@ -567,7 +591,7 @@
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword, deleteUser
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, deleteDoc, updateDoc, collection, onSnapshot, addDoc,
@@ -627,9 +651,11 @@ function formatBusinessDateLabel(key) {
 }
 
 // ============ AUTH ============
-// Accounts are created manually by the treasurer (Firebase Console → Authentication → Add
-// user), then given a role by writing role/name/roll fields into the matching users/{uid}
-// Firestore document. There is no self-service sign-up in this app.
+// Treasurer/girls-admin accounts are still created manually by the treasurer from the "লগইন
+// অ্যাকাউন্ট" tab (see addUserAccount). Subscribers instead self-register: the treasurer first
+// adds just Name + Roll (see addStudent), and the subscriber then comes here, enters that Roll,
+// and sets their own email/password (see doRegister). Either path ends the same way — a
+// users/{uid} Firestore doc with a role — which is what applyLoggedInUser() reads.
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
   el.textContent = msg;
@@ -652,6 +678,83 @@ window.doLogin = async () => {
 window.doLogout = async () => {
   currentActiveTab = null;
   await signOut(auth);
+};
+
+window.showRegisterForm = () => {
+  document.getElementById('auth-error').classList.add('hidden');
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.remove('hidden');
+};
+
+window.showLoginForm = () => {
+  document.getElementById('auth-error').classList.add('hidden');
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('login-form').classList.remove('hidden');
+};
+
+// Subscriber self-registration. The treasurer must have already added this Roll under the
+// "সাবস্ক্রাইবার" tab (addStudent) — that's what proves the person registering is a real
+// subscriber. We create the Auth account first (Firebase requires the caller to be signed in
+// before it will let them query Firestore, per this project's security rules), then verify the
+// Roll against the students collection and that nobody else already claimed it. If either check
+// fails, we roll back by deleting the just-created Auth account so no orphaned "pending" login
+// is left behind.
+window.doRegister = async () => {
+  const roll = parseInt(document.getElementById('reg-roll').value, 10);
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirmPassword = document.getElementById('reg-confirm-password').value;
+
+  if (!roll && roll !== 0) return showAuthError("সঠিক Roll নম্বর দিন।");
+  if (!email || !password) return showAuthError("ইমেইল ও পাসওয়ার্ড — দুটোই দিন।");
+  if (password.length < 6) return showAuthError("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।");
+  if (password !== confirmPassword) return showAuthError("পাসওয়ার্ড দুইবার একই দেননি।");
+
+  const btn = document.getElementById('register-btn');
+  if (btn) { btn.disabled = true; btn.textContent = "রেজিস্ট্রেশন হচ্ছে…"; }
+  document.getElementById('auth-error').classList.add('hidden');
+
+  let cred;
+  try {
+    cred = await createUserWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    const code = e && e.code;
+    let msg = "অ্যাকাউন্ট তৈরি করা যায়নি। কারণ: " + (e && e.message ? e.message : e);
+    if (code === 'auth/email-already-in-use') msg = "এই ইমেইলে ইতিমধ্যে একটি অ্যাকাউন্ট আছে।";
+    if (code === 'auth/invalid-email') msg = "সঠিক ইমেইল ঠিকানা দিন।";
+    showAuthError(msg);
+    if (btn) { btn.disabled = false; btn.textContent = "Register"; }
+    return;
+  }
+
+  try {
+    const studentDoc = await getDoc(doc(db, "students", roll.toString()));
+    if (!studentDoc.exists()) {
+      throw new Error(`Roll ${roll} এখনো Treasurer যোগ করেননি। আগে Treasurer-কে বলে আপনার নাম ও Roll যোগ করিয়ে নিন, তারপর রেজিস্ট্রেশন করুন।`);
+    }
+    const student = studentDoc.data();
+
+    const existingSnap = await getDocs(query(collection(db, "users"), where("role", "==", "subscriber")));
+    if (existingSnap.docs.some(d => d.data().roll === roll)) {
+      throw new Error(`Roll ${roll} এর জন্য আগে থেকেই একটি অ্যাকাউন্ট রেজিস্টার করা আছে। এটি আপনার নিজের অ্যাকাউন্ট না হলে Treasurer-এর সাথে যোগাযোগ করুন।`);
+    }
+
+    await setDoc(doc(db, "users", cred.user.uid), {
+      role: 'subscriber', roll, name: student.name, email,
+      createdAt: serverTimestamp(), addedBy: 'self-registration'
+    });
+
+    document.getElementById('reg-roll').value = "";
+    document.getElementById('reg-email').value = "";
+    document.getElementById('reg-password').value = "";
+    document.getElementById('reg-confirm-password').value = "";
+    await applyLoggedInUser(cred.user);
+  } catch (e) {
+    showAuthError(e && e.message ? e.message : "রেজিস্ট্রেশন করা যায়নি।");
+    try { await deleteUser(cred.user); } catch (_) { try { await signOut(auth); } catch (_) {} }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Register"; }
+  }
 };
 
 function stampInitials(name) {
@@ -766,6 +869,7 @@ onAuthStateChanged(auth, (user) => {
     document.getElementById('app').classList.add('hidden');
     document.getElementById('pending-screen').classList.add('hidden');
     document.getElementById('auth-screen').classList.remove('hidden');
+    window.showLoginForm();
   }
 });
 
