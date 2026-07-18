@@ -11,28 +11,33 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
-    --bg:#F4F6F8;
+    --bg:#EAF3FC;
     --panel:#FFFFFF;
-    --ink:#1E293B;
-    --ink-soft:#64748B;
-    --line:#E2E8F0;
-    --line-strong:#CBD5E1;
-    --accent:#2563EB;
-    --accent-bg:#EFF4FF;
+    --ink:#0F2540;
+    --ink-soft:#5E7A98;
+    --line:#DCEAF9;
+    --line-strong:#BBDCF7;
+    --accent:#0B84DA;
+    --accent-2:#38BDF8;
+    --accent-bg:#E6F3FD;
     --green:#16A34A;
     --green-bg:#DCFCE7;
     --red:#DC2626;
     --red-bg:#FEE2E2;
     --gold:#D97706;
     --gold-bg:#FEF3C7;
-    --shadow: 0 2px 10px rgba(15,23,42,0.06);
+    --shadow: 0 2px 14px rgba(11,132,218,0.08);
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     font-family:'Inter','Noto Sans Bengali',sans-serif;
     color:var(--ink);
-    background:var(--bg);
+    background:
+      radial-gradient(circle at 12% 0%, #DFF0FE 0%, transparent 45%),
+      radial-gradient(circle at 100% 20%, #E5F4FE 0%, transparent 40%),
+      var(--bg);
+    background-attachment:fixed;
     min-height:100vh;
   }
   h1,h2,h3{font-family:'Inter','Noto Sans Bengali',sans-serif;}
@@ -56,9 +61,10 @@
   .stamp-wrap{display:flex;align-items:center;gap:10px;}
   .stamp{
     width:40px;height:40px;border-radius:50%;
-    background:var(--accent);color:#fff;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));color:#fff;
     display:flex;align-items:center;justify-content:center;
     font-weight:700;font-size:.95rem;flex:none;
+    box-shadow:0 3px 10px rgba(11,132,218,0.3);
   }
   .who{line-height:1.25;text-align:right;}
   .who .name{font-weight:600;font-size:.9rem;}
@@ -82,13 +88,16 @@
     background:var(--panel);color:var(--ink-soft);font-family:inherit;font-size:.85rem;
     font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s ease;
   }
-  .nav-tab-btn:hover{border-color:var(--ink-soft);color:var(--ink);}
-  .nav-tab-btn.active{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 2px 8px rgba(30,41,59,0.25);}
+  .nav-tab-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .nav-tab-btn.active{
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(11,132,218,0.35);
+  }
   .tab-inactive{display:none !important;}
 
   /* ---------- cards ---------- */
   .panel{
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
     padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px;
   }
   .panel h2{font-size:1rem;margin:0 0 12px;font-weight:600;letter-spacing:-.01em;}
@@ -117,17 +126,17 @@
   }
   input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
   .btn{
-    border:none;border-radius:8px;padding:10px 16px;font-size:.88rem;font-weight:600;
-    cursor:pointer;transition:background-color .15s ease, opacity .1s ease, transform .1s ease;
+    border:none;border-radius:9px;padding:10px 16px;font-size:.88rem;font-weight:600;
+    cursor:pointer;transition:background-color .15s ease, opacity .1s ease, transform .1s ease, box-shadow .15s ease;
   }
   .btn:active{opacity:.85;transform:translateY(1px);}
   .btn:disabled{cursor:not-allowed;}
-  .btn-primary{background:var(--ink);color:#fff;}
-  .btn-primary:hover{background:#334155;}
+  .btn-primary{background:linear-gradient(135deg, var(--accent), var(--accent-2));color:#fff;box-shadow:0 3px 10px rgba(11,132,218,0.3);}
+  .btn-primary:hover{box-shadow:0 5px 16px rgba(11,132,218,0.4);}
   .btn-gold{background:var(--gold);color:#fff;}
   .btn-gold:hover{background:#B45F04;}
   .btn-outline{background:none;border:1px solid var(--line-strong);color:var(--ink);}
-  .btn-outline:hover{background:var(--bg);border-color:var(--ink-soft);}
+  .btn-outline:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);}
   .btn-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
 
   /* ---------- table ---------- */
@@ -163,11 +172,12 @@
   /* ---------- auth screen ---------- */
   .auth-screen{
     min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
-    background:radial-gradient(circle at 50% 0%, #EEF3FC 0%, var(--bg) 60%);
+    background:radial-gradient(circle at 50% 0%, #DDEFFC 0%, var(--bg) 65%);
   }
   .auth-card{
-    background:var(--panel);border:1px solid var(--line);border-radius:16px;
-    box-shadow:0 8px 30px rgba(15,23,42,0.08);padding:36px 30px;max-width:380px;width:100%;
+    background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);
+    border:1px solid var(--line-strong);border-radius:18px;
+    box-shadow:0 12px 40px rgba(11,132,218,0.14);padding:36px 30px;max-width:380px;width:100%;
   }
   .auth-card h1{font-size:1.3rem;margin:0 0 4px;text-align:center;font-weight:700;letter-spacing:-.01em;}
   .auth-card .sub{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-bottom:22px;}
@@ -181,112 +191,14 @@
   .auth-stamp{display:flex;justify-content:center;margin-bottom:18px;}
   .auth-stamp .stamp{
     width:54px;height:54px;font-size:1.2rem;
-    background:linear-gradient(135deg, var(--accent), #1D4ED8);
-    box-shadow:0 4px 14px rgba(37,99,235,0.35);
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow:0 6px 18px rgba(11,132,218,0.4);
   }
-
-  /* ---------- setup overlay ---------- */
-  .setup-overlay{
-    position:fixed;inset:0;background:rgba(15,23,42,0.75);z-index:999;
-    display:flex;align-items:center;justify-content:center;padding:20px;
-  }
-  .setup-card{
-    background:var(--panel);border-radius:12px;max-width:560px;width:100%;
-    padding:28px 30px;max-height:88vh;overflow-y:auto;
-  }
-  .setup-card h2{margin-top:0;}
-  .setup-card ol{padding-left:20px;font-size:.9rem;line-height:1.7;}
-  .setup-card code{background:var(--bg);padding:2px 6px;border-radius:4px;font-size:.82rem;}
-  .setup-card pre{background:var(--ink);color:#e8e8e8;padding:12px 14px;border-radius:8px;font-size:.78rem;overflow-x:auto;}
 
   #voucher-box{display:none;}
 </style>
 </head>
 <body>
-
-<!-- ============ SETUP OVERLAY (shown only if firebaseConfig is unfilled) ============ -->
-<div id="setup-overlay" class="setup-overlay hidden">
-  <div class="setup-card">
-    <h2>Firebase Setup Guide</h2>
-    <p>Complete these one-time setup steps to connect your Firebase project:</p>
-    <ol>
-      <li>Go to the <a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase Console</a> and create a project.</li>
-      <li>Build → <b>Authentication</b> → Sign-in method → enable <b>Email/Password</b>.</li>
-      <li>Build → <b>Firestore Database</b> → create a database (production mode).</li>
-      <li><b>Paste the following into your Firestore rules:</b>
-        <pre>rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    function isSignedIn() { return request.auth != null; }
-    function myRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-    }
-    function isTreasurer() {
-      return isSignedIn() &&
-        (!exists(/databases/$(database)/documents/users/$(request.auth.uid)) || myRole() == 'treasurer');
-    }
-    function isGirlsAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && myRole() == 'girls_admin';
-    }
-    function isFemaleRoll(roll) {
-      return exists(/databases/$(database)/documents/students/$(string(roll))) &&
-        get(/databases/$(database)/documents/students/$(string(roll))).data.gender == 'female';
-    }
-
-    // A new sign-up may create their OWN profile doc, but only with role "pending" — nobody
-    // can hand themselves a role from the browser. Afterwards they may update harmless fields
-    // (like their name) but can never change their own role/roll. Only the treasurer, or you
-    // manually from the Firebase Console (which isn't subject to these rules), can promote
-    // someone to treasurer / subscriber / girls_admin.
-    match /users/{uid} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.auth.uid == uid
-                    && request.resource.data.role == 'pending';
-      allow update: if isSignedIn() && request.auth.uid == uid
-                    && request.resource.data.role == resource.data.role
-                    && request.resource.data.roll == resource.data.roll;
-      allow write: if isTreasurer();
-    }
-
-    // a subscriber may create sheet-print orders only under their own uid;
-    // the treasurer can edit/delete anything; the girls' admin may only update
-    // (to mark "received") — not delete
-    match /sheetOrders/{orderId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.resource.data.orderedByUid == request.auth.uid;
-      allow update: if isTreasurer() || isGirlsAdmin();
-      allow delete: if isTreasurer();
-    }
-
-    // the girls' admin may add a payment ONLY for a subscriber whose gender is 'female';
-    // the treasurer may add a payment for anyone
-    match /payments/{paymentId} {
-      allow read: if isSignedIn();
-      allow create: if isTreasurer() ||
-        (isGirlsAdmin() && isFemaleRoll(request.resource.data.roll));
-      allow update, delete: if isTreasurer();
-    }
-
-    // activity log entries — treasurer always, girls' admin only for her own actions
-    match /activity/{activityId} {
-      allow read: if isSignedIn();
-      allow create: if isTreasurer() || isGirlsAdmin();
-      allow update, delete: if isTreasurer();
-    }
-
-    match /{document=**} {
-      allow read: if isSignedIn();
-      allow write: if isTreasurer();
-    }
-  }
-}</pre>
-      </li>
-      <li>Project settings → General → scroll down to "Your apps" → add a Web app and copy the <code>firebaseConfig</code> object.</li>
-      <li>In this file, paste your own config in place of <code>firebaseConfig</code> at the start of the <code>&lt;script type="module"&gt;</code> block, then save/upload the file again.</li>
-    </ol>
-    <p style="color:var(--ink-soft);font-size:.82rem;">These steps only need to be done once. After that, anyone can register with just a name, email, and password. New accounts start as <b>"Pending"</b> and see a waiting screen. To activate someone: open Firestore → <code>users</code> collection → find their document (match by email) → set <code>role</code> to <code>treasurer</code>, <code>subscriber</code>, or <code>girls_admin</code>. For a <code>subscriber</code>, also add a <code>roll</code> field (number) matching their entry in the <code>students</code> collection.</p>
-  </div>
-</div>
 
 <!-- ============ AUTH SCREEN ============ -->
 <div id="auth-screen" class="auth-screen hidden">
@@ -308,39 +220,18 @@ service cloud.firestore {
         <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter'){doLogin();}">
       </div>
       <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Log In</button>
-      <div class="auth-toggle">New here? <a onclick="toggleAuthMode()">Create an account</a></div>
-    </div>
-
-    <!-- REGISTER FORM — just the basics; access level is granted afterwards by the business owner -->
-    <div id="register-form" class="hidden">
-      <div class="field" style="margin-bottom:10px;">
-        <label>Name</label>
-        <input type="text" id="reg-name" placeholder="e.g. John Smith">
-      </div>
-      <div class="field" style="margin-bottom:10px;">
-        <label>Email</label>
-        <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="username">
-      </div>
-      <div class="field" style="margin-bottom:14px;">
-        <label>Password</label>
-        <input type="password" id="reg-password" placeholder="At least 6 characters" autocomplete="new-password" onkeydown="if(event.key==='Enter'){doRegister();}">
-      </div>
-      <p style="font-size:.78rem;color:var(--ink-soft);margin:0 0 14px;">অ্যাকাউন্ট তৈরির পর অ্যাক্সেসের জন্য অপেক্ষা করতে হবে — Treasurer আপনার অ্যাকাউন্টটি সক্রিয় করে দেবেন।</p>
-      <button class="btn btn-gold" style="width:100%;" onclick="doRegister()">Create Account</button>
-      <div class="auth-toggle">Already have an account? <a onclick="toggleAuthMode()">Log In</a></div>
     </div>
   </div>
 </div>
 
-<!-- ============ PENDING-APPROVAL SCREEN (shown after login until an admin sets a role) ============ -->
+<!-- ============ PENDING-APPROVAL SCREEN (shown if a signed-in account has no role assigned yet) ============ -->
 <div id="pending-screen" class="auth-screen hidden">
   <div class="auth-card" style="text-align:center;">
     <div class="auth-stamp"><div class="stamp">⏳</div></div>
     <h1>অ্যাক্সেসের অপেক্ষায়</h1>
     <div class="sub" style="margin-bottom:4px;">Waiting for Access</div>
     <p style="font-size:.88rem;color:var(--ink-soft);line-height:1.6;margin:14px 0 20px;">
-      আপনার অ্যাকাউন্ট (<b id="pending-email">—</b>) তৈরি হয়েছে, কিন্তু এখনো কোনো ভূমিকা (role) নির্ধারণ করা হয়নি।
-      Treasurer-কে জানান — তিনি আপনাকে Subscriber, Treasurer, বা মেয়েদের এডমিন হিসেবে সক্রিয় করে দেবেন।
+      আপনার অ্যাকাউন্টে (<b id="pending-email">—</b>) এখনো কোনো ভূমিকা (role) দেওয়া হয়নি। Treasurer-এর সাথে যোগাযোগ করুন।
     </p>
     <button class="btn btn-outline" style="width:100%;" onclick="doLogout()">Log Out</button>
   </div>
@@ -640,15 +531,14 @@ service cloud.firestore {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, updateProfile, signOut, deleteUser
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, deleteDoc, updateDoc, collection, onSnapshot, addDoc,
   query, orderBy, limit, serverTimestamp, where, getDocs, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ============ 1) Your Firebase Config ============
+// ============ Firebase Config ============
 const firebaseConfig = {
   apiKey: "AIzaSyCuT_E8UUdBmftYGcVa7nxww6fUE1WBuak",
   authDomain: "tree-d26aa.firebaseapp.com",
@@ -657,12 +547,6 @@ const firebaseConfig = {
   messagingSenderId: "222720179431",
   appId: "1:222720179431:web:e86835cdc1b950e8a07642"
 };
-
-// ---- setup guard: show the setup guide if the config hasn't been filled in ----
-if (firebaseConfig.apiKey === "YOUR_API_KEY") {
-  document.getElementById('setup-overlay').classList.remove('hidden');
-  throw new Error("Firebase config not set. Follow the setup guide.");
-}
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -685,7 +569,6 @@ let sheetOrdersData = [];
 let currentTreasurerName = "";
 let currentUserRole = "treasurer";   // 'treasurer' | 'subscriber' | 'girls_admin' — detected from users/{uid} after sign-in
 let currentSubscriberRoll = null;    // set when currentUserRole === 'subscriber'
-let isRegisterMode = false;
 let currentOrderDateFilter = null;   // businessDate key currently selected in the treasurer's order panel
 let currentActiveTab = null;         // which nav-bar tab is currently open
 
@@ -707,14 +590,9 @@ function formatBusinessDateLabel(key) {
 }
 
 // ============ AUTH ============
-function toggleAuthMode() {
-  isRegisterMode = !isRegisterMode;
-  document.getElementById('login-form').classList.toggle('hidden', isRegisterMode);
-  document.getElementById('register-form').classList.toggle('hidden', !isRegisterMode);
-  document.getElementById('auth-error').classList.add('hidden');
-}
-window.toggleAuthMode = toggleAuthMode;
-
+// Accounts are created manually by the treasurer (Firebase Console → Authentication → Add
+// user), then given a role by writing role/name/roll fields into the matching users/{uid}
+// Firestore document. There is no self-service sign-up in this app.
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
   el.textContent = msg;
@@ -734,47 +612,6 @@ window.doLogin = async () => {
   }
 };
 
-window.doRegister = async () => {
-  const name = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const password = document.getElementById('reg-password').value;
-  if (!name || !email || !password) return showAuthError("Please fill in all fields.");
-  if (password.length < 6) return showAuthError("Password must be at least 6 characters.");
-
-  let cred;
-  try {
-    cred = await createUserWithEmailAndPassword(auth, email, password);
-  } catch (e) {
-    showAuthError(friendlyAuthError(e));
-    return;
-  }
-
-  try {
-    // Every new account starts as "pending" — no role, no access — until the owner assigns
-    // one manually in the Firebase console (see the setup guide). This is the ONLY role a
-    // client is ever allowed to write for itself; Firestore rules enforce that.
-    await setDoc(doc(db, "users", cred.user.uid), {
-      role: "pending", roll: null, name, email, createdAt: serverTimestamp()
-    });
-    await updateProfile(cred.user, { displayName: name });
-    // onAuthStateChanged already fired (before the profile doc/displayName were set), so
-    // refresh the UI here too.
-    await applyLoggedInUser(cred.user);
-  } catch (e) {
-    // Roll back the auth account so nobody is left signed in without a profile doc.
-    try { await deleteUser(cred.user); } catch (_) {}
-    showAuthError("অ্যাকাউন্ট তৈরি সম্পন্ন হয়নি। আবার চেষ্টা করুন।");
-  }
-};
-
-function friendlyAuthError(e) {
-  const code = e && e.code;
-  if (code === 'auth/email-already-in-use') return "এই ইমেইলে ইতিমধ্যে একটি অ্যাকাউন্ট আছে। Log In করুন।";
-  if (code === 'auth/invalid-email') return "সঠিক ইমেইল ঠিকানা দিন।";
-  if (code === 'auth/weak-password') return "Password must be at least 6 characters.";
-  return "Registration failed. Please try again.";
-}
-
 window.doLogout = async () => {
   currentActiveTab = null;
   await signOut(auth);
@@ -787,19 +624,21 @@ function stampInitials(name) {
 }
 
 // Resolve the signed-in user's role and populate the header + role-based visibility.
-// A missing users/{uid} doc means this is a pre-existing account from before roles existed —
-// those are always treated as Treasurer accounts, so nothing breaks for current treasurers.
+// BUGFIX: a missing users/{uid} doc used to silently default to full Treasurer access. Since
+// accounts are now created manually (Auth user first, role doc second), that default handed
+// out admin access to anyone signed in before their role doc existed. It now safely falls
+// back to "pending" — the waiting screen — until the treasurer writes their role doc.
 async function applyLoggedInUser(user) {
-  let role = "treasurer", roll = null, name = user.displayName || user.email;
+  let role = "pending", roll = null, name = user.displayName || user.email;
   try {
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (userDoc.exists()) {
       const data = userDoc.data();
-      role = data.role || "treasurer";
+      role = data.role || "pending";
       roll = data.roll || null;
       name = data.name || name;
     }
-  } catch (e) { /* fall back to treasurer defaults */ }
+  } catch (e) { /* fall back to pending defaults */ }
 
   currentUserRole = role;
   currentSubscriberRoll = roll;
