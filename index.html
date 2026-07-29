@@ -259,6 +259,42 @@
     font-size:.7rem;font-weight:600;color:var(--ink-soft);background:var(--accent-bg);
     padding:2px 9px;border-radius:999px;
   }
+
+  /* ---------- e-commerce style extras: discount ribbon, strikethrough price, pending toggle ---------- */
+  .sheet-card{overflow:hidden;}
+  .sheet-card .sc-discount-ribbon{
+    position:absolute;top:14px;left:-32px;transform:rotate(-45deg);
+    background:linear-gradient(135deg, var(--red), #F87171);color:#fff;
+    font-size:.66rem;font-weight:700;padding:3px 34px;box-shadow:0 2px 6px rgba(0,0,0,.15);
+    letter-spacing:.02em;
+  }
+  .sc-price-row{display:flex;align-items:baseline;gap:8px;margin-top:auto;}
+  .sc-price-old{font-size:.85rem;color:var(--ink-soft);text-decoration:line-through;opacity:.75;}
+  .sc-price-new{font-size:1.3rem;font-weight:700;color:var(--accent);}
+  .sheet-card.ordered .sc-price-new{color:var(--green);}
+
+  .pending-toggle-row{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;
+    background:var(--accent-bg);border:1px solid var(--line-strong);border-radius:10px;padding:10px 14px;
+  }
+  .pending-toggle-row .ptr-count{font-weight:700;color:var(--accent);}
+  .switch{position:relative;display:inline-block;width:40px;height:22px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .slider{position:absolute;cursor:pointer;inset:0;background:var(--line-strong);border-radius:999px;transition:.15s;}
+  .switch .slider::before{position:absolute;content:"";height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .switch input:checked + .slider{background:var(--accent);}
+  .switch input:checked + .slider::before{transform:translateX(18px);}
+  .switch-label{font-size:.86rem;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;}
+
+  .price-input-row{display:flex;gap:8px;align-items:center;}
+  #new-sheet-custom-price{max-width:130px;}
+  .price-hint{font-size:.72rem;color:var(--ink-soft);margin-top:4px;}
+
+  /* nicer product-catalog feel for the whole shell */
+  .panel:hover{box-shadow:0 6px 22px rgba(15,23,42,0.1);}
+  .sum-card{position:relative;}
+  .sum-card::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;background:linear-gradient(90deg, var(--accent), var(--accent-2));opacity:.0;transition:opacity .15s ease;}
+  .sum-card:hover::after{opacity:1;}
 </style>
 </head>
 <body>
@@ -413,6 +449,11 @@
         <select id="girls-received-sheet-select" onchange="onGirlsReceivedSheetFilterChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
       </div>
     </div>
+    <div class="pending-toggle-row">
+      <label class="switch"><input type="checkbox" id="girls-pending-only-toggle" onchange="onGirlsPendingOnlyToggle()"><span class="slider"></span></label>
+      <span class="switch-label" onclick="document.getElementById('girls-pending-only-toggle').click()">শুধু যারা এখনও বুঝে পায়নি — তাদের দেখাও</span>
+      <span class="ptr-count" id="girls-pending-count"></span>
+    </div>
     <div class="table-scroll">
       <table class="ledger">
         <thead><tr><th></th><th>সাবস্ক্রাইবার</th><th>প্রাপ্তি তথ্য</th></tr></thead>
@@ -450,6 +491,68 @@
     </div>
   </div>
 
+  <!-- ============ BOYS-ADMIN-ONLY: dashboard ============ -->
+  <div class="panel boys-admin-only hidden" id="boys-admin-panel" data-tab="dashboard">
+    <h2>ছেলেদের হিসাব — সংক্ষিপ্ত</h2>
+    <div class="summary-grid" style="margin-bottom:10px;">
+      <div class="sum-card"><div class="label">ছেলে সাবস্ক্রাইবার</div><div class="val num" id="boys-count">0</div></div>
+      <div class="sum-card green"><div class="label">ছেলেদের মোট জমা</div><div class="val num" id="boys-total-collected">৳0</div></div>
+    </div>
+
+    <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট — ছেলেদের শিট</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">ট্রেজারার প্রিন্ট সম্পন্ন করার পর এখানে ছেলেদের শিট দেখা যাবে। নিচে তারিখ ও শিটের নাম বেছে নিয়ে শুধু সেই তালিকাটাই দেখুন — চাইলে "সব তারিখ" / "সব শিট" রেখে সম্পূর্ণ তালিকাও দেখা যাবে। যে সাবস্ক্রাইবার শিট বুঝে পেয়েছে, তার পাশে টিক দিন — এটাই রিসিভের রেকর্ড হিসেবে থেকে যাবে।</p>
+    <div class="field-row" style="align-items:flex-end;margin-bottom:12px;">
+      <div class="field" style="max-width:240px;">
+        <label>তারিখ বাছাই করুন</label>
+        <select id="boys-received-date-select" onchange="onBoysReceivedDateFilterChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
+      </div>
+      <div class="field" style="max-width:240px;">
+        <label>শিট বাছাই করুন</label>
+        <select id="boys-received-sheet-select" onchange="onBoysReceivedSheetFilterChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
+      </div>
+    </div>
+    <div class="pending-toggle-row">
+      <label class="switch"><input type="checkbox" id="boys-pending-only-toggle" onchange="onBoysPendingOnlyToggle()"><span class="slider"></span></label>
+      <span class="switch-label" onclick="document.getElementById('boys-pending-only-toggle').click()">শুধু যারা এখনও বুঝে পায়নি — তাদের দেখাও</span>
+      <span class="ptr-count" id="boys-pending-count"></span>
+    </div>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th></th><th>সাবস্ক্রাইবার</th><th>প্রাপ্তি তথ্য</th></tr></thead>
+        <tbody id="boys-received-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ BOYS-ADMIN-ONLY: payments (male subscribers only) ============ -->
+  <div class="panel boys-admin-only hidden" data-tab="payments">
+    <h2>টাকা জমা যোগ করুন (শুধু ছেলে সাবস্ক্রাইবার)</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখানে শুধু ছেলে সাবস্ক্রাইবারদের তালিকা দেখা যাবে — তাদের জমা এখান থেকে যোগ করা যাবে।</p>
+    <input type="text" class="search-box" id="boys-admin-student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজুন..." oninput="filterBoysAdminStudents()">
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>Roll</th><th>Name</th><th>মোট জমা (৳)</th><th>নতুন জমা যোগ করুন</th></tr></thead>
+        <tbody id="boys-admin-student-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ BOYS-ADMIN-ONLY: his own free personal sheet order ============ -->
+  <div class="panel boys-admin-only hidden" data-tab="sheets">
+    <h2>আপনার ব্যক্তিগত শিট অর্ডার</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এটা আপনার নিজের (এডমিনের) শিট অর্ডার — কোনো সাবস্ক্রাইবারের হিসাব থেকে এর দাম কাটা হবে না। <strong>অর্ডার শুধু ট্রেজারারের ঠিক করা সময়সীমার মধ্যে দেওয়া যায়</strong> (নিচে দেখুন)।</p>
+    <div id="boys-order-window-notice" class="hidden" style="background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:.85rem;margin-bottom:12px;font-weight:600;"></div>
+    <div id="boys-admin-sheet-select-list"></div>
+    <div class="btn-row"><button class="btn btn-gold" id="confirm-boys-order-btn" onclick="confirmBoysAdminPersonalOrder()">✓ নির্বাচিত শিট অর্ডার নিশ্চিত করুন</button></div>
+    <h2 style="margin-top:20px;">আপনার অর্ডারকৃত শিট</h2>
+    <div class="table-scroll">
+      <table class="ledger">
+        <thead><tr><th>তারিখ</th><th>শিট</th><th>মূল্য</th><th>ব্যাচ</th><th>স্ট্যাটাস</th></tr></thead>
+        <tbody id="boys-admin-my-orders-body"></tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- summary cards -->
   <div class="summary-grid treasurer-only" data-tab="dashboard">
     <div class="sum-card green"><div class="label">Subscriber Collection</div><div class="val num" id="sum-collection">৳0</div></div>
@@ -469,6 +572,15 @@
       <div class="sum-card green"><div class="label">মেয়েদের মোট জমা</div><div class="val num" id="girls-collected-admin">৳0</div></div>
       <div class="sum-card"><div class="label">মেয়েদের সম্মিলিত ব্যালেন্স</div><div class="val num" id="girls-balance-admin">৳0</div></div>
     </div>
+  </div>
+
+  <!-- quick glance: how many printed sheets are still not received -->
+  <div class="panel treasurer-only" data-tab="dashboard">
+    <h2>📥 প্রাপ্তি স্বীকার — এক নজরে</h2>
+    <div class="summary-grid" style="margin-bottom:0;grid-template-columns:1fr;">
+      <div class="sum-card gold"><div class="label">প্রিন্ট সম্পন্ন কিন্তু এখনও বুঝে পায়নি</div><div class="val num" id="dashboard-pending-receive-count">0</div></div>
+    </div>
+    <p style="color:var(--ink-soft);font-size:.8rem;margin:10px 0 0;">বিস্তারিত তালিকা ও টিক দেওয়ার জন্য "📄 শিট ও অর্ডার" ট্যাবের "প্রাপ্তি স্বীকার" অংশে যান।</p>
   </div>
 
   <!-- report buttons -->
@@ -514,6 +626,7 @@
         <select id="new-user-role" onchange="onNewUserRoleChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);">
           <option value="treasurer">Treasurer</option>
           <option value="girls_admin">মেয়েদের এডমিন</option>
+          <option value="chele_admin">ছেলেদের এডমিন</option>
           <option value="subscriber">Subscriber</option>
         </select>
       </div>
@@ -594,9 +707,11 @@
       <div class="field"><label>অর্ডার শুরু (ঘণ্টা, ০-২৩)</label><input type="number" min="0" max="23" id="cfg-window-start"></div>
       <div class="field"><label>অর্ডার শেষ (ঘণ্টা, ০-২৩)</label><input type="number" min="0" max="23" id="cfg-window-end"></div>
       <div class="field"><label>ব্যাচ কাট-অফ (ঘণ্টা, ০-২৩)</label><input type="number" min="0" max="23" id="cfg-cutoff"></div>
+      <div class="field"><label>🏷️ সবার জন্য ডিসকাউন্ট (%)</label><input type="number" min="0" max="100" step="0.01" id="cfg-discount" placeholder="0"></div>
     </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="saveOrderTimingSettings()">সংরক্ষণ করুন</button></div>
     <p id="cfg-preview" style="color:var(--ink-soft);font-size:.82rem;margin:10px 0 0;"></p>
+    <p style="color:var(--ink-soft);font-size:.78rem;margin:4px 0 0;">এই ডিসকাউন্ট এখন থেকে করা প্রতিটি নতুন শিট অর্ডারের দামে (সাবস্ক্রাইবার, মেয়েদের এডমিন ও ছেলেদের এডমিন — সবার) স্বয়ংক্রিয়ভাবে প্রযোজ্য হবে। আগের অর্ডারের দাম বদলাবে না।</p>
   </div>
 
   <!-- lecture sheet catalog management -->
@@ -619,6 +734,11 @@
       <div class="field">
         <label>হিসাব</label>
         <div id="new-sheet-price-breakdown" style="padding:9px 0;font-size:.8rem;color:var(--ink-soft);"></div>
+      </div>
+      <div class="field">
+        <label>✏️ কাস্টম দাম (ঐচ্ছিক)</label>
+        <div class="price-input-row"><input type="number" min="0" step="0.01" id="new-sheet-custom-price" placeholder="স্বয়ংক্রিয় দামই থাকবে"></div>
+        <div class="price-hint">খালি রাখলে স্বয়ংক্রিয় দাম বসবে — চাইলে এখানে নিজে দাম বসিয়ে সেটিই নির্দিষ্ট করে দিতে পারবেন।</div>
       </div>
     </div>
     <div class="btn-row">
@@ -679,6 +799,11 @@
         <button class="btn btn-outline" onclick="downloadReceiversPDF()">📄 কে কোন সিট রিসিভ করবে — PDF (ছেলে/মেয়ে আলাদা)</button>
         <button class="btn btn-outline" onclick="downloadTodayReceiversPDF()">🔄 আজকের রিসিভার লিস্ট (আবার) ডাউনলোড করুন</button>
       </div>
+    </div>
+    <div class="pending-toggle-row">
+      <label class="switch"><input type="checkbox" id="treasurer-pending-only-toggle" onchange="onTreasurerPendingOnlyToggle()"><span class="slider"></span></label>
+      <span class="switch-label" onclick="document.getElementById('treasurer-pending-only-toggle').click()">শুধু যারা এখনও বুঝে পায়নি — তাদের দেখাও</span>
+      <span class="ptr-count" id="treasurer-pending-count"></span>
     </div>
     <div class="table-scroll">
       <table class="ledger">
@@ -781,13 +906,31 @@ let currentReceivedDateFilter = 'all';
 let currentReceivedSheetFilter = 'all';
 let currentGirlsReceivedDateFilter = 'all';
 let currentGirlsReceivedSheetFilter = 'all';
+let currentBoysReceivedDateFilter = 'all';
+let currentBoysReceivedSheetFilter = 'all';
+// "শুধু যারা এখনও বুঝে পায়নি" toggles — when true, the checklist hides already-received rows
+// so the admin can see at a glance exactly who still hasn't gotten their sheet(s).
+let treasurerPendingOnly = false;
+let girlsPendingOnly = false;
+let boysPendingOnly = false;
 let batchCountersData = {};   // { businessDate: { currentSeq } } — which print-batch number new orders for that date currently fall into
 
 // ============ ORDER TIMING: fully controlled by the treasurer now (settings/orderConfig doc) ============
 // cutoffHour: after this hour, a new order is bucketed into the NEXT day's batch.
 // windowStartHour/windowEndHour: subscribers/girls-admin may only PLACE orders in this range.
 // Defaults below are only used until the settings/orderConfig doc loads (or if it's never created).
-let orderConfig = { cutoffHour: 15, windowStartHour: 10, windowEndHour: 17 };
+let orderConfig = { cutoffHour: 15, windowStartHour: 10, windowEndHour: 17, discountPercent: 0 };
+
+// ============ TREASURER DISCOUNT: a global % off applied automatically to every NEW sheet
+// order's price (subscriber orders, and girls/boys-admin personal orders). Set from the
+// "শিট ও অর্ডার" tab (settings/orderConfig doc, same doc as the order-timing config). Orders
+// already placed keep whatever price they were charged at — this only affects orders created
+// from now on. ============
+function discountedPrice(basePrice) {
+  const pct = Number(orderConfig.discountPercent) || 0;
+  if (pct <= 0) return +(basePrice || 0).toFixed(2);
+  return +(Math.max(0, (basePrice || 0) * (1 - pct / 100))).toFixed(2);
+}
 
 function businessDateKeyOf(date) {
   const d = new Date(date);
@@ -882,6 +1025,7 @@ function sheetBreakdownLabel(pages) {
 setInterval(() => {
   renderSheetCatalogSubscriber();
   renderGirlsAdminSheetCatalog();
+  renderBoysAdminSheetCatalog();
   window.maybeAutoDownloadReceiversPDF();
 }, 60000);
 
@@ -1033,10 +1177,10 @@ async function applyLoggedInUser(user) {
 
   document.getElementById('current-user-name').textContent = name;
   document.getElementById('current-user-role').textContent =
-    role === 'subscriber' ? 'Subscriber' : (role === 'girls_admin' ? 'মেয়েদের এডমিন' : 'Treasurer');
+    role === 'subscriber' ? 'Subscriber' : (role === 'girls_admin' ? 'মেয়েদের এডমিন' : (role === 'chele_admin' ? 'ছেলেদের এডমিন' : 'Treasurer'));
   document.getElementById('current-user-stamp').textContent = stampInitials(name);
   document.getElementById('masthead-sub').textContent =
-    role === 'subscriber' ? 'Subscriber Dashboard' : (role === 'girls_admin' ? 'মেয়েদের এডমিন ড্যাশবোর্ড' : 'Treasury Dashboard');
+    role === 'subscriber' ? 'Subscriber Dashboard' : (role === 'girls_admin' ? 'মেয়েদের এডমিন ড্যাশবোর্ড' : (role === 'chele_admin' ? 'ছেলেদের এডমিন ড্যাশবোর্ড' : 'Treasury Dashboard'));
 
   applyRoleVisibility();
   startListeners();
@@ -1058,6 +1202,11 @@ const TABS_BY_ROLE = {
     { id: 'sheets', label: '📄 শিট অর্ডার' }
   ],
   girls_admin: [
+    { id: 'dashboard', label: '📊 সংক্ষিপ্ত' },
+    { id: 'payments', label: '💰 জমা যোগ করুন' },
+    { id: 'sheets', label: '📄 ব্যক্তিগত অর্ডার' }
+  ],
+  chele_admin: [
     { id: 'dashboard', label: '📊 সংক্ষিপ্ত' },
     { id: 'payments', label: '💰 জমা যোগ করুন' },
     { id: 'sheets', label: '📄 ব্যক্তিগত অর্ডার' }
@@ -1089,13 +1238,15 @@ function renderNavBar() {
 }
 
 function applyRoleVisibility() {
-  const role = currentUserRole; // 'treasurer' | 'subscriber' | 'girls_admin'
+  const role = currentUserRole; // 'treasurer' | 'subscriber' | 'girls_admin' | 'chele_admin'
   document.querySelectorAll('.treasurer-only').forEach(el => el.classList.toggle('hidden', role !== 'treasurer'));
   document.querySelectorAll('.subscriber-only').forEach(el => el.classList.toggle('hidden', role !== 'subscriber'));
   document.querySelectorAll('.girls-admin-only').forEach(el => el.classList.toggle('hidden', role !== 'girls_admin'));
+  document.querySelectorAll('.boys-admin-only').forEach(el => el.classList.toggle('hidden', role !== 'chele_admin'));
   renderNavBar();
   if (role === 'subscriber') renderSubscriberPanel();
   if (role === 'girls_admin') renderGirlsAdminPanel();
+  if (role === 'chele_admin') renderBoysAdminPanel();
 }
 
 onAuthStateChanged(auth, (user) => {
@@ -1126,12 +1277,14 @@ function startListeners() {
       orderConfig = {
         cutoffHour: (typeof data.cutoffHour === 'number') ? data.cutoffHour : orderConfig.cutoffHour,
         windowStartHour: (typeof data.windowStartHour === 'number') ? data.windowStartHour : orderConfig.windowStartHour,
-        windowEndHour: (typeof data.windowEndHour === 'number') ? data.windowEndHour : orderConfig.windowEndHour
+        windowEndHour: (typeof data.windowEndHour === 'number') ? data.windowEndHour : orderConfig.windowEndHour,
+        discountPercent: (typeof data.discountPercent === 'number') ? data.discountPercent : orderConfig.discountPercent
       };
     }
     renderOrderTimingSettingsForm();
     renderSheetCatalogSubscriber();
     renderGirlsAdminSheetCatalog();
+    renderBoysAdminSheetCatalog();
   }));
 
   // print-batch counters — one doc per business date, tracking which batch number new orders
@@ -1153,6 +1306,7 @@ function startListeners() {
     renderExpenses();
     renderSummary();
     renderGirlsAdminPanel();
+    renderBoysAdminPanel();
   }));
 
   // login accounts — treasurer-only tab; lets the treasurer create/manage accounts without
@@ -1219,6 +1373,7 @@ function startListeners() {
     renderSheetCatalogTreasurer();
     renderSheetCatalogSubscriber();
     renderGirlsAdminSheetCatalog();
+    renderBoysAdminSheetCatalog();
   }));
 
   // sheet print orders — each subscriber can create their own; treasurer/girls-admin see everyone's
@@ -1232,6 +1387,7 @@ function startListeners() {
     renderStudents();        // sheet cost is now part of personal charge
     renderSubscriberPanel();
     renderGirlsAdminPanel();
+    renderBoysAdminPanel();
     renderSummary();         // sheet cost must also count toward the admin's Total Expense/Balance cards
     window.maybeAutoDownloadReceiversPDF();
   }));
@@ -1494,6 +1650,10 @@ function renderSummary() {
   document.getElementById('sum-donation').textContent = "৳" + totalDonation.toFixed(2);
   document.getElementById('sum-expense').textContent = "৳" + totalExpense.toFixed(2);
   document.getElementById('sum-balance').textContent = "৳" + balance.toFixed(2);
+  const pendingReceiveEl = document.getElementById('dashboard-pending-receive-count');
+  if (pendingReceiveEl) {
+    pendingReceiveEl.textContent = String(sheetOrdersData.filter(o => o.printed && !o.received).length);
+  }
   renderGenderSummary();
 }
 
@@ -1686,13 +1846,16 @@ function renderSheetCatalogSubscriber() {
           if (ordered) cardClasses.push('ordered');
           else if (!canOrder) cardClasses.push('locked');
           const hasCardNo = s.cardNo !== null && s.cardNo !== undefined && s.cardNo !== '';
+          const dPrice = discountedPrice(s.price || 0);
+          const hasDiscount = dPrice < (s.price || 0) - 0.001;
           return `
             <label class="${cardClasses.join(' ')}">
+              ${hasDiscount ? `<span class="sc-discount-ribbon">${orderConfig.discountPercent}% ছাড়</span>` : ''}
               <input type="checkbox" class="sheet-check" value="${s.id}" ${ordered ? 'checked' : ''} ${disabled ? 'disabled' : ''} onchange="onSheetCheckChange(this)">
               <span class="sc-subject">${g.subject}${hasCardNo ? ' · কার্ড #' + s.cardNo : ''}</span>
               <span class="sc-title">${s.title}</span>
               ${s.pages ? `<span class="sc-meta"><span>📄 ${s.pages} পেজ</span><span>${sheetBreakdownLabel(s.pages)}</span></span>` : ''}
-              <span class="sc-price num">৳${(s.price || 0).toFixed(2)}</span>
+              <span class="sc-price-row num">${hasDiscount ? `<span class="sc-price-old">৳${(s.price || 0).toFixed(2)}</span>` : ''}<span class="sc-price-new">৳${dPrice.toFixed(2)}</span></span>
               ${ordered ? '<span class="sc-badge">✓ অর্ডার করা হয়েছে</span>' : ''}
             </label>`;
         }).join('')}
@@ -1718,7 +1881,7 @@ function updateSheetOrderSummary() {
   if (!countEl || !totalEl) return;
   const checkedIds = Array.from(document.querySelectorAll('.sheet-check:checked:not(:disabled)')).map(cb => cb.value);
   const chosen = sheetsData.filter(s => checkedIds.includes(s.id));
-  const total = chosen.reduce((a, s) => a + (s.price || 0), 0);
+  const total = chosen.reduce((a, s) => a + discountedPrice(s.price || 0), 0);
   countEl.textContent = String(chosen.length);
   totalEl.textContent = '৳' + total.toFixed(2);
 }
@@ -1822,14 +1985,21 @@ function applyReceivedFilters(orders, dateSelectEl, sheetSelectEl, dateFilter, s
 // first" on every tick, so the instant someone checked a box the whole list reshuffled under
 // their finger and they'd end up mis-tapping a *different* row right after. Sorting only by
 // date/sheet/name keeps every row's position fixed regardless of its checked state.
-function renderGroupedReceivedChecklist(orders, tbodyId, showGenderCol) {
+function renderGroupedReceivedChecklist(orders, tbodyId, showGenderCol, pendingOnly, countElId) {
   const tbody = document.getElementById(tbodyId);
   if (!tbody) return;
   const colspan = showGenderCol ? 4 : 3;
-  if (!orders.length) {
-    tbody.innerHTML = `<tr><td colspan="${colspan}" class="activity-meta">এই তারিখ/শিটের জন্য কোনো প্রিন্ট-সম্পন্ন অর্ডার পাওয়া যায়নি — অন্য তারিখ বা শিট বেছে নিন, অথবা "সব তারিখ" / "সব শিট" রাখুন।</td></tr>`;
+  const totalPendingCount = orders.filter(o => !o.received).length;
+  if (countElId) {
+    const countEl = document.getElementById(countElId);
+    if (countEl) countEl.textContent = totalPendingCount > 0 ? `${totalPendingCount} জন এখনও বুঝে পাননি` : (orders.length ? 'সবাই বুঝে পেয়েছে ✓' : '');
+  }
+  const visibleOrders = pendingOnly ? orders.filter(o => !o.received) : orders;
+  if (!visibleOrders.length) {
+    tbody.innerHTML = `<tr><td colspan="${colspan}" class="activity-meta">${pendingOnly ? 'চমৎকার — বাছাইকৃত তালিকায় সবাই ইতিমধ্যে বুঝে পেয়েছে।' : 'এই তারিখ/শিটের জন্য কোনো প্রিন্ট-সম্পন্ন অর্ডার পাওয়া যায়নি — অন্য তারিখ বা শিট বেছে নিন, অথবা "সব তারিখ" / "সব শিট" রাখুন।'}</td></tr>`;
     return;
   }
+  orders = visibleOrders;
   const sorted = [...orders].sort((a, b) => {
     const dcmp = (b.businessDate || '').localeCompare(a.businessDate || ''); // newest batch first
     if (dcmp !== 0) return dcmp;
@@ -1966,8 +2136,14 @@ function renderSheetOrdersTreasurer() {
   );
   currentReceivedDateFilter = effectiveDateFilter;
   currentReceivedSheetFilter = effectiveSheetFilter;
-  renderGroupedReceivedChecklist(receivedFiltered, 'order-received-body', true);
+  renderGroupedReceivedChecklist(receivedFiltered, 'order-received-body', true, treasurerPendingOnly, 'treasurer-pending-count');
 }
+
+window.onTreasurerPendingOnlyToggle = () => {
+  const el = document.getElementById('treasurer-pending-only-toggle');
+  treasurerPendingOnly = el ? el.checked : false;
+  renderSheetOrdersTreasurer();
+};
 
 // Wrappers so inline onclick (which runs outside module scope) can reach the
 // module-scoped currentOrderDateFilter variable safely.
@@ -2112,11 +2288,14 @@ function renderGirlsAdminSheetCatalog() {
   box.innerHTML = sheetsData.map(s => {
     const ordered = myOrderedIds.has(s.id);
     const disabled = ordered || !windowOpen;
+    const dPrice = discountedPrice(s.price || 0);
+    const hasDiscount = dPrice < (s.price || 0) - 0.001;
     return `
       <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.9rem;${!windowOpen && !ordered ? 'opacity:.55;' : ''}">
         <input type="checkbox" class="girls-admin-sheet-check" value="${s.id}" ${ordered ? 'checked' : ''} ${disabled ? 'disabled' : ''} style="width:16px;height:16px;">
         <span style="flex:1;">${s.title}</span>
-        <span class="num" style="color:var(--ink-soft);">৳${(s.price || 0).toFixed(2)}</span>
+        ${hasDiscount ? `<span class="activity-meta" style="text-decoration:line-through;">৳${(s.price || 0).toFixed(2)}</span>` : ''}
+        <span class="num" style="color:var(--ink-soft);">৳${dPrice.toFixed(2)}</span>
         ${ordered ? '<span class="activity-meta" style="color:var(--green);">✓ অর্ডার করা হয়েছে</span>' : ''}
       </label>`;
   }).join('');
@@ -2149,7 +2328,8 @@ window.confirmGirlsAdminPersonalOrder = async () => {
       personal: true,
       sheetId: s.id,
       sheetTitle: s.title,
-      price: s.price,
+      price: discountedPrice(s.price || 0),
+      originalPrice: s.price || 0,
       orderedAt: serverTimestamp(),
       businessDate,
       batchSeq,
@@ -2199,8 +2379,14 @@ function renderGirlsAdminPanel() {
   );
   currentGirlsReceivedDateFilter = gDateF;
   currentGirlsReceivedSheetFilter = gSheetF;
-  renderGroupedReceivedChecklist(girlsReceivedFiltered, 'girls-received-body', false);
+  renderGroupedReceivedChecklist(girlsReceivedFiltered, 'girls-received-body', false, girlsPendingOnly, 'girls-pending-count');
 }
+
+window.onGirlsPendingOnlyToggle = () => {
+  const el = document.getElementById('girls-pending-only-toggle');
+  girlsPendingOnly = el ? el.checked : false;
+  renderGirlsAdminPanel();
+};
 
 window.onGirlsReceivedDateFilterChange = () => {
   const sel = document.getElementById('girls-received-date-select');
@@ -2212,6 +2398,208 @@ window.onGirlsReceivedSheetFilterChange = () => {
   const sel = document.getElementById('girls-received-sheet-select');
   currentGirlsReceivedSheetFilter = sel ? sel.value : 'all';
   renderGirlsAdminPanel();
+};
+
+// ============ BOYS (ছেলেদের) ADMIN DASHBOARD — mirrors the girls-admin logic above, scoped to gender:'male' ============
+function getBoysTotals() {
+  const maleStudents = students.filter(s => s.gender === 'male');
+  const totalCollected = maleStudents.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
+  return { count: maleStudents.length, totalCollected };
+}
+
+function renderBoysAdminStudentRows() {
+  const tbody = document.getElementById('boys-admin-student-body');
+  if (!tbody) return;
+  const maleStudents = students.filter(s => s.gender === 'male');
+  if (!maleStudents.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="activity-meta">এখনো কোনো ছেলে সাবস্ক্রাইবার যোগ করা হয়নি।</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = maleStudents.map(s => {
+    const amt = (collectionsData[s.roll] || {}).amount || 0;
+    return `
+    <tr data-name="${(s.name || '').toLowerCase()}" data-roll="${s.roll}">
+      <td class="num">${s.roll}</td>
+      <td>${s.name}</td>
+      <td class="num">৳${amt.toFixed(2)}</td>
+      <td>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="number" class="coll-input" id="boys-pay-${s.roll}" placeholder="৳ পরিমাণ" style="width:90px;" onkeydown="if(event.key==='Enter'){addPaymentBoysAdmin(${s.roll});}">
+          <button class="btn btn-outline" style="padding:7px 10px;font-size:.78rem;white-space:nowrap;" onclick="addPaymentBoysAdmin(${s.roll})">+ যোগ করুন</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.filterBoysAdminStudents = () => {
+  const q = document.getElementById('boys-admin-student-search').value.trim().toLowerCase();
+  document.querySelectorAll('#boys-admin-student-body tr').forEach(tr => {
+    if (!tr.dataset.name) return;
+    const match = tr.dataset.name.includes(q) || tr.dataset.roll.includes(q);
+    tr.style.display = match ? "" : "none";
+  });
+};
+
+window.addPaymentBoysAdmin = async (roll) => {
+  const student = students.find(s => s.roll === roll);
+  if (!student || student.gender !== 'male') { alert("শুধু ছেলে সাবস্ক্রাইবারের জমা এখান থেকে যোগ করা যাবে।"); return; }
+  const input = document.getElementById(`boys-pay-${roll}`);
+  const amt = parseFloat(input ? input.value : "");
+  if (!amt || amt <= 0) { alert("সঠিক পরিমাণ লিখুন।"); return; }
+  try {
+    await addDoc(collection(db, "payments"), {
+      roll, amount: amt, addedBy: currentTreasurerName, addedAt: serverTimestamp()
+    });
+    await addDoc(collection(db, "activity"), {
+      type: "payment", actor: currentTreasurerName,
+      detail: `${student.name} (Roll ${roll}) থেকে ৳${amt.toFixed(2)} নতুন জমা যোগ হয়েছে (ছেলেদের এডমিন)`,
+      amount: amt, createdAt: serverTimestamp()
+    });
+    if (input) input.value = "";
+  } catch (e) {
+    alert("জমা যোগ করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
+};
+
+// Boys admin: his own personal sheet catalog — selecting & confirming here never charges
+// any subscriber (order docs are created with roll: null, personal: true)
+function renderBoysAdminSheetCatalog() {
+  const box = document.getElementById('boys-admin-sheet-select-list');
+  if (!box || currentUserRole !== 'chele_admin') return;
+  const uid = auth.currentUser ? auth.currentUser.uid : null;
+  const myOrderedIds = new Set(sheetOrdersData.filter(o => o.personal && o.orderedByUid === uid).map(o => o.sheetId));
+  const windowOpen = isWithinOrderWindow();
+
+  const notice = document.getElementById('boys-order-window-notice');
+  if (notice) {
+    notice.classList.toggle('hidden', windowOpen);
+    if (!windowOpen) notice.textContent = '⏰ ' + orderWindowMessage();
+  }
+  const confirmBtn = document.getElementById('confirm-boys-order-btn');
+  if (confirmBtn) {
+    confirmBtn.disabled = !windowOpen;
+    confirmBtn.style.opacity = windowOpen ? '1' : '.55';
+    confirmBtn.style.cursor = windowOpen ? 'pointer' : 'not-allowed';
+  }
+
+  if (!sheetsData.length) {
+    box.innerHTML = `<div class="activity-meta">এখনো কোনো লেকচার শিট যোগ করা হয়নি।</div>`;
+    return;
+  }
+  box.innerHTML = sheetsData.map(s => {
+    const ordered = myOrderedIds.has(s.id);
+    const disabled = ordered || !windowOpen;
+    const dPrice = discountedPrice(s.price || 0);
+    const hasDiscount = dPrice < (s.price || 0) - 0.001;
+    return `
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.9rem;${!windowOpen && !ordered ? 'opacity:.55;' : ''}">
+        <input type="checkbox" class="boys-admin-sheet-check" value="${s.id}" ${ordered ? 'checked' : ''} ${disabled ? 'disabled' : ''} style="width:16px;height:16px;">
+        <span style="flex:1;">${s.title}</span>
+        ${hasDiscount ? `<span class="activity-meta" style="text-decoration:line-through;">৳${(s.price || 0).toFixed(2)}</span>` : ''}
+        <span class="num" style="color:var(--ink-soft);">৳${dPrice.toFixed(2)}</span>
+        ${ordered ? '<span class="activity-meta" style="color:var(--green);">✓ অর্ডার করা হয়েছে</span>' : ''}
+      </label>`;
+  }).join('');
+}
+
+window.confirmBoysAdminPersonalOrder = async () => {
+  if (currentUserRole !== 'chele_admin') return;
+  if (!isWithinOrderWindow()) { alert('⏰ ' + orderWindowMessage()); renderBoysAdminSheetCatalog(); return; }
+  const uid = auth.currentUser ? auth.currentUser.uid : null;
+  const alreadyOrderedIds = new Set(sheetOrdersData.filter(o => o.personal && o.orderedByUid === uid).map(o => o.sheetId));
+  const checked = Array.from(document.querySelectorAll('.boys-admin-sheet-check:checked'))
+    .map(cb => cb.value)
+    .filter(id => !alreadyOrderedIds.has(id));
+  if (!checked.length) { alert("অর্ডার করার জন্য নতুন কোনো শিট বাছাই করা হয়নি।"); return; }
+
+  const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
+  const names = chosenSheets.map(s => s.title).join(', ');
+  const businessDate = currentBusinessDateKey();
+  const cutoffNote = isPastCutoffNow()
+    ? `\n\n⏰ ${formatHourLabel(orderConfig.cutoffHour)} পার হয়ে গেছে, তাই এই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`
+    : `\n\nএই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`;
+  if (!confirm(`নিচের শিটগুলো আপনার ব্যক্তিগত অর্ডার হিসেবে বসাতে চান? এতে কোনো সাবস্ক্রাইবারের হিসাব থেকে টাকা কাটা হবে না।\n\n${names}${cutoffNote}`)) return;
+
+  const batchSeq = currentBatchSeqFor(businessDate);
+  try {
+    await Promise.all(chosenSheets.map(s => addDoc(collection(db, "sheetOrders"), {
+      roll: null,
+      studentName: currentTreasurerName + " (ছেলেদের এডমিন)",
+      gender: null,
+      personal: true,
+      sheetId: s.id,
+      sheetTitle: s.title,
+      price: discountedPrice(s.price || 0),
+      originalPrice: s.price || 0,
+      orderedAt: serverTimestamp(),
+      businessDate,
+      batchSeq,
+      printed: false, printedAt: null, printedBy: null,
+      received: false, receivedAt: null, receivedBy: null,
+      addedBy: currentTreasurerName,
+      orderedByUid: uid
+    })));
+  } catch (e) {
+    alert("শিট অর্ডার করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
+};
+
+// Boys admin: his own personal order history
+function renderBoysAdminMyOrders() {
+  const tbody = document.getElementById('boys-admin-my-orders-body');
+  if (!tbody || currentUserRole !== 'chele_admin') return;
+  const uid = auth.currentUser ? auth.currentUser.uid : null;
+  const mine = sheetOrdersData.filter(o => o.personal && o.orderedByUid === uid);
+  tbody.innerHTML = mine.map(o => {
+    const t = o.orderedAt && o.orderedAt.toDate ? o.orderedAt.toDate().toLocaleDateString('en-US') : '...';
+    const batch = o.businessDate ? formatBusinessDateLabel(o.businessDate) : '—';
+    const status = o.received
+      ? '<span style="color:var(--green);font-weight:600;">✓ গৃহীত</span>'
+      : (o.printed ? '<span style="color:var(--gold);font-weight:600;">প্রিন্ট সম্পন্ন</span>' : '<span class="activity-meta">পেন্ডিং</span>');
+    return `<tr><td class="activity-meta">${t}</td><td>${o.sheetTitle}</td><td class="num">৳${(o.price || 0).toFixed(2)} <span class="activity-meta">(চার্জবিহীন)</span></td><td class="activity-meta">${batch}</td><td>${status}</td></tr>`;
+  }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো কোনো ব্যক্তিগত শিট অর্ডার করা হয়নি।</td></tr>`;
+}
+
+function renderBoysAdminPanel() {
+  if (currentUserRole !== 'chele_admin') return;
+  const { count, totalCollected } = getBoysTotals();
+  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setText('boys-count', count);
+  setText('boys-total-collected', "৳" + totalCollected.toFixed(2));
+
+  renderBoysAdminStudentRows();
+  renderBoysAdminSheetCatalog();
+  renderBoysAdminMyOrders();
+
+  const printedBoysOrders = sheetOrdersData.filter(o => o.gender === 'male' && o.printed);
+  const boysDateSel = document.getElementById('boys-received-date-select');
+  const boysSheetSel = document.getElementById('boys-received-sheet-select');
+  const { filtered: boysReceivedFiltered, effectiveDateFilter: bDateF, effectiveSheetFilter: bSheetF } = applyReceivedFilters(
+    printedBoysOrders, boysDateSel, boysSheetSel,
+    currentBoysReceivedDateFilter, currentBoysReceivedSheetFilter
+  );
+  currentBoysReceivedDateFilter = bDateF;
+  currentBoysReceivedSheetFilter = bSheetF;
+  renderGroupedReceivedChecklist(boysReceivedFiltered, 'boys-received-body', false, boysPendingOnly, 'boys-pending-count');
+}
+
+window.onBoysPendingOnlyToggle = () => {
+  const el = document.getElementById('boys-pending-only-toggle');
+  boysPendingOnly = el ? el.checked : false;
+  renderBoysAdminPanel();
+};
+
+window.onBoysReceivedDateFilterChange = () => {
+  const sel = document.getElementById('boys-received-date-select');
+  currentBoysReceivedDateFilter = sel ? sel.value : 'all';
+  currentBoysReceivedSheetFilter = 'all';
+  renderBoysAdminPanel();
+};
+window.onBoysReceivedSheetFilterChange = () => {
+  const sel = document.getElementById('boys-received-sheet-select');
+  currentBoysReceivedSheetFilter = sel ? sel.value : 'all';
+  renderBoysAdminPanel();
 };
 
 // ============ ORDERS PDF (treasurer) ============
@@ -2445,7 +2833,11 @@ window.onExpenseChargeTypeChange = () => {
 
 // ============ LOGIN ACCOUNTS (treasurer creates/manages users directly from the app) ============
 function roleLabel(role) {
-  return role === 'subscriber' ? 'Subscriber' : (role === 'girls_admin' ? 'মেয়েদের এডমিন' : (role === 'treasurer' ? 'Treasurer' : 'Pending'));
+  if (role === 'subscriber') return 'Subscriber';
+  if (role === 'girls_admin') return 'মেয়েদের এডমিন';
+  if (role === 'chele_admin') return 'ছেলেদের এডমিন';
+  if (role === 'treasurer') return 'Treasurer';
+  return 'Pending';
 }
 
 function renderNewUserRollOptions() {
@@ -2591,6 +2983,7 @@ function recomputeCollections() {
   renderStudents();
   renderSummary();
   renderGirlsAdminPanel();
+  renderBoysAdminPanel();
 }
 
 window.addPayment = async (roll) => {
@@ -2692,13 +3085,16 @@ function renderOrderTimingSettingsForm() {
   const s = document.getElementById('cfg-window-start');
   const e = document.getElementById('cfg-window-end');
   const c = document.getElementById('cfg-cutoff');
+  const dsc = document.getElementById('cfg-discount');
   // Don't stomp on whatever the treasurer is actively typing.
   if (s && document.activeElement !== s) s.value = orderConfig.windowStartHour;
   if (e && document.activeElement !== e) e.value = orderConfig.windowEndHour;
   if (c && document.activeElement !== c) c.value = orderConfig.cutoffHour;
+  if (dsc && document.activeElement !== dsc) dsc.value = orderConfig.discountPercent || 0;
   const preview = document.getElementById('cfg-preview');
   if (preview) {
-    preview.textContent = `এখন অর্ডার নেওয়া হচ্ছে ${formatHourLabel(orderConfig.windowStartHour)} থেকে ${formatHourLabel(orderConfig.windowEndHour)} পর্যন্ত। ${formatHourLabel(orderConfig.cutoffHour)}-এর পরের অর্ডার পরের দিনের ব্যাচে যোগ হবে।`;
+    const discountNote = (orderConfig.discountPercent > 0) ? ` বর্তমানে সবার জন্য ${orderConfig.discountPercent}% ডিসকাউন্ট চালু আছে।` : '';
+    preview.textContent = `এখন অর্ডার নেওয়া হচ্ছে ${formatHourLabel(orderConfig.windowStartHour)} থেকে ${formatHourLabel(orderConfig.windowEndHour)} পর্যন্ত। ${formatHourLabel(orderConfig.cutoffHour)}-এর পরের অর্ডার পরের দিনের ব্যাচে যোগ হবে।${discountNote}`;
   }
 }
 
@@ -2706,6 +3102,8 @@ window.saveOrderTimingSettings = async () => {
   const start = parseInt(document.getElementById('cfg-window-start').value, 10);
   const end = parseInt(document.getElementById('cfg-window-end').value, 10);
   const cutoff = parseInt(document.getElementById('cfg-cutoff').value, 10);
+  const discountRaw = document.getElementById('cfg-discount').value;
+  const discountPercent = discountRaw === '' ? 0 : parseFloat(discountRaw);
   if ([start, end, cutoff].some(v => isNaN(v) || v < 0 || v > 23)) {
     alert("প্রতিটি ঘণ্টা অবশ্যই ০ থেকে ২৩ এর মধ্যে একটি সংখ্যা হতে হবে।");
     return;
@@ -2714,9 +3112,13 @@ window.saveOrderTimingSettings = async () => {
     alert("অর্ডার শুরুর সময় অবশ্যই শেষ সময়ের আগে হতে হবে।");
     return;
   }
+  if (isNaN(discountPercent) || discountPercent < 0 || discountPercent > 100) {
+    alert("ডিসকাউন্ট অবশ্যই ০ থেকে ১০০ এর মধ্যে একটি সংখ্যা হতে হবে।");
+    return;
+  }
   try {
     await setDoc(doc(db, "settings", "orderConfig"), {
-      windowStartHour: start, windowEndHour: end, cutoffHour: cutoff,
+      windowStartHour: start, windowEndHour: end, cutoffHour: cutoff, discountPercent,
       updatedBy: currentTreasurerName, updatedAt: serverTimestamp()
     }, { merge: true });
     alert("অর্ডার সময়সূচী সংরক্ষণ করা হয়েছে।");
@@ -2746,6 +3148,7 @@ window.cancelSheetEdit = () => {
   document.getElementById('new-sheet-pages').value = "";
   document.getElementById('new-sheet-subject').value = "";
   document.getElementById('new-sheet-card').value = "";
+  document.getElementById('new-sheet-custom-price').value = "";
   window.updateNewSheetPricePreview();
   const btn = document.getElementById('add-sheet-btn');
   const cancelBtn = document.getElementById('cancel-sheet-edit-btn');
@@ -2764,6 +3167,12 @@ window.editSheet = (id) => {
   document.getElementById('new-sheet-subject').value = s.subject || "";
   document.getElementById('new-sheet-card').value = (s.cardNo !== null && s.cardNo !== undefined) ? s.cardNo : "";
   window.updateNewSheetPricePreview();
+  // If this sheet's saved price doesn't match the auto-calculated price for its page count,
+  // it was manually overridden earlier — show that custom value so editing doesn't silently
+  // reset it back to the auto price.
+  const autoPrice = computeSheetPrice(s.pages);
+  document.getElementById('new-sheet-custom-price').value =
+    (typeof s.price === 'number' && Math.abs(s.price - autoPrice) > 0.001) ? s.price : "";
   const btn = document.getElementById('add-sheet-btn');
   const cancelBtn = document.getElementById('cancel-sheet-edit-btn');
   if (btn) btn.textContent = '✓ পরিবর্তন সংরক্ষণ করুন';
@@ -2779,7 +3188,10 @@ window.addSheet = async () => {
   const pages = parseInt(document.getElementById('new-sheet-pages').value, 10);
   if (!title) { alert("শিটের নাম লিখুন।"); return; }
   if (!pages || pages <= 0) { alert("সঠিক পেজ সংখ্যা লিখুন।"); return; }
-  const price = computeSheetPrice(pages);
+  const customPriceRaw = document.getElementById('new-sheet-custom-price').value;
+  const customPrice = customPriceRaw !== '' ? parseFloat(customPriceRaw) : null;
+  if (customPrice !== null && (isNaN(customPrice) || customPrice < 0)) { alert("কাস্টম দাম সঠিক একটি সংখ্যা হতে হবে।"); return; }
+  const price = (customPrice !== null) ? customPrice : computeSheetPrice(pages);
   try {
     if (editingSheetId) {
       await updateDoc(doc(db, "sheets", editingSheetId), {
@@ -2826,8 +3238,12 @@ window.confirmSheetOrders = async () => {
   if (!checked.length) { alert("অর্ডার করার জন্য নতুন কোনো শিট বাছাই করা হয়নি।"); return; }
 
   const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
-  const total = chosenSheets.reduce((a, s) => a + (s.price || 0), 0);
-  const names = chosenSheets.map(s => `${s.title} (৳${s.price.toFixed(2)})`).join(', ');
+  const total = chosenSheets.reduce((a, s) => a + discountedPrice(s.price || 0), 0);
+  const names = chosenSheets.map(s => {
+    const dPrice = discountedPrice(s.price || 0);
+    const hasDiscount = dPrice < (s.price || 0) - 0.001;
+    return hasDiscount ? `${s.title} (৳${dPrice.toFixed(2)}, আগে ৳${s.price.toFixed(2)})` : `${s.title} (৳${dPrice.toFixed(2)})`;
+  }).join(', ');
   const businessDate = currentBusinessDateKey();
   const cutoffNote = isPastCutoffNow()
     ? `\n\n⏰ ${formatHourLabel(orderConfig.cutoffHour)} পার হয়ে গেছে, তাই এই অর্ডারটি আজকের নয় — ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`
@@ -2844,7 +3260,8 @@ window.confirmSheetOrders = async () => {
       gender: (student && student.gender) || 'unspecified',
       sheetId: s.id,
       sheetTitle: s.title,
-      price: s.price,
+      price: discountedPrice(s.price || 0),
+      originalPrice: s.price || 0,
       orderedAt: serverTimestamp(),
       businessDate,
       batchSeq,
