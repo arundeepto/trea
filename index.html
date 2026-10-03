@@ -174,7 +174,6 @@
 </head>
 <body>
 
-<!-- ============ AUTH SCREEN ============ -->
 <div id="auth-screen" class="auth-screen hidden">
   <div class="auth-card">
     <div class="auth-stamp"><div class="stamp">৳</div></div>
@@ -250,13 +249,11 @@
 
   <div class="nav-bar" id="nav-bar"></div>
 
-  <!-- SUBSCRIBER-ONLY: Due warning banner -->
   <div class="panel subscriber-only hidden" id="subscriber-due-warning" data-tab="dashboard" style="background:var(--red-bg);border-color:var(--red);color:var(--red);display:none;">
     <strong>⚠️ আপনার বকেয়া বেশি!</strong>
     <span id="subscriber-due-warning-text" style="font-size:.85rem;"></span>
   </div>
 
-  <!-- SUBSCRIBER-ONLY: personal account panel -->
   <div class="panel subscriber-only hidden" id="subscriber-account-panel" data-tab="dashboard">
     <h2>আপনার হিসাব</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 12px;" id="subscriber-account-sub">—</p>
@@ -281,10 +278,9 @@
     </div>
   </div>
 
-  <!-- SUBSCRIBER-ONLY: lecture sheet ordering -->
   <div class="panel subscriber-only hidden" data-tab="sheets">
     <h2>লেকচার শিট</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">যে শিটগুলো প্রিন্ট করাতে চান, নিচ থেকে বেছে নিয়ে কনফার্ম করুন। কনফার্ম করার সাথে সাথেই দাম আপনার হিসাব থেকে ব্যক্তিগত চার্জ হিসেবে কেটে নেওয়া হবে। <strong>অর্ডার শুধু ট্রেজারারের ঠিক করা সময়সীমার মধ্যে দেওয়া যায়</strong> (নিচে দেখুন)।</p>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">যে শিটগুলো প্রিন্ট করাতে চান, নিচ থেকে বেছে নিয়ে কনফার্ম করুন। কনফার্ম করার সাথে সাথেই দাম আপনার হিসাব থেকে ব্যক্তিগত চার্জ হিসেবে কেটে নেওয়া হবে। <strong>অর্ডার শুধু ট্রেজারারের ঠিক করা সময়সীমার মধ্যে দেওয়া যায়</strong>।</p>
     <div id="order-window-notice" class="hidden" style="background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:.85rem;margin-bottom:12px;font-weight:600;"></div>
     <div class="sheet-order-toolbar">
       <div class="sheet-search-box"><input type="text" id="sheet-search-input" placeholder="শিটের নাম দিয়ে খুঁজুন..." oninput="renderSheetCatalogSubscriber()"></div>
@@ -304,7 +300,6 @@
     </div>
   </div>
 
-  <!-- GIRLS-ADMIN-ONLY: dashboard -->
   <div class="panel girls-admin-only hidden" id="girls-admin-panel" data-tab="dashboard">
     <h2>মেয়েদের হিসাব — সংক্ষিপ্ত</h2>
     <div class="summary-grid" style="margin-bottom:10px;">
@@ -606,7 +601,7 @@
         <select id="order-date-select" onchange="onOrderDateFilterChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
       </div>
       <div class="btn-row" style="margin-top:0;">
-        <button class="btn btn-outline" onclick="downloadCurrentBatchPDF()">📄 এই ব্যাচের অর্ডার PDF</button>
+        <button class="btn btn-outline" onclick="downloadCurrentBatchPDF()">📄 এই ব্যাচের অর্ডার PDF (সাদা-কালো)</button>
         <button class="btn btn-gold" id="mark-printed-btn" onclick="markCurrentBatchPrinted()">✓ প্রিন্ট সম্পন্ন চিহ্নিত করুন</button>
       </div>
     </div>
@@ -637,8 +632,8 @@
         <select id="received-sheet-select" onchange="onReceivedSheetFilterChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
       </div>
       <div class="btn-row" style="margin-top:0;">
-        <button class="btn btn-outline" onclick="downloadReceiversPDF()">📄 কে কোন সিট রিসিভ করবে — PDF</button>
-        <button class="btn btn-outline" onclick="downloadTodayReceiversPDF()">🔄 আজকের রিসিভার লিস্ট ডাউনলোড</button>
+        <button class="btn btn-outline" onclick="downloadReceiversPDF()">📄 কে কোন সিট রিসিভ করবে (সাদা-কালো)</button>
+        <button class="btn btn-outline" onclick="downloadTodayReceiversPDF()">🔄 আজকের রিসিভার লিস্ট (সাদা-কালো)</button>
       </div>
     </div>
     <div class="pending-toggle-row">
@@ -701,7 +696,6 @@ import {
   query, orderBy, limit, serverTimestamp, where, getDocs, getDoc, increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ============ Firebase Config ============
 const firebaseConfig = {
   apiKey: "AIzaSyCuT_E8UUdBmftYGcVa7nxww6fUE1WBuak",
   authDomain: "tree-d26aa.firebaseapp.com",
@@ -715,7 +709,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ============ state ============
 let students = [];
 let collectionsData = {};
 let legacyCollectionsData = {};
@@ -728,6 +721,7 @@ let sheetOrdersData = [];
 let usersData = [];
 let currentTreasurerName = "";
 let currentUserRole = "treasurer";
+let currentUserGender = null;
 let currentSubscriberRoll = null;
 let currentOrderDateFilter = null;
 let currentActiveTab = null;
@@ -744,7 +738,6 @@ let batchCountersData = {};
 
 let orderConfig = { cutoffHour: 15, windowStartHour: 10, windowEndHour: 17, discountPercent: 0 };
 
-// ⭐ DUE LIMIT — ২০ টাকা (আগে ৭০ ছিল)
 const DUE_ORDER_BLOCK_LIMIT = 20;
 
 function discountedPrice(basePrice) {
@@ -826,7 +819,6 @@ setInterval(() => {
   else if (currentUserRole === 'treasurer') window.maybeAutoDownloadReceiversPDF();
 }, 60000);
 
-// ============ AUTH ============
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
   el.textContent = msg;
@@ -895,7 +887,7 @@ window.doRegister = async () => {
   try {
     const studentDoc = await getDoc(doc(db, "students", roll.toString()));
     if (!studentDoc.exists()) {
-      throw new Error(`Roll ${roll} এখনো Treasurer যোগ করেননি। আগে Treasurer-কে বলে আপনার নাম ও Roll যোগ করিয়ে নিন।`);
+      throw new Error(`Roll ${roll} এখনো Treasurer যোগ করেননি।`);
     }
     const student = studentDoc.data();
 
@@ -906,6 +898,7 @@ window.doRegister = async () => {
 
     await setDoc(doc(db, "users", cred.user.uid), {
       role: 'subscriber', roll, name: student.name, email,
+      gender: student.gender || null,
       createdAt: serverTimestamp(), addedBy: 'self-registration'
     });
 
@@ -930,6 +923,7 @@ function stampInitials(name) {
 
 async function applyLoggedInUser(user) {
   let role = "pending", roll = null, name = user.displayName || user.email;
+  let adminGender = null;
   try {
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (userDoc.exists()) {
@@ -937,12 +931,15 @@ async function applyLoggedInUser(user) {
       role = data.role || "pending";
       roll = data.roll || null;
       name = data.name || name;
+      // ⭐ Girls Admin সবসময় মেয়ে, Boys Admin সবসময় ছেলে
+      adminGender = data.gender || (role === 'girls_admin' ? 'female' : (role === 'chele_admin' ? 'male' : null));
     }
   } catch (e) {}
 
   currentUserRole = role;
   currentSubscriberRoll = roll;
   currentTreasurerName = name;
+  currentUserGender = adminGender;
 
   document.getElementById('auth-screen').classList.add('hidden');
 
@@ -1041,7 +1038,6 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// ============ PERFORMANCE: share cache + debounce ============
 let _shareCache = null;
 let _shareCacheKey = "";
 let _recomputeTimer = null;
@@ -1107,7 +1103,6 @@ function scheduleRecompute() {
   }, 300);
 }
 
-// ============ FIRESTORE LISTENERS ============
 let listenersStarted = false;
 let activeUnsubscribes = [];
 
@@ -1302,7 +1297,6 @@ function stopListeners() {
   invalidateShareCache();
 }
 
-// ============ SUBSCRIBER MANAGEMENT ============
 window.addStudent = async () => {
   const name = document.getElementById('new-student-name').value.trim();
   const roll = parseInt(document.getElementById('new-student-roll').value);
@@ -1335,7 +1329,6 @@ window.deleteStudent = async (roll) => {
   } catch (e) {}
 };
 
-// ============ RENDERING ============
 function renderStudentRows() {
   const tbody = document.getElementById('student-body');
   if (!tbody) return;
@@ -1481,7 +1474,6 @@ function renderSubscriberPanel() {
   const personalCharge = getPersonalCharge(roll);
   const remaining = amount - equalShare - personalCharge;
 
-  // ⭐ Due warning banner
   const warnEl = document.getElementById('subscriber-due-warning');
   const warnText = document.getElementById('subscriber-due-warning-text');
   if (warnEl && warnText) {
@@ -1559,10 +1551,13 @@ function renderGenderSummary() {
   };
   const boys = getGenderTotals('male');
   const girls = getGenderTotals('female');
-  setText('boys-count-admin', boys.count);
+  // ⭐ Girls Admin নিজেও মেয়ে হিসেবে গণ্য হবে +1
+  const girlsDisplayCount = girls.count + ((currentUserRole === 'girls_admin') ? 1 : 0);
+  const boysDisplayCount = boys.count + ((currentUserRole === 'chele_admin') ? 1 : 0);
+  setText('boys-count-admin', boysDisplayCount);
   setText('boys-collected-admin', "৳" + boys.totalCollected.toFixed(2));
   setBalance('boys-balance-admin', boys.totalBalance);
-  setText('girls-count-admin', girls.count);
+  setText('girls-count-admin', girlsDisplayCount);
   setText('girls-collected-admin', "৳" + girls.totalCollected.toFixed(2));
   setBalance('girls-balance-admin', girls.totalBalance);
 }
@@ -1622,7 +1617,6 @@ function renderActivity() {
   }).join('') || `<div class="activity-meta">No activity yet.</div>`;
 }
 
-// ============ LECTURE SHEETS ============
 function getGroupedSheets(list) {
   const FALLBACK = 'সাধারণ';
   const groups = {};
@@ -2042,11 +2036,12 @@ window.toggleOrderReceived = async (orderId, checkboxEl) => {
   }
 };
 
-// ============ GIRLS ADMIN ============
 function getGirlsTotals() {
   const femaleStudents = students.filter(s => s.gender === 'female');
   const totalCollected = femaleStudents.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
-  return { count: femaleStudents.length, totalCollected };
+  // ⭐ Girls Admin নিজেও count হবে
+  const adminIncluded = currentUserRole === 'girls_admin' ? 1 : 0;
+  return { count: femaleStudents.length + adminIncluded, totalCollected };
 }
 
 function renderGirlsAdminStudentRows() {
@@ -2162,7 +2157,7 @@ window.confirmGirlsAdminPersonalOrder = async () => {
     await Promise.all(chosenSheets.map(s => addDoc(collection(db, "sheetOrders"), {
       roll: null,
       studentName: currentTreasurerName + " (মেয়েদের এডমিন)",
-      gender: null,
+      gender: 'female',
       personal: true,
       sheetId: s.id,
       sheetTitle: s.title,
@@ -2237,11 +2232,11 @@ window.onGirlsReceivedSheetFilterChange = () => {
   renderGirlsAdminPanel();
 };
 
-// ============ BOYS ADMIN ============
 function getBoysTotals() {
   const maleStudents = students.filter(s => s.gender === 'male');
   const totalCollected = maleStudents.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
-  return { count: maleStudents.length, totalCollected };
+  const adminIncluded = currentUserRole === 'chele_admin' ? 1 : 0;
+  return { count: maleStudents.length + adminIncluded, totalCollected };
 }
 
 function renderBoysAdminStudentRows() {
@@ -2357,7 +2352,7 @@ window.confirmBoysAdminPersonalOrder = async () => {
     await Promise.all(chosenSheets.map(s => addDoc(collection(db, "sheetOrders"), {
       roll: null,
       studentName: currentTreasurerName + " (ছেলেদের এডমিন)",
-      gender: null,
+      gender: 'male',
       personal: true,
       sheetId: s.id,
       sheetTitle: s.title,
@@ -2432,7 +2427,7 @@ window.onBoysReceivedSheetFilterChange = () => {
   renderBoysAdminPanel();
 };
 
-// ============ PDFs ============
+// ⭐ PDF — SIMPLE, LOW-INK (সাদা-কালো)
 window.downloadOrdersPDF = (batchKey) => {
   if (!batchKey) return;
   const { businessDate, seq } = parseBatchKey(batchKey);
@@ -2443,10 +2438,15 @@ window.downloadOrdersPDF = (batchKey) => {
   const doc = new jsPDF();
   const now = new Date();
 
-  doc.setFontSize(16); doc.setTextColor(30, 41, 59);
-  doc.text(`Sheet Print Orders — ${formatBusinessDateLabel(businessDate)} (Batch ${seq})`, 14, 18);
-  doc.setFontSize(9); doc.setTextColor(100, 116, 139);
-  doc.text(`Treasurer: ${currentTreasurerName}   |   Generated: ${now.toLocaleString()}`, 14, 24);
+  // কালি সাশ্রয়: সব কালো, ছোট ফন্ট, compact layout
+  doc.setFontSize(14); doc.setTextColor(0, 0, 0);
+  doc.setFont(undefined, 'bold');
+  doc.text(`Sheet Print Orders`, 14, 16);
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(10);
+  doc.text(`${formatBusinessDateLabel(businessDate)}  |  Batch ${seq}`, 14, 22);
+  doc.setFontSize(8); doc.setTextColor(80, 80, 80);
+  doc.text(`Treasurer: ${currentTreasurerName}   |   ${now.toLocaleString()}`, 14, 27);
 
   const groups = {};
   orders.forEach(o => {
@@ -2459,32 +2459,40 @@ window.downloadOrdersPDF = (batchKey) => {
   const groupList = Object.values(groups).sort((a, b) => b.total - a.total);
 
   doc.autoTable({
-    startY: 30,
-    head: [["Sheet", "Total Copies", "Boys", "Girls"]],
+    startY: 32,
+    head: [["Sheet", "Total", "Boys", "Girls"]],
     body: groupList.map(g => [g.title, String(g.total), String(g.boys), String(g.girls)]),
-    theme: "grid", headStyles: { fillColor: [30, 41, 59] }, styles: { fontSize: 10, halign: "center" },
-    columnStyles: { 0: { halign: "left" } }
+    theme: "grid",
+    headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontSize: 9, fontStyle: 'bold' },
+    bodyStyles: { textColor: [0, 0, 0], fontSize: 9 },
+    styles: { halign: "center", lineColor: [150, 150, 150], lineWidth: 0.2 },
+    columnStyles: { 0: { halign: "left" } },
+    alternateRowStyles: { fillColor: [250, 250, 250] }
   });
 
   const totalCopies = orders.length;
   const totalBoys = groupList.reduce((a, g) => a + g.boys, 0);
   const totalGirls = groupList.reduce((a, g) => a + g.girls, 0);
-  const finalY = doc.lastAutoTable.finalY + 12;
-  doc.setFontSize(10); doc.setTextColor(30, 41, 59);
+  const finalY = doc.lastAutoTable.finalY + 8;
+  doc.setFontSize(10); doc.setTextColor(0, 0, 0);
+  doc.setFont(undefined, 'bold');
   doc.text(`Total Copies: ${totalCopies}   |   Boys: ${totalBoys}   |   Girls: ${totalGirls}`, 14, finalY);
 
   doc.save(`Sheet_Orders_${businessDate}_batch${seq}.pdf`);
 };
 
+// ⭐ Receivers PDF — LOW-INK
 function buildReceiversPDF(orders, titleText, filenameSuffix) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   const now = new Date();
 
-  doc.setFontSize(16); doc.setTextColor(30, 41, 59);
-  doc.text(titleText, 14, 18);
-  doc.setFontSize(9); doc.setTextColor(100, 116, 139);
-  doc.text(`Treasurer: ${currentTreasurerName}   |   Generated: ${now.toLocaleString()}`, 14, 24);
+  doc.setFontSize(14); doc.setTextColor(0, 0, 0);
+  doc.setFont(undefined, 'bold');
+  doc.text(titleText, 14, 16);
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(8); doc.setTextColor(80, 80, 80);
+  doc.text(`Treasurer: ${currentTreasurerName}   |   ${now.toLocaleString()}`, 14, 21);
 
   function buildRows(list) {
     const sorted = [...list].sort((a, b) => {
@@ -2506,23 +2514,38 @@ function buildReceiversPDF(orders, titleText, filenameSuffix) {
   const boys = orders.filter(o => o.gender === 'male');
   const girls = orders.filter(o => o.gender === 'female');
 
-  doc.setFontSize(12); doc.setTextColor(11, 132, 218);
-  doc.text(`Boys (${boys.length})`, 14, 34);
+  // Boys section — plain black header
+  doc.setFontSize(11); doc.setTextColor(0, 0, 0);
+  doc.setFont(undefined, 'bold');
+  doc.text(`Boys (${boys.length})`, 14, 30);
+  doc.setFont(undefined, 'normal');
+
   doc.autoTable({
-    startY: 38,
-    head: [["Batch Date", "Sheet", "Name", "Roll", "Status"]],
+    startY: 33,
+    head: [["Date", "Sheet", "Name", "Roll", "Status"]],
     body: boys.length ? buildRows(boys) : [["-", "-", "No orders", "-", "-"]],
-    theme: "grid", headStyles: { fillColor: [11, 132, 218] }, styles: { fontSize: 8 }
+    theme: "grid",
+    headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontSize: 8, fontStyle: 'bold' },
+    bodyStyles: { textColor: [0, 0, 0], fontSize: 8 },
+    styles: { lineColor: [150, 150, 150], lineWidth: 0.2, cellPadding: 1.5 },
+    alternateRowStyles: { fillColor: [250, 250, 250] }
   });
 
-  const afterBoysY = doc.lastAutoTable.finalY + 12;
-  doc.setFontSize(12); doc.setTextColor(217, 119, 6);
+  const afterBoysY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(11); doc.setTextColor(0, 0, 0);
+  doc.setFont(undefined, 'bold');
   doc.text(`Girls (${girls.length})`, 14, afterBoysY);
+  doc.setFont(undefined, 'normal');
+
   doc.autoTable({
-    startY: afterBoysY + 4,
-    head: [["Batch Date", "Sheet", "Name", "Roll", "Status"]],
+    startY: afterBoysY + 3,
+    head: [["Date", "Sheet", "Name", "Roll", "Status"]],
     body: girls.length ? buildRows(girls) : [["-", "-", "No orders", "-", "-"]],
-    theme: "grid", headStyles: { fillColor: [217, 119, 6] }, styles: { fontSize: 8 }
+    theme: "grid",
+    headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontSize: 8, fontStyle: 'bold' },
+    bodyStyles: { textColor: [0, 0, 0], fontSize: 8 },
+    styles: { lineColor: [150, 150, 150], lineWidth: 0.2, cellPadding: 1.5 },
+    alternateRowStyles: { fillColor: [250, 250, 250] }
   });
 
   doc.save(`Sheet_Receivers_${filenameSuffix}.pdf`);
@@ -2630,7 +2653,6 @@ window.onExpenseChargeTypeChange = () => {
   if (type === 'multiple') renderExpenseMultiTargetOptions();
 };
 
-// ============ LOGIN ACCOUNTS ============
 function roleLabel(role) {
   if (role === 'subscriber') return 'Subscriber';
   if (role === 'girls_admin') return 'মেয়েদের এডমিন';
@@ -2678,7 +2700,9 @@ window.addUserAccount = async () => {
   try {
     const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
     await setDoc(doc(db, "users", cred.user.uid), {
-      role, roll, name, email, createdAt: serverTimestamp(), addedBy: currentTreasurerName
+      role, roll, name, email,
+      gender: role === 'girls_admin' ? 'female' : (role === 'chele_admin' ? 'male' : null),
+      createdAt: serverTimestamp(), addedBy: currentTreasurerName
     });
     try { await signOut(secondaryAuth); } catch (_) {}
     alert(`✓ ${name} এর অ্যাকাউন্ট তৈরি হয়েছে এবং "${roleLabel(role)}" হিসেবে সক্রিয় করা হয়েছে।`);
@@ -2736,7 +2760,6 @@ window.filterStudents = () => {
   });
 };
 
-// ============ WRITES ============
 function recomputeCollections() {
   collectionsData = {};
   const rolls = new Set([
@@ -2868,7 +2891,6 @@ window.saveExpense = async () => {
   onExpenseChargeTypeChange();
 };
 
-// ============ ORDER TIMING SETTINGS ============
 function renderOrderTimingSettingsForm() {
   const s = document.getElementById('cfg-window-start');
   const e = document.getElementById('cfg-window-end');
@@ -2914,7 +2936,6 @@ window.saveOrderTimingSettings = async () => {
   }
 };
 
-// ============ LECTURE SHEETS (WRITES) ============
 window.updateNewSheetPricePreview = () => {
   const pages = parseInt(document.getElementById('new-sheet-pages').value, 10) || 0;
   const preview = document.getElementById('new-sheet-price-preview');
@@ -2998,12 +3019,10 @@ window.deleteSheet = async (id) => {
   }
 };
 
-// ⭐ SUBSCRIBER ORDER CONFIRM — Due limit 20 check with deposit alert
 window.confirmSheetOrders = async () => {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   if (!isWithinOrderWindow()) { alert('⏰ ' + orderWindowMessage()); renderSheetCatalogSubscriber(); return; }
 
-  // ⛔ DUE LIMIT CHECK — ২০ টাকার বেশি হলে alert
   if (isOrderBlockedByDue(currentSubscriberRoll)) {
     const remaining = getSubscriberRemaining(currentSubscriberRoll);
     const dueAmount = Math.abs(remaining).toFixed(2);
@@ -3064,7 +3083,6 @@ window.confirmSheetOrders = async () => {
   }
 };
 
-// ============ VOUCHER ============
 window.openVoucherModal = () => {
   const box = document.getElementById('voucher-box');
   document.getElementById('voucher-date').textContent = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -3085,7 +3103,6 @@ window.openVoucherModal = () => {
   });
 };
 
-// ============ FULL PDF REPORT ============
 window.downloadFullReport = () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -3097,24 +3114,25 @@ window.downloadFullReport = () => {
   const balance = totalCollection + totalDonation - totalExpense;
   const now = new Date();
 
-  doc.setFontSize(18); doc.setTextColor(30, 41, 59);
+  doc.setFontSize(16); doc.setTextColor(0, 0, 0);
   doc.text("Class Treasury Ledger — Report", 14, 18);
-  doc.setFontSize(10); doc.setTextColor(100, 116, 139);
-  doc.text(`Prepared by: ${currentTreasurerName}   |   Generated: ${now.toLocaleString()}`, 14, 25);
+  doc.setFontSize(9); doc.setTextColor(80, 80, 80);
+  doc.text(`Prepared by: ${currentTreasurerName}   |   ${now.toLocaleString()}`, 14, 24);
 
   doc.autoTable({
-    startY: 32,
-    head: [["Total Collection", "Total Fund", "Total Expense", "Balance in Hand", "Avg Per-student Share"]],
+    startY: 30,
+    head: [["Total Collection", "Total Fund", "Total Expense", "Balance in Hand", "Avg Share"]],
     body: [[
       `Tk ${totalCollection.toFixed(2)}`, `Tk ${totalDonation.toFixed(2)}`,
       `Tk ${totalExpense.toFixed(2)}`, `Tk ${balance.toFixed(2)}`, `Tk ${avgEqualShare.toFixed(2)}`
     ]],
     theme: "grid",
-    headStyles: { fillColor: [30, 41, 59] },
-    styles: { halign: "center", fontSize: 9 }
+    headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontSize: 9, fontStyle: 'bold' },
+    bodyStyles: { textColor: [0, 0, 0], fontSize: 9 },
+    styles: { halign: "center", lineColor: [150, 150, 150], lineWidth: 0.2 }
   });
 
-  doc.setFontSize(12); doc.setTextColor(30, 41, 59);
+  doc.setFontSize(11); doc.setTextColor(0, 0, 0);
   doc.text("Student Ledger", 14, doc.lastAutoTable.finalY + 10);
   const studentRows = students.map(s => {
     const amt = (collectionsData[s.roll] || {}).amount || 0;
@@ -3127,29 +3145,28 @@ window.downloadFullReport = () => {
     head: [["Roll", "Name", "Mobile", "Collected", "Due / Credit"]],
     body: studentRows,
     theme: "striped",
-    headStyles: { fillColor: [30, 41, 59] },
-    styles: { fontSize: 8 },
-    didParseCell: (data) => {
-      if (data.section === 'body' && data.column.index === 4) {
-        const txt = data.cell.raw;
-        data.cell.styles.textColor = txt.startsWith('-') ? [220, 38, 38] : [22, 163, 74];
-      }
-    }
+    headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontSize: 8, fontStyle: 'bold' },
+    bodyStyles: { textColor: [0, 0, 0], fontSize: 8 },
+    styles: { lineColor: [150, 150, 150], lineWidth: 0.2 },
+    alternateRowStyles: { fillColor: [250, 250, 250] }
   });
 
   if (donationsData.length) {
-    doc.setFontSize(12); doc.setTextColor(30, 41, 59);
+    doc.setFontSize(11); doc.setTextColor(0, 0, 0);
     doc.text("Fund", 14, doc.lastAutoTable.finalY + 10);
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 14,
       head: [["Contributor", "Amount", "Note", "Added By"]],
       body: donationsData.map(d => [d.donorName || "Anonymous", `Tk ${d.amount.toFixed(2)}`, d.note || "-", d.addedBy || "-"]),
-      theme: "grid", headStyles: { fillColor: [217, 119, 6] }, styles: { fontSize: 8 }
+      theme: "grid",
+      headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontSize: 8, fontStyle: 'bold' },
+      bodyStyles: { textColor: [0, 0, 0], fontSize: 8 },
+      styles: { lineColor: [150, 150, 150], lineWidth: 0.2 }
     });
   }
 
   if (expensesData.length) {
-    doc.setFontSize(12); doc.setTextColor(30, 41, 59);
+    doc.setFontSize(11); doc.setTextColor(0, 0, 0);
     doc.text("Expenses", 14, doc.lastAutoTable.finalY + 10);
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 14,
@@ -3159,19 +3176,18 @@ window.downloadFullReport = () => {
         e.chargeType === 'individual' ? `${e.targetName || 'Roll ' + e.targetRoll} (personal)` : "All (equal split)",
         e.addedBy || "-"
       ]),
-      theme: "grid", headStyles: { fillColor: [220, 38, 38] }, styles: { fontSize: 8 }
+      theme: "grid",
+      headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontSize: 8, fontStyle: 'bold' },
+      bodyStyles: { textColor: [0, 0, 0], fontSize: 8 },
+      styles: { lineColor: [150, 150, 150], lineWidth: 0.2 }
     });
   }
 
-  const finalY = doc.lastAutoTable.finalY + 20;
-  doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.8);
-  doc.circle(30, finalY, 12);
-  doc.setFontSize(9); doc.setTextColor(37, 99, 235);
-  doc.text("Tk", 27, finalY + 2);
-  doc.setFontSize(9); doc.setTextColor(30, 41, 59);
-  doc.text(`Verified by: ${currentTreasurerName}`, 48, finalY - 2);
-  doc.setFontSize(8); doc.setTextColor(100, 116, 139);
-  doc.text(`Generated on ${now.toLocaleDateString()}`, 48, finalY + 4);
+  const finalY = doc.lastAutoTable.finalY + 15;
+  doc.setFontSize(9); doc.setTextColor(0, 0, 0);
+  doc.text(`Verified by: ${currentTreasurerName}`, 14, finalY);
+  doc.setFontSize(8); doc.setTextColor(80, 80, 80);
+  doc.text(`Generated on ${now.toLocaleDateString()}`, 14, finalY + 5);
 
   doc.save(`Treasury_Report_${now.toISOString().slice(0,10)}.pdf`);
 };
