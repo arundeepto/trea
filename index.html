@@ -45,69 +45,28 @@
   a{color:inherit;}
   ::selection{background:#CFE0FF;}
   :focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
-
-  /* ---------- shell ---------- */
   .wrap{max-width:1080px;margin:0 auto;padding:24px 16px 64px;}
   .hidden{display:none !important;}
-
-  /* ---------- header ---------- */
-  .masthead{
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
-    padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid var(--line-strong);
-    flex-wrap:wrap;
-  }
+  .masthead{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid var(--line-strong);flex-wrap:wrap;}
   .masthead h1{margin:0;font-size:1.5rem;font-weight:700;}
   .masthead .sub{color:var(--ink-soft);font-size:.82rem;margin-top:2px;}
   .stamp-wrap{display:flex;align-items:center;gap:10px;}
-  .stamp{
-    width:40px;height:40px;border-radius:50%;
-    background:linear-gradient(135deg, var(--accent), var(--accent-2));color:#fff;
-    display:flex;align-items:center;justify-content:center;
-    font-weight:700;font-size:.95rem;flex:none;
-    box-shadow:0 3px 10px rgba(11,132,218,0.3);
-  }
+  .stamp{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, var(--accent), var(--accent-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex:none;box-shadow:0 3px 10px rgba(11,132,218,0.3);}
   .who{line-height:1.25;text-align:right;}
   .who .name{font-weight:600;font-size:.9rem;}
   .who .role{font-size:.72rem;color:var(--ink-soft);}
-  .logout-btn{
-    background:none;border:1px solid var(--line-strong);color:var(--ink-soft);
-    padding:6px 12px;border-radius:6px;font-size:.8rem;cursor:pointer;
-  }
+  .logout-btn{background:none;border:1px solid var(--line-strong);color:var(--ink-soft);padding:6px 12px;border-radius:6px;font-size:.8rem;cursor:pointer;}
   .logout-btn:hover{background:var(--bg);}
-
-  /* ---------- nav bar (per-role dashboard tabs) ---------- */
-  .nav-bar{
-    position:sticky;top:0;z-index:20;
-    display:flex;gap:6px;overflow-x:auto;
-    background:var(--bg);padding:10px 0 14px;margin-bottom:6px;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none;
-  }
+  .nav-bar{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow-x:auto;background:var(--bg);padding:10px 0 14px;margin-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
   .nav-bar::-webkit-scrollbar{display:none;}
-  .nav-tab-btn{
-    flex:none;padding:9px 16px;border-radius:999px;border:1px solid var(--line-strong);
-    background:var(--panel);color:var(--ink-soft);font-family:inherit;font-size:.85rem;
-    font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s ease;
-  }
+  .nav-tab-btn{flex:none;padding:9px 16px;border-radius:999px;border:1px solid var(--line-strong);background:var(--panel);color:var(--ink-soft);font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s ease;}
   .nav-tab-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .nav-tab-btn.active{
-    background:linear-gradient(135deg, var(--accent), var(--accent-2));
-    border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(11,132,218,0.35);
-  }
+  .nav-tab-btn.active{background:linear-gradient(135deg, var(--accent), var(--accent-2));border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(11,132,218,0.35);}
   .tab-inactive{display:none !important;}
-
-  /* ---------- cards ---------- */
-  .panel{
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px;
-    transition:box-shadow .15s ease;
-  }
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px;transition:box-shadow .15s ease;}
   .panel h2{font-size:1rem;margin:0 0 12px;font-weight:600;letter-spacing:-.01em;}
-
   .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
-  .sum-card{
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    padding:14px 16px;box-shadow:var(--shadow);transition:box-shadow .15s ease;
-  }
+  .sum-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);transition:box-shadow .15s ease;}
   .sum-card:hover{box-shadow:0 4px 16px rgba(15,23,42,0.1);}
   .sum-card .label{font-size:.72rem;color:var(--ink-soft);}
   .sum-card .val{font-size:1.3rem;font-weight:700;margin-top:4px;}
@@ -115,21 +74,12 @@
   .sum-card.red .val{color:var(--red);}
   .sum-card.gold .val{color:var(--gold);}
   @media (max-width:720px){.summary-grid{grid-template-columns:repeat(2,1fr);}}
-
-  /* ---------- forms ---------- */
   .field-row{display:flex;gap:10px;flex-wrap:wrap;}
   .field{flex:1;min-width:140px;}
   label{font-size:.78rem;color:var(--ink-soft);display:block;margin-bottom:4px;}
-  input[type=text],input[type=number],input[type=email],input[type=password],input[type=tel]{
-    width:100%;padding:9px 12px;border:1px solid var(--line-strong);border-radius:8px;
-    background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);
-    transition:border-color .15s ease, box-shadow .15s ease;
-  }
+  input[type=text],input[type=number],input[type=email],input[type=password],input[type=tel]{width:100%;padding:9px 12px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);transition:border-color .15s ease, box-shadow .15s ease;}
   input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
-  .btn{
-    border:none;border-radius:9px;padding:10px 16px;font-size:.88rem;font-weight:600;
-    cursor:pointer;transition:background-color .15s ease, opacity .1s ease, transform .1s ease, box-shadow .15s ease;
-  }
+  .btn{border:none;border-radius:9px;padding:10px 16px;font-size:.88rem;font-weight:600;cursor:pointer;transition:background-color .15s ease, opacity .1s ease, transform .1s ease, box-shadow .15s ease;}
   .btn:active{opacity:.85;transform:translateY(1px);}
   .btn:disabled{cursor:not-allowed;}
   .btn-primary{background:linear-gradient(135deg, var(--accent), var(--accent-2));color:#fff;box-shadow:0 3px 10px rgba(11,132,218,0.3);}
@@ -140,88 +90,43 @@
   .btn-outline:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);}
   .btn-sm{padding:6px 12px;font-size:.78rem;border-radius:7px;}
   .btn-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
-
-  /* ---------- table ---------- */
   .table-scroll{overflow-x:auto;}
   table.ledger{width:100%;border-collapse:collapse;font-size:.88rem;}
-  table.ledger thead th{
-    text-align:left;font-weight:600;font-size:.72rem;
-    color:var(--ink-soft);border-bottom:1px solid var(--line-strong);padding:8px 10px;white-space:nowrap;
-  }
+  table.ledger thead th{text-align:left;font-weight:600;font-size:.72rem;color:var(--ink-soft);border-bottom:1px solid var(--line-strong);padding:8px 10px;white-space:nowrap;}
   table.ledger tbody td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
   table.ledger tbody tr:hover{background:var(--bg);}
   .due-pos{color:var(--green);font-weight:600;}
   .due-neg{color:var(--red);font-weight:600;}
   .coll-input{width:100px;}
   .search-box{max-width:280px;margin-bottom:12px;}
-  .icon-btn{
-    background:none;border:1px solid var(--line-strong);border-radius:6px;
-    padding:4px 9px;font-size:.78rem;cursor:pointer;color:var(--red);
-  }
+  .icon-btn{background:none;border:1px solid var(--line-strong);border-radius:6px;padding:4px 9px;font-size:.78rem;cursor:pointer;color:var(--red);}
   .icon-btn:hover{background:var(--red-bg);}
   .icon-btn.edit{color:var(--accent);}
   .icon-btn.edit:hover{background:var(--accent-bg);border-color:var(--accent);}
-
-  /* ---------- activity ---------- */
-  .activity-item{
-    display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.85rem;
-  }
+  .activity-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.85rem;}
   .activity-item:last-child{border-bottom:none;}
   .activity-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;}
   .activity-dot.pay{background:var(--green);}
   .activity-dot.don{background:var(--gold);}
   .activity-dot.exp{background:var(--red);}
   .activity-meta{color:var(--ink-soft);font-size:.75rem;}
-
-  /* ---------- auth screen ---------- */
-  .auth-screen{
-    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
-    background:radial-gradient(circle at 50% 0%, #DDEFFC 0%, var(--bg) 65%);
-  }
-  .auth-card{
-    background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);
-    border:1px solid var(--line-strong);border-radius:18px;
-    box-shadow:0 12px 40px rgba(11,132,218,0.14);padding:36px 30px;max-width:380px;width:100%;
-  }
+  .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 0%, #DDEFFC 0%, var(--bg) 65%);}
+  .auth-card{background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);border:1px solid var(--line-strong);border-radius:18px;box-shadow:0 12px 40px rgba(11,132,218,0.14);padding:36px 30px;max-width:380px;width:100%;}
   .auth-card h1{font-size:1.3rem;margin:0 0 4px;text-align:center;font-weight:700;letter-spacing:-.01em;}
   .auth-card .sub{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-bottom:22px;}
-  .auth-info{background:var(--green-bg);color:#166534;border:1px solid var(--green);border-radius:8px;padding:10px 12px;font-size:.82rem;line-height:1.5;margin-bottom:14px;}
-  .auth-forgot{text-align:right;margin:-8px 0 14px;font-size:.8rem;}
-  .auth-forgot a{color:var(--accent);cursor:pointer;font-weight:600;}
-  .auth-forgot a:hover{text-decoration:underline;}
   .auth-toggle{text-align:center;margin-top:16px;font-size:.85rem;color:var(--ink-soft);}
   .auth-toggle a{color:var(--accent);cursor:pointer;font-weight:600;text-decoration:none;}
   .auth-toggle a:hover{text-decoration:underline;}
-  .auth-error{
-    background:var(--red-bg);color:var(--red);border-radius:8px;padding:9px 12px;
-    font-size:.82rem;margin-bottom:14px;
-  }
+  .auth-error{background:var(--red-bg);color:var(--red);border-radius:8px;padding:9px 12px;font-size:.82rem;margin-bottom:14px;}
   .auth-stamp{display:flex;justify-content:center;margin-bottom:18px;}
-  .auth-stamp .stamp{
-    width:54px;height:54px;font-size:1.2rem;
-    background:linear-gradient(135deg, var(--accent), var(--accent-2));
-    box-shadow:0 6px 18px rgba(11,132,218,0.4);
-  }
-
+  .auth-stamp .stamp{width:54px;height:54px;font-size:1.2rem;background:linear-gradient(135deg, var(--accent), var(--accent-2));box-shadow:0 6px 18px rgba(11,132,218,0.4);}
   #voucher-box{display:none;}
-
-  /* ---------- sheet order (subscriber) ---------- */
   .sheet-order-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
   .sheet-search-box{flex:1;min-width:180px;position:relative;}
   .sheet-search-box input{padding-left:34px;}
-  .sheet-search-box::before{
-    content:"🔍";position:absolute;left:11px;top:50%;transform:translateY(-50%);
-    font-size:.8rem;opacity:.6;pointer-events:none;
-  }
-  .sheet-grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:8px;
-  }
-  .sheet-card{
-    position:relative;border:2px solid var(--line-strong);border-radius:16px;
-    padding:20px 20px 16px;background:#fff;cursor:pointer;
-    transition:border-color .15s ease, box-shadow .15s ease, transform .1s ease;
-    display:flex;flex-direction:column;gap:10px;min-height:150px;
-  }
+  .sheet-search-box::before{content:"🔍";position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:.8rem;opacity:.6;pointer-events:none;}
+  .sheet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:8px;}
+  .sheet-card{position:relative;border:2px solid var(--line-strong);border-radius:16px;padding:20px 20px 16px;background:#fff;cursor:pointer;transition:border-color .15s ease, box-shadow .15s ease, transform .1s ease;display:flex;flex-direction:column;gap:10px;min-height:150px;}
   .sheet-card:hover{border-color:var(--accent-2);box-shadow:0 6px 20px rgba(11,132,218,0.14);}
   .sheet-card:active{transform:translateY(1px);}
   .sheet-card.checked{border-color:var(--accent);background:var(--accent-bg);box-shadow:0 6px 20px rgba(11,132,218,0.18);}
@@ -229,58 +134,27 @@
   .sheet-card.locked{opacity:.5;cursor:not-allowed;}
   .sheet-card input[type=checkbox]{position:absolute;top:16px;right:16px;width:22px;height:22px;accent-color:var(--accent);cursor:pointer;}
   .sheet-card.ordered input[type=checkbox]{accent-color:var(--green);}
-  .sheet-card .sc-subject{
-    font-size:.72rem;font-weight:700;letter-spacing:.02em;color:var(--accent);
-    text-transform:uppercase;padding-right:28px;
-  }
+  .sheet-card .sc-subject{font-size:.72rem;font-weight:700;letter-spacing:.02em;color:var(--accent);text-transform:uppercase;padding-right:28px;}
   .sheet-card .sc-title{font-weight:700;font-size:1.08rem;padding-right:28px;line-height:1.35;}
   .sheet-card .sc-meta{font-size:.78rem;color:var(--ink-soft);display:flex;gap:10px;flex-wrap:wrap;}
   .sheet-card .sc-price{font-size:1.3rem;font-weight:700;color:var(--accent);margin-top:auto;}
   .sheet-card.ordered .sc-price{color:var(--green);}
-  .sheet-card .sc-badge{
-    align-self:flex-start;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:999px;
-    background:var(--green);color:#fff;
-  }
-  .sheet-order-summary{
-    position:sticky;bottom:0;z-index:5;
-    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    background:var(--panel);border:1px solid var(--line-strong);border-radius:12px;
-    padding:12px 16px;margin-top:14px;box-shadow:0 -4px 16px rgba(15,23,42,0.08);
-  }
+  .sheet-card .sc-badge{align-self:flex-start;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--green);color:#fff;}
+  .sheet-order-summary{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line-strong);border-radius:12px;padding:12px 16px;margin-top:14px;box-shadow:0 -4px 16px rgba(15,23,42,0.08);}
   .sheet-order-summary .sos-text{font-size:.88rem;color:var(--ink-soft);}
   .sheet-order-summary .sos-total{font-size:1.15rem;font-weight:700;color:var(--ink);margin-left:6px;}
-  .sheet-order-empty{
-    text-align:center;padding:28px 12px;color:var(--ink-soft);font-size:.88rem;
-    border:1.5px dashed var(--line-strong);border-radius:12px;
-  }
+  .sheet-order-empty{text-align:center;padding:28px 12px;color:var(--ink-soft);font-size:.88rem;border:1.5px dashed var(--line-strong);border-radius:12px;}
   .sheet-subject-section{margin-bottom:20px;}
   .sheet-subject-section:last-child{margin-bottom:0;}
-  .sheet-subject-heading{
-    display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:700;color:var(--ink);
-    margin:0 0 10px;padding-bottom:6px;border-bottom:2px solid var(--accent-bg);
-  }
-  .sheet-subject-heading .ssh-count{
-    font-size:.7rem;font-weight:600;color:var(--ink-soft);background:var(--accent-bg);
-    padding:2px 9px;border-radius:999px;
-  }
-
-  /* ---------- e-commerce style extras: discount ribbon, strikethrough price, pending toggle ---------- */
+  .sheet-subject-heading{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:700;color:var(--ink);margin:0 0 10px;padding-bottom:6px;border-bottom:2px solid var(--accent-bg);}
+  .sheet-subject-heading .ssh-count{font-size:.7rem;font-weight:600;color:var(--ink-soft);background:var(--accent-bg);padding:2px 9px;border-radius:999px;}
   .sheet-card{overflow:hidden;}
-  .sheet-card .sc-discount-ribbon{
-    position:absolute;top:14px;left:-32px;transform:rotate(-45deg);
-    background:linear-gradient(135deg, var(--red), #F87171);color:#fff;
-    font-size:.66rem;font-weight:700;padding:3px 34px;box-shadow:0 2px 6px rgba(0,0,0,.15);
-    letter-spacing:.02em;
-  }
+  .sheet-card .sc-discount-ribbon{position:absolute;top:14px;left:-32px;transform:rotate(-45deg);background:linear-gradient(135deg, var(--red), #F87171);color:#fff;font-size:.66rem;font-weight:700;padding:3px 34px;box-shadow:0 2px 6px rgba(0,0,0,.15);letter-spacing:.02em;}
   .sc-price-row{display:flex;align-items:baseline;gap:8px;margin-top:auto;}
   .sc-price-old{font-size:.85rem;color:var(--ink-soft);text-decoration:line-through;opacity:.75;}
   .sc-price-new{font-size:1.3rem;font-weight:700;color:var(--accent);}
   .sheet-card.ordered .sc-price-new{color:var(--green);}
-
-  .pending-toggle-row{
-    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;
-    background:var(--accent-bg);border:1px solid var(--line-strong);border-radius:10px;padding:10px 14px;
-  }
+  .pending-toggle-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;background:var(--accent-bg);border:1px solid var(--line-strong);border-radius:10px;padding:10px 14px;}
   .pending-toggle-row .ptr-count{font-weight:700;color:var(--accent);}
   .switch{position:relative;display:inline-block;width:40px;height:22px;flex:none;}
   .switch input{opacity:0;width:0;height:0;}
@@ -289,12 +163,9 @@
   .switch input:checked + .slider{background:var(--accent);}
   .switch input:checked + .slider::before{transform:translateX(18px);}
   .switch-label{font-size:.86rem;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;}
-
   .price-input-row{display:flex;gap:8px;align-items:center;}
   #new-sheet-custom-price{max-width:130px;}
   .price-hint{font-size:.72rem;color:var(--ink-soft);margin-top:4px;}
-
-  /* nicer product-catalog feel for the whole shell */
   .panel:hover{box-shadow:0 6px 22px rgba(15,23,42,0.1);}
   .sum-card{position:relative;}
   .sum-card::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;background:linear-gradient(90deg, var(--accent), var(--accent-2));opacity:.0;transition:opacity .15s ease;}
@@ -309,11 +180,8 @@
     <div class="auth-stamp"><div class="stamp">৳</div></div>
     <h1>Arundeepto Printers</h1>
     <div class="sub">Treasury Login</div>
-
     <div id="auth-error" class="auth-error hidden"></div>
-    <div id="auth-info" class="auth-info hidden"></div>
 
-    <!-- LOGIN FORM -->
     <div id="login-form">
       <div class="field" style="margin-bottom:10px;">
         <label>Email</label>
@@ -323,23 +191,10 @@
         <label>Password</label>
         <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter'){doLogin();}">
       </div>
-      <div class="auth-forgot"><a onclick="showForgotForm()">পাসওয়ার্ড ভুলে গেছেন? (Forgot password?)</a></div>
       <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Log In</button>
       <div class="auth-toggle">Subscriber, first time here? <a onclick="showRegisterForm()">Register with your Roll</a></div>
     </div>
 
-    <!-- FORGOT PASSWORD FORM -->
-    <div id="forgot-form" class="hidden">
-      <p style="color:var(--ink-soft);font-size:.8rem;margin:-6px 0 14px;">আপনার রেজিস্টার করা ইমেইল দিন — আমরা পাসওয়ার্ড রিসেট করার লিংক পাঠিয়ে দেব।<br><b style="color:var(--gold);">⚠️ মেইল ইনবক্সে না পেলে অবশ্যই Spam / Junk ফোল্ডার চেক করুন</b> — রিসেট মেইল অনেক সময় সেখানেই জমা হয়।</p>
-      <div class="field" style="margin-bottom:16px;">
-        <label>Email</label>
-        <input type="email" id="forgot-email" placeholder="you@example.com" autocomplete="username" onkeydown="if(event.key==='Enter'){doForgotPassword();}">
-      </div>
-      <button class="btn btn-primary" style="width:100%;" id="forgot-btn" onclick="doForgotPassword()">রিসেট লিংক পাঠান</button>
-      <div class="auth-toggle"><a onclick="showLoginForm()">← Log in-এ ফিরে যান</a></div>
-    </div>
-
-    <!-- REGISTER FORM (subscriber self-registration — Treasurer must add Name + Roll first) -->
     <div id="register-form" class="hidden">
       <p style="color:var(--ink-soft);font-size:.8rem;margin:-6px 0 14px;">Treasurer আপনার নাম ও Roll যোগ করার পরই আপনি এখান থেকে নিজের ইমেইল ও পাসওয়ার্ড সেট করে অ্যাকাউন্ট চালু করতে পারবেন।</p>
       <div class="field" style="margin-bottom:10px;">
@@ -364,7 +219,6 @@
   </div>
 </div>
 
-<!-- ============ PENDING-APPROVAL SCREEN (shown if a signed-in account has no role assigned yet) ============ -->
 <div id="pending-screen" class="auth-screen hidden">
   <div class="auth-card" style="text-align:center;">
     <div class="auth-stamp"><div class="stamp">⏳</div></div>
@@ -377,7 +231,6 @@
   </div>
 </div>
 
-<!-- ============ MAIN APP ============ -->
 <div id="app" class="wrap hidden">
 
   <div class="masthead">
@@ -395,10 +248,15 @@
     </div>
   </div>
 
-  <!-- ============ NAV BAR: tabs differ per role, filled in by JS ============ -->
   <div class="nav-bar" id="nav-bar"></div>
 
-  <!-- ============ SUBSCRIBER-ONLY: personal account panel ============ -->
+  <!-- SUBSCRIBER-ONLY: Due warning banner -->
+  <div class="panel subscriber-only hidden" id="subscriber-due-warning" data-tab="dashboard" style="background:var(--red-bg);border-color:var(--red);color:var(--red);display:none;">
+    <strong>⚠️ আপনার বকেয়া বেশি!</strong>
+    <span id="subscriber-due-warning-text" style="font-size:.85rem;"></span>
+  </div>
+
+  <!-- SUBSCRIBER-ONLY: personal account panel -->
   <div class="panel subscriber-only hidden" id="subscriber-account-panel" data-tab="dashboard">
     <h2>আপনার হিসাব</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 12px;" id="subscriber-account-sub">—</p>
@@ -423,7 +281,7 @@
     </div>
   </div>
 
-  <!-- ============ SUBSCRIBER-ONLY: lecture sheet ordering ============ -->
+  <!-- SUBSCRIBER-ONLY: lecture sheet ordering -->
   <div class="panel subscriber-only hidden" data-tab="sheets">
     <h2>লেকচার শিট</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">যে শিটগুলো প্রিন্ট করাতে চান, নিচ থেকে বেছে নিয়ে কনফার্ম করুন। কনফার্ম করার সাথে সাথেই দাম আপনার হিসাব থেকে ব্যক্তিগত চার্জ হিসেবে কেটে নেওয়া হবে। <strong>অর্ডার শুধু ট্রেজারারের ঠিক করা সময়সীমার মধ্যে দেওয়া যায়</strong> (নিচে দেখুন)।</p>
@@ -446,7 +304,7 @@
     </div>
   </div>
 
-  <!-- ============ GIRLS-ADMIN-ONLY: dashboard ============ -->
+  <!-- GIRLS-ADMIN-ONLY: dashboard -->
   <div class="panel girls-admin-only hidden" id="girls-admin-panel" data-tab="dashboard">
     <h2>মেয়েদের হিসাব — সংক্ষিপ্ত</h2>
     <div class="summary-grid" style="margin-bottom:10px;">
@@ -455,7 +313,6 @@
     </div>
 
     <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট — মেয়েদের শিট</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">ট্রেজারার প্রিন্ট সম্পন্ন করার পর এখানে মেয়েদের শিট দেখা যাবে। নিচে তারিখ ও শিটের নাম বেছে নিয়ে শুধু সেই তালিকাটাই দেখুন — চাইলে "সব তারিখ" / "সব শিট" রেখে সম্পূর্ণ তালিকাও দেখা যাবে। যে সাবস্ক্রাইবার শিট বুঝে পেয়েছে, তার পাশে টিক দিন — এটাই রিসিভের রেকর্ড হিসেবে থেকে যাবে।</p>
     <div class="field-row" style="align-items:flex-end;margin-bottom:12px;">
       <div class="field" style="max-width:240px;">
         <label>তারিখ বাছাই করুন</label>
@@ -479,10 +336,8 @@
     </div>
   </div>
 
-  <!-- ============ GIRLS-ADMIN-ONLY: payments (female subscribers only) ============ -->
   <div class="panel girls-admin-only hidden" data-tab="payments">
     <h2>টাকা জমা যোগ করুন (শুধু মেয়ে সাবস্ক্রাইবার)</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখানে শুধু মেয়ে সাবস্ক্রাইবারদের তালিকা দেখা যাবে — তাদের জমা এখান থেকে যোগ করা যাবে।</p>
     <input type="text" class="search-box" id="girls-admin-student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজুন..." oninput="filterGirlsAdminStudents()">
     <div class="table-scroll">
       <table class="ledger">
@@ -492,10 +347,8 @@
     </div>
   </div>
 
-  <!-- ============ GIRLS-ADMIN-ONLY: her own free personal sheet order ============ -->
   <div class="panel girls-admin-only hidden" data-tab="sheets">
     <h2>আপনার ব্যক্তিগত শিট অর্ডার</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এটা আপনার নিজের (এডমিনের) শিট অর্ডার — কোনো সাবস্ক্রাইবারের হিসাব থেকে এর দাম কাটা হবে না। <strong>অর্ডার শুধু ট্রেজারারের ঠিক করা সময়সীমার মধ্যে দেওয়া যায়</strong> (নিচে দেখুন)।</p>
     <div id="girls-order-window-notice" class="hidden" style="background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:.85rem;margin-bottom:12px;font-weight:600;"></div>
     <div id="girls-admin-sheet-select-list"></div>
     <div class="btn-row"><button class="btn btn-gold" id="confirm-girls-order-btn" onclick="confirmGirlsAdminPersonalOrder()">✓ নির্বাচিত শিট অর্ডার নিশ্চিত করুন</button></div>
@@ -508,7 +361,6 @@
     </div>
   </div>
 
-  <!-- ============ BOYS-ADMIN-ONLY: dashboard ============ -->
   <div class="panel boys-admin-only hidden" id="boys-admin-panel" data-tab="dashboard">
     <h2>ছেলেদের হিসাব — সংক্ষিপ্ত</h2>
     <div class="summary-grid" style="margin-bottom:10px;">
@@ -517,7 +369,6 @@
     </div>
 
     <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট — ছেলেদের শিট</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">ট্রেজারার প্রিন্ট সম্পন্ন করার পর এখানে ছেলেদের শিট দেখা যাবে। নিচে তারিখ ও শিটের নাম বেছে নিয়ে শুধু সেই তালিকাটাই দেখুন — চাইলে "সব তারিখ" / "সব শিট" রেখে সম্পূর্ণ তালিকাও দেখা যাবে। যে সাবস্ক্রাইবার শিট বুঝে পেয়েছে, তার পাশে টিক দিন — এটাই রিসিভের রেকর্ড হিসেবে থেকে যাবে।</p>
     <div class="field-row" style="align-items:flex-end;margin-bottom:12px;">
       <div class="field" style="max-width:240px;">
         <label>তারিখ বাছাই করুন</label>
@@ -541,10 +392,8 @@
     </div>
   </div>
 
-  <!-- ============ BOYS-ADMIN-ONLY: payments (male subscribers only) ============ -->
   <div class="panel boys-admin-only hidden" data-tab="payments">
     <h2>টাকা জমা যোগ করুন (শুধু ছেলে সাবস্ক্রাইবার)</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখানে শুধু ছেলে সাবস্ক্রাইবারদের তালিকা দেখা যাবে — তাদের জমা এখান থেকে যোগ করা যাবে।</p>
     <input type="text" class="search-box" id="boys-admin-student-search" placeholder="🔍 নাম বা রোল দিয়ে খুঁজুন..." oninput="filterBoysAdminStudents()">
     <div class="table-scroll">
       <table class="ledger">
@@ -554,10 +403,8 @@
     </div>
   </div>
 
-  <!-- ============ BOYS-ADMIN-ONLY: his own free personal sheet order ============ -->
   <div class="panel boys-admin-only hidden" data-tab="sheets">
     <h2>আপনার ব্যক্তিগত শিট অর্ডার</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এটা আপনার নিজের (এডমিনের) শিট অর্ডার — কোনো সাবস্ক্রাইবারের হিসাব থেকে এর দাম কাটা হবে না। <strong>অর্ডার শুধু ট্রেজারারের ঠিক করা সময়সীমার মধ্যে দেওয়া যায়</strong> (নিচে দেখুন)।</p>
     <div id="boys-order-window-notice" class="hidden" style="background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:.85rem;margin-bottom:12px;font-weight:600;"></div>
     <div id="boys-admin-sheet-select-list"></div>
     <div class="btn-row"><button class="btn btn-gold" id="confirm-boys-order-btn" onclick="confirmBoysAdminPersonalOrder()">✓ নির্বাচিত শিট অর্ডার নিশ্চিত করুন</button></div>
@@ -570,7 +417,6 @@
     </div>
   </div>
 
-  <!-- summary cards -->
   <div class="summary-grid treasurer-only" data-tab="dashboard">
     <div class="sum-card green"><div class="label">Subscriber Collection</div><div class="val num" id="sum-collection">৳0</div></div>
     <div class="sum-card gold"><div class="label">Fund</div><div class="val num" id="sum-donation">৳0</div></div>
@@ -578,7 +424,6 @@
     <div class="sum-card"><div class="label">Balance in Hand</div><div class="val num" id="sum-balance">৳0</div></div>
   </div>
 
-  <!-- gender-wise (boys / girls) summary — treasurer only -->
   <div class="panel treasurer-only" data-tab="dashboard">
     <h2>জেন্ডার অনুযায়ী হিসাব</h2>
     <div class="summary-grid" style="margin-bottom:0;">
@@ -591,26 +436,21 @@
     </div>
   </div>
 
-  <!-- quick glance: how many printed sheets are still not received -->
   <div class="panel treasurer-only" data-tab="dashboard">
     <h2>📥 প্রাপ্তি স্বীকার — এক নজরে</h2>
     <div class="summary-grid" style="margin-bottom:0;grid-template-columns:1fr;">
       <div class="sum-card gold"><div class="label">প্রিন্ট সম্পন্ন কিন্তু এখনও বুঝে পায়নি</div><div class="val num" id="dashboard-pending-receive-count">0</div></div>
     </div>
-    <p style="color:var(--ink-soft);font-size:.8rem;margin:10px 0 0;">বিস্তারিত তালিকা ও টিক দেওয়ার জন্য "📄 শিট ও অর্ডার" ট্যাবের "প্রাপ্তি স্বীকার" অংশে যান।</p>
   </div>
 
-  <!-- report buttons -->
   <div class="panel treasurer-only" data-tab="dashboard">
     <h2>Reports & Vouchers</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 6px;">Download the full statement as a PDF, or save an expense voucher as an image.</p>
     <div class="btn-row">
       <button class="btn btn-primary" onclick="downloadFullReport()">📄 Full PDF Report</button>
       <button class="btn btn-outline" onclick="openVoucherModal()">🧾 Expense Voucher (PNG)</button>
     </div>
   </div>
 
-  <!-- student management -->
   <div class="panel treasurer-only" data-tab="subscribers">
     <h2>Add Subscriber</h2>
     <div class="field-row">
@@ -628,10 +468,8 @@
     <div class="btn-row"><button class="btn btn-primary" onclick="addStudent()">Add Subscriber</button></div>
   </div>
 
-  <!-- login accounts (create + manage — replaces manual Firebase Console work) -->
   <div class="panel treasurer-only" data-tab="users">
     <h2>নতুন লগইন অ্যাকাউন্ট তৈরি করুন</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখান থেকেই Treasurer, মেয়েদের এডমিন, বা Subscriber-এর জন্য লগইন অ্যাকাউন্ট তৈরি করুন — Firebase Console-এ আলাদা করে কিছু করা লাগবে না।</p>
     <div class="field-row">
       <div class="field"><label>নাম</label><input type="text" id="new-user-name" placeholder="e.g. Rahim Uddin"></div>
       <div class="field"><label>ইমেইল</label><input type="email" id="new-user-email" placeholder="e.g. rahim@example.com"></div>
@@ -661,13 +499,10 @@
         <tbody id="users-list-body"></tbody>
       </table>
     </div>
-    <p style="color:var(--ink-soft);font-size:.78rem;margin-top:8px;">"অ্যাক্সেস বাতিল" চাপলে শুধু অ্যাপের অ্যাক্সেস বন্ধ হবে (আবার Waiting screen-এ চলে যাবে) — ইমেইল/পাসওয়ার্ড দিয়ে Firebase-এর Auth অ্যাকাউন্টটি রয়ে যাবে, ফলে চাইলে পরে আবার নতুন role দিয়ে সক্রিয় করা যাবে।</p>
   </div>
 
-  <!-- fund (donation) -->
   <div class="panel treasurer-only" data-tab="fund">
     <h2>Add Fund</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">Record contributions received from parents, alumni, or other donors.</p>
     <div class="field-row">
       <div class="field"><label>Purpose</label><input type="text" id="donation-name" placeholder="e.g. Parent / Former Subscriber"></div>
       <div class="field"><label>Amount (৳)</label><input type="number" id="donation-amount" placeholder="500"></div>
@@ -682,7 +517,6 @@
     </div>
   </div>
 
-  <!-- expense -->
   <div class="panel treasurer-only" data-tab="expense">
     <h2>Add Expense</h2>
     <div class="field-row">
@@ -693,7 +527,7 @@
         <div class="field">
           <label>এই খরচ কার ঘাড়ে পড়বে?</label>
           <select id="expense-charge-type" onchange="onExpenseChargeTypeChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);">
-            <option value="all">সবার সমান ভাগে (Equal split — all subscribers)</option>
+            <option value="all">সবার সমান ভাগে (Equal split)</option>
             <option value="individual">নির্দিষ্ট একজন সাবস্ক্রাইবারের ব্যক্তিগত হিসাব থেকে</option>
             <option value="multiple">একাধিক সাবস্ক্রাইবারের প্রত্যেকের হিসাব থেকে সমান পরিমাণ (একসাথে)</option>
           </select>
@@ -704,7 +538,7 @@
         </div>
       </div>
       <div class="field hidden" id="expense-target-multi-wrap" style="margin-top:10px;">
-        <label>একাধিক সাবস্ক্রাইবার বাছাই করুন — উপরে দেওয়া Amount টি প্রত্যেকের হিসাব থেকে আলাদাভাবে কাটা হবে (ভাগ হবে না)</label>
+        <label>একাধিক সাবস্ক্রাইবার বাছাই করুন</label>
         <div id="expense-multi-target-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--line-strong);border-radius:8px;padding:10px 12px;background:#fff;"></div>
       </div>
       <div class="btn-row"><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
@@ -716,10 +550,8 @@
     </div>
   </div>
 
-  <!-- order timing control -->
   <div class="panel treasurer-only" data-tab="sheets">
     <h2>⏰ অর্ডার সময়সূচী নিয়ন্ত্রণ</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">সাবস্ক্রাইবার ও মেয়েদের এডমিন কখন শিট অর্ডার দিতে পারবেন, এবং কোন সময়ের পরের অর্ডার পরের দিনের ব্যাচে যোগ হবে — এখান থেকেই নিয়ন্ত্রণ করুন। কোনো কোড পরিবর্তনের দরকার নেই।</p>
     <div class="field-row">
       <div class="field"><label>অর্ডার শুরু (ঘণ্টা, ০-২৩)</label><input type="number" min="0" max="23" id="cfg-window-start"></div>
       <div class="field"><label>অর্ডার শেষ (ঘণ্টা, ০-২৩)</label><input type="number" min="0" max="23" id="cfg-window-end"></div>
@@ -728,13 +560,10 @@
     </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="saveOrderTimingSettings()">সংরক্ষণ করুন</button></div>
     <p id="cfg-preview" style="color:var(--ink-soft);font-size:.82rem;margin:10px 0 0;"></p>
-    <p style="color:var(--ink-soft);font-size:.78rem;margin:4px 0 0;">এই ডিসকাউন্ট এখন থেকে করা প্রতিটি নতুন শিট অর্ডারের দামে (সাবস্ক্রাইবার, মেয়েদের এডমিন ও ছেলেদের এডমিন — সবার) স্বয়ংক্রিয়ভাবে প্রযোজ্য হবে। আগের অর্ডারের দাম বদলাবে না।</p>
   </div>
 
-  <!-- lecture sheet catalog management -->
   <div class="panel treasurer-only" data-tab="sheets">
     <h2>লেকচার শিট ব্যবস্থাপনা</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">এখানে যেসব শিট যোগ করবেন, সাবস্ক্রাইবাররা তাদের ড্যাশবোর্ড থেকে সেগুলো প্রিন্টের জন্য অর্ডার করতে পারবে। দাম বসাতে হয় না — শুধু পেজ সংখ্যা দিলেই দাম স্বয়ংক্রিয়ভাবে হিসাব হয়ে যাবে। সব পিডিএফ এপিঠ-ওপিঠ (দুই সাইড) প্রিন্ট হয়, তাই প্রতি ২ পেজে ১টি এপিঠ-ওপিঠ শিট (৳৩) — আর পেজ সংখ্যা বিজোড় হলে শেষে একটি এক সাইড শিট (৳১.৫) যুক্ত হয়।</p>
     <div class="field-row">
       <div class="field" style="flex:2;"><label>সাবজেক্ট</label><input type="text" id="new-sheet-subject" placeholder="e.g. Physics"></div>
       <div class="field"><label>কার্ড নং (সিরিয়াল)</label><input type="number" id="new-sheet-card" placeholder="1"></div>
@@ -755,7 +584,6 @@
       <div class="field">
         <label>✏️ কাস্টম দাম (ঐচ্ছিক)</label>
         <div class="price-input-row"><input type="number" min="0" step="0.01" id="new-sheet-custom-price" placeholder="স্বয়ংক্রিয় দামই থাকবে"></div>
-        <div class="price-hint">খালি রাখলে স্বয়ংক্রিয় দাম বসবে — চাইলে এখানে নিজে দাম বসিয়ে সেটিই নির্দিষ্ট করে দিতে পারবেন।</div>
       </div>
     </div>
     <div class="btn-row">
@@ -770,11 +598,8 @@
     </div>
   </div>
 
-  <!-- lecture sheet print orders -->
   <div class="panel treasurer-only" data-tab="sheets">
     <h2>শিট প্রিন্ট রিকোয়েস্ট (ব্যাচ অনুযায়ী)</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">অর্ডার সময়সূচী উপরের প্যানেল থেকে ঠিক করা যায় — তার পরের অর্ডার পরের দিনের ব্যাচে যোগ হয়। একই দিনে একাধিক ব্যাচেও প্রিন্ট করা যাবে: একটি ব্যাচ "প্রিন্ট সম্পন্ন" চিহ্নিত করলেই তারপরের নতুন অর্ডারগুলো স্বয়ংক্রিয়ভাবে সেই দিনের পরবর্তী নতুন ব্যাচ হিসেবে গণনা শুরু করে। একই শিট একাধিক সাবস্ক্রাইবার চাইলে এখানে একসাথে দেখা যাবে — ব্যাচে প্রিন্ট করার জন্য সুবিধাজনক।</p>
-
     <div class="field-row" style="align-items:flex-end;margin-bottom:14px;">
       <div class="field" style="max-width:280px;">
         <label>অর্ডার ব্যাচ (তারিখ)</label>
@@ -802,7 +627,6 @@
     </div>
 
     <h2 style="margin-top:20px;">প্রাপ্তি স্বীকার (Received) চেকলিস্ট</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">নিচে তারিখ ও শিটের নাম বেছে নিয়ে শুধু সেই তালিকাটাই দেখুন — চাইলে "সব তারিখ" / "সব শিট" রেখে সম্পূর্ণ তালিকাও দেখা যাবে। সাবস্ক্রাইবার শিট বুঝে পেলে এখানে টিক দিন। ছেলে ও মেয়ে — উভয় গ্রুপের শিটের জন্যই ট্রেজারার এখান থেকে টিক দিতে পারবেন।</p>
     <div class="field-row" style="align-items:flex-end;margin-bottom:12px;">
       <div class="field" style="max-width:240px;">
         <label>তারিখ বাছাই করুন</label>
@@ -813,8 +637,8 @@
         <select id="received-sheet-select" onchange="onReceivedSheetFilterChange()" style="width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:6px;background:#fff;font-family:inherit;font-size:.92rem;color:var(--ink);"></select>
       </div>
       <div class="btn-row" style="margin-top:0;">
-        <button class="btn btn-outline" onclick="downloadReceiversPDF()">📄 কে কোন সিট রিসিভ করবে — PDF (ছেলে/মেয়ে আলাদা)</button>
-        <button class="btn btn-outline" onclick="downloadTodayReceiversPDF()">🔄 আজকের রিসিভার লিস্ট (আবার) ডাউনলোড করুন</button>
+        <button class="btn btn-outline" onclick="downloadReceiversPDF()">📄 কে কোন সিট রিসিভ করবে — PDF</button>
+        <button class="btn btn-outline" onclick="downloadTodayReceiversPDF()">🔄 আজকের রিসিভার লিস্ট ডাউনলোড</button>
       </div>
     </div>
     <div class="pending-toggle-row">
@@ -830,12 +654,8 @@
     </div>
   </div>
 
-  <!-- student ledger -->
   <div class="panel treasurer-only" data-tab="subscribers">
     <h2>Subscriber List</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 10px;">
-      Calculation rule: (Shared Expense − Total Fund) ÷ Total Subscribers = Equal Share. Each subscriber's <b>Due/Credit</b> = their Total Collected − Equal Share − their Personal Charges. Green means credit, red means due. Amounts entered below are <b>added</b> to the subscriber's running total — nothing gets overwritten.
-    </p>
     <input type="text" class="search-box" id="student-search" placeholder="🔍 Search by name or roll..." oninput="filterStudents()">
     <div class="table-scroll">
       <table class="ledger">
@@ -845,7 +665,6 @@
     </div>
   </div>
 
-  <!-- activity feed -->
   <div class="panel treasurer-only" data-tab="activity">
     <h2>Activity</h2>
     <div id="activity-feed"></div>
@@ -853,7 +672,6 @@
 
 </div>
 
-<!-- ============ VOUCHER (hidden, rendered to canvas) ============ -->
 <div id="voucher-box" style="padding:28px;width:420px;background:#FFFFFF;border:2px solid #1E293B;font-family:'Inter',sans-serif;">
   <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #E2E8F0;padding-bottom:10px;margin-bottom:14px;">
     <div>
@@ -876,7 +694,7 @@
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut,
-  createUserWithEmailAndPassword, deleteUser, sendPasswordResetEmail
+  createUserWithEmailAndPassword, deleteUser
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, deleteDoc, updateDoc, collection, onSnapshot, addDoc,
@@ -897,52 +715,38 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ============ 2) Subscriber list — now comes directly from Firebase, added manually via the form ============
-let students = []; // [{id, roll, name, mobile}]
-
 // ============ state ============
-let collectionsData = {};   // computed: { roll: {amount, updatedBy, updatedAt, paymentCount} }
-let legacyCollectionsData = {}; // old single-amount docs from "collections" (kept as a starting balance, never overwritten again)
-let paymentsData = {};       // { roll: [{id, amount, addedBy, addedAt}, ...] } — every entry is additive, nothing is ever lost
-let donationsData = [];     // [{id, donorName, amount, note, addedBy, addedAt}]
-let expensesData = [];      // [{id, description, amount, date, addedBy, addedAt}]
-let activityData = [];      // recent activity log
-let sheetsData = [];        // [{id, title, price, addedBy, addedAt}] — lecture sheet catalog
-// [{id, roll, studentName, sheetId, sheetTitle, price, orderedAt, addedBy, businessDate, gender,
-//   printed, printedAt, printedBy, received, receivedAt, receivedBy}]
+let students = [];
+let collectionsData = {};
+let legacyCollectionsData = {};
+let paymentsData = {};
+let donationsData = [];
+let expensesData = [];
+let activityData = [];
+let sheetsData = [];
 let sheetOrdersData = [];
-let usersData = [];         // [{id(=uid), role, roll, name, email}] — login accounts, treasurer-managed
+let usersData = [];
 let currentTreasurerName = "";
-let currentUserRole = "treasurer";   // 'treasurer' | 'subscriber' | 'girls_admin' — detected from users/{uid} after sign-in
-let currentSubscriberRoll = null;    // set when currentUserRole === 'subscriber'
-let currentOrderDateFilter = null;   // composite "businessDate#seq" batch key currently selected in the treasurer's order panel
-let currentActiveTab = null;         // which nav-bar tab is currently open
-// "প্রাপ্তি স্বীকার" (received) checklist filters — 'all' means no filter on that dimension.
-// Kept separate for the treasurer's (all-genders) checklist and the girls-admin's (female-only) one.
+let currentUserRole = "treasurer";
+let currentSubscriberRoll = null;
+let currentOrderDateFilter = null;
+let currentActiveTab = null;
 let currentReceivedDateFilter = 'all';
 let currentReceivedSheetFilter = 'all';
 let currentGirlsReceivedDateFilter = 'all';
 let currentGirlsReceivedSheetFilter = 'all';
 let currentBoysReceivedDateFilter = 'all';
 let currentBoysReceivedSheetFilter = 'all';
-// "শুধু যারা এখনও বুঝে পায়নি" toggles — when true, the checklist hides already-received rows
-// so the admin can see at a glance exactly who still hasn't gotten their sheet(s).
 let treasurerPendingOnly = false;
 let girlsPendingOnly = false;
 let boysPendingOnly = false;
-let batchCountersData = {};   // { businessDate: { currentSeq } } — which print-batch number new orders for that date currently fall into
+let batchCountersData = {};
 
-// ============ ORDER TIMING: fully controlled by the treasurer now (settings/orderConfig doc) ============
-// cutoffHour: after this hour, a new order is bucketed into the NEXT day's batch.
-// windowStartHour/windowEndHour: subscribers/girls-admin may only PLACE orders in this range.
-// Defaults below are only used until the settings/orderConfig doc loads (or if it's never created).
 let orderConfig = { cutoffHour: 15, windowStartHour: 10, windowEndHour: 17, discountPercent: 0 };
 
-// ============ TREASURER DISCOUNT: a global % off applied automatically to every NEW sheet
-// order's price (subscriber orders, and girls/boys-admin personal orders). Set from the
-// "শিট ও অর্ডার" tab (settings/orderConfig doc, same doc as the order-timing config). Orders
-// already placed keep whatever price they were charged at — this only affects orders created
-// from now on. ============
+// ⭐ DUE LIMIT — ২০ টাকা (আগে ৭০ ছিল)
+const DUE_ORDER_BLOCK_LIMIT = 20;
+
 function discountedPrice(basePrice) {
   const pct = Number(orderConfig.discountPercent) || 0;
   if (pct <= 0) return +(basePrice || 0).toFixed(2);
@@ -961,14 +765,10 @@ function formatBusinessDateLabel(key) {
   const [y, m, d] = key.split('-').map(Number);
   return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 }
-// Local (not UTC) Y-M-D key — used for "which calendar day is this" comparisons, as opposed to
-// businessDateKeyOf() which additionally rolls forward past the cutoff hour.
 function localDateKey(d) {
   const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
-// 24h hour -> a short 12h label, e.g. 15 -> "3:00 PM" — used to render the treasurer's chosen
-// timing back into messages/UI without hardcoding text anywhere.
 function formatHourLabel(h) {
   const hour = ((Number(h) % 24) + 24) % 24;
   const period = hour < 12 ? 'AM' : 'PM';
@@ -976,25 +776,14 @@ function formatHourLabel(h) {
   return `${hour12}:00 ${period}`;
 }
 
-// ============ ORDER WINDOW: subscribers/girls-admin may only PLACE orders between
-// orderConfig.windowStartHour and orderConfig.windowEndHour local time, every day. Outside this
-// window the ordering UI is disabled and confirmSheetOrders/confirmGirlsAdminPersonalOrder refuse
-// to submit (checked again there as a hard safety net, in case the UI wasn't refreshed). This is
-// separate from orderConfig.cutoffHour above, which only decides which day's *print batch* an
-// accepted order is bucketed into. The treasurer edits all three from the "শিট ও অর্ডার" tab.
 function isWithinOrderWindow() {
   const h = new Date().getHours();
   return h >= orderConfig.windowStartHour && h < orderConfig.windowEndHour;
 }
 function orderWindowMessage() {
-  return `অর্ডার শুধুমাত্র প্রতিদিন ${formatHourLabel(orderConfig.windowStartHour)} থেকে ${formatHourLabel(orderConfig.windowEndHour)} এর মধ্যে দেওয়া যায়। এখন অর্ডার নেওয়া বন্ধ আছে — অনুগ্রহ করে এই সময়ের মধ্যে আবার চেষ্টা করুন।`;
+  return `অর্ডার শুধুমাত্র প্রতিদিন ${formatHourLabel(orderConfig.windowStartHour)} থেকে ${formatHourLabel(orderConfig.windowEndHour)} এর মধ্যে দেওয়া যায়। এখন অর্ডার নেওয়া বন্ধ আছে।`;
 }
 
-// ============ PRINT BATCHES: a business date can contain MULTIPLE print batches. New orders
-// always land in the "current" (still-open) batch for their business date. When the treasurer
-// marks a batch as printed, that date's counter advances — any order placed afterwards (even
-// later the same business date) automatically starts a fresh batch instead of mixing into the
-// one that's already gone to print. ============
 function currentBatchSeqFor(businessDate) {
   const rec = batchCountersData[businessDate];
   return (rec && rec.currentSeq) ? rec.currentSeq : 1;
@@ -1010,11 +799,6 @@ function formatBatchLabel(businessDate, seq, extra) {
   return `${formatBusinessDateLabel(businessDate)} — ব্যাচ ${seq}${extra ? ' ' + extra : ''}`;
 }
 
-// ============ SHEET PRICING: fully automatic from page count alone ============
-// All lecture-sheet PDFs are printed duplex (এপিঠ-ওপিঠ / front+back on one physical sheet of
-// paper). So N pages consume floor(N/2) physical duplex sheets, each costing ৳3 — and if N is
-// odd, one leftover page has to go on its own single-sided physical sheet, costing ৳1.5.
-// Example: 5 pages -> 2 duplex sheets (৳3 each) + 1 single-sided sheet (৳1.5) = ৳7.5 total.
 const PRICE_PER_DUPLEX_SHEET = 3;
 const PRICE_PER_SINGLE_SHEET = 1.5;
 function sheetBreakdownFor(pages) {
@@ -1027,7 +811,6 @@ function computeSheetPrice(pages) {
   const { duplexSheets, hasSingleLeftover } = sheetBreakdownFor(pages);
   return duplexSheets * PRICE_PER_DUPLEX_SHEET + (hasSingleLeftover ? PRICE_PER_SINGLE_SHEET : 0);
 }
-// Short Bengali description of the physical-sheet breakdown, e.g. "২টি এপিঠ-ওপিঠ + ১টি এক সাইড"
 function sheetBreakdownLabel(pages) {
   const { duplexSheets, hasSingleLeftover } = sheetBreakdownFor(pages);
   const parts = [];
@@ -1035,23 +818,15 @@ function sheetBreakdownLabel(pages) {
   if (hasSingleLeftover) parts.push(`১টি এক সাইড`);
   return parts.join(' + ') || 'পেজ নেই';
 }
-// Re-check the order window every 60s so the ordering UI locks/unlocks itself right at the
-// 10:00/17:00 boundary even if the person just leaves the tab open — Firestore listeners only
-// re-render on data changes, not on the clock ticking. (Function declarations below are hoisted,
-// so this is safe to register up here.)
+
 setInterval(() => {
-  renderSheetCatalogSubscriber();
-  renderGirlsAdminSheetCatalog();
-  renderBoysAdminSheetCatalog();
-  window.maybeAutoDownloadReceiversPDF();
+  if (currentUserRole === 'subscriber') renderSheetCatalogSubscriber();
+  else if (currentUserRole === 'girls_admin') renderGirlsAdminSheetCatalog();
+  else if (currentUserRole === 'chele_admin') renderBoysAdminSheetCatalog();
+  else if (currentUserRole === 'treasurer') window.maybeAutoDownloadReceiversPDF();
 }, 60000);
 
 // ============ AUTH ============
-// Treasurer/girls-admin accounts are still created manually by the treasurer from the "লগইন
-// অ্যাকাউন্ট" tab (see addUserAccount). Subscribers instead self-register: the treasurer first
-// adds just Name + Roll (see addStudent), and the subscriber then comes here, enters that Roll,
-// and sets their own email/password (see doRegister). Either path ends the same way — a
-// users/{uid} Firestore doc with a role — which is what applyLoggedInUser() reads.
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
   el.textContent = msg;
@@ -1062,7 +837,6 @@ window.doLogin = async () => {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   if (!email || !password) return showAuthError("Please enter both email and password.");
-  document.getElementById('auth-info').classList.add('hidden');
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (e) {
@@ -1078,87 +852,18 @@ window.doLogout = async () => {
   await signOut(auth);
 };
 
-function hideAuthMessages() {
-  document.getElementById('auth-error').classList.add('hidden');
-  document.getElementById('auth-info').classList.add('hidden');
-}
-function showAuthInfo(msg) {
-  const el = document.getElementById('auth-info');
-  el.textContent = msg;
-  el.classList.remove('hidden');
-}
-function showOnlyAuthForm(id) {
-  ['login-form', 'register-form', 'forgot-form'].forEach(f => {
-    document.getElementById(f).classList.toggle('hidden', f !== id);
-  });
-}
-
 window.showRegisterForm = () => {
-  hideAuthMessages();
-  showOnlyAuthForm('register-form');
+  document.getElementById('auth-error').classList.add('hidden');
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.remove('hidden');
 };
 
 window.showLoginForm = () => {
-  hideAuthMessages();
-  showOnlyAuthForm('login-form');
+  document.getElementById('auth-error').classList.add('hidden');
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('login-form').classList.remove('hidden');
 };
 
-window.showForgotForm = () => {
-  hideAuthMessages();
-  // carry over whatever the person already typed in the login box
-  const typed = document.getElementById('login-email').value.trim();
-  if (typed) document.getElementById('forgot-email').value = typed;
-  showOnlyAuthForm('forgot-form');
-};
-
-// Forgot password: Firebase emails a reset link. Those mails very often land in Spam/Junk, so
-// every success message says so explicitly. A 60s cooldown on the button stops accidental
-// repeat-taps (and Firebase's own "too many requests" limit).
-let forgotCooldownTimer = null;
-window.doForgotPassword = async () => {
-  const email = document.getElementById('forgot-email').value.trim();
-  hideAuthMessages();
-  if (!email) return showAuthError("আপনার ইমেইল ঠিকানা দিন।");
-  const btn = document.getElementById('forgot-btn');
-  if (btn.disabled) return;
-  btn.disabled = true;
-  btn.textContent = "পাঠানো হচ্ছে…";
-  let sent = false;
-  try {
-    await sendPasswordResetEmail(auth, email);
-    sent = true;
-    showAuthInfo(`✅ ${email} ঠিকানায় পাসওয়ার্ড রিসেট লিংক পাঠানো হয়েছে (যদি এই ইমেইলে অ্যাকাউন্ট থাকে)। ইনবক্সে না পেলে অবশ্যই Spam / Junk ফোল্ডার চেক করুন — অনেক সময় মেইলটি সেখানে চলে যায়। মেইল আসতে ২–৩ মিনিট লাগতে পারে।`);
-  } catch (e) {
-    const code = e && e.code;
-    if (code === 'auth/invalid-email') showAuthError("সঠিক ইমেইল ঠিকানা দিন।");
-    else if (code === 'auth/user-not-found') showAuthError("এই ইমেইলে কোনো অ্যাকাউন্ট পাওয়া যায়নি। যে ইমেইল দিয়ে রেজিস্টার করেছিলেন সেটি দিন।");
-    else if (code === 'auth/too-many-requests') showAuthError("অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।");
-    else if (code === 'auth/network-request-failed') showAuthError("ইন্টারনেট সংযোগ চেক করুন, তারপর আবার চেষ্টা করুন।");
-    else showAuthError("রিসেট মেইল পাঠানো যায়নি। কারণ: " + (e && e.message ? e.message : e));
-  }
-  // cooldown so it can't be spammed
-  let left = sent ? 60 : 5;
-  btn.textContent = `আবার পাঠাতে ${left}s অপেক্ষা করুন`;
-  clearInterval(forgotCooldownTimer);
-  forgotCooldownTimer = setInterval(() => {
-    left -= 1;
-    if (left <= 0) {
-      clearInterval(forgotCooldownTimer);
-      btn.disabled = false;
-      btn.textContent = sent ? "আবার পাঠান" : "রিসেট লিংক পাঠান";
-    } else {
-      btn.textContent = `আবার পাঠাতে ${left}s অপেক্ষা করুন`;
-    }
-  }, 1000);
-};
-
-// Subscriber self-registration. The treasurer must have already added this Roll under the
-// "সাবস্ক্রাইবার" tab (addStudent) — that's what proves the person registering is a real
-// subscriber. We create the Auth account first (Firebase requires the caller to be signed in
-// before it will let them query Firestore, per this project's security rules), then verify the
-// Roll against the students collection and that nobody else already claimed it. If either check
-// fails, we roll back by deleting the just-created Auth account so no orphaned "pending" login
-// is left behind.
 window.doRegister = async () => {
   const roll = parseInt(document.getElementById('reg-roll').value, 10);
   const email = document.getElementById('reg-email').value.trim();
@@ -1190,14 +895,13 @@ window.doRegister = async () => {
   try {
     const studentDoc = await getDoc(doc(db, "students", roll.toString()));
     if (!studentDoc.exists()) {
-      throw new Error(`Roll ${roll} এখনো Treasurer যোগ করেননি। আগে Treasurer-কে বলে আপনার নাম ও Roll যোগ করিয়ে নিন, তারপর রেজিস্ট্রেশন করুন।`);
+      throw new Error(`Roll ${roll} এখনো Treasurer যোগ করেননি। আগে Treasurer-কে বলে আপনার নাম ও Roll যোগ করিয়ে নিন।`);
     }
     const student = studentDoc.data();
 
-    // READ-SAVING: look up only this roll (max 1 doc) instead of downloading every subscriber account
-    const existingSnap = await getDocs(query(collection(db, "users"), where("role", "==", "subscriber"), where("roll", "==", roll), limit(1)));
-    if (existingSnap.docs.length > 0) {
-      throw new Error(`Roll ${roll} এর জন্য আগে থেকেই একটি অ্যাকাউন্ট রেজিস্টার করা আছে। এটি আপনার নিজের অ্যাকাউন্ট না হলে Treasurer-এর সাথে যোগাযোগ করুন।`);
+    const existingSnap = await getDocs(query(collection(db, "users"), where("role", "==", "subscriber")));
+    if (existingSnap.docs.some(d => d.data().roll === roll)) {
+      throw new Error(`Roll ${roll} এর জন্য আগে থেকেই একটি অ্যাকাউন্ট রেজিস্টার করা আছে।`);
     }
 
     await setDoc(doc(db, "users", cred.user.uid), {
@@ -1224,11 +928,6 @@ function stampInitials(name) {
   return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
 }
 
-// Resolve the signed-in user's role and populate the header + role-based visibility.
-// BUGFIX: a missing users/{uid} doc used to silently default to full Treasurer access. Since
-// accounts are now created manually (Auth user first, role doc second), that default handed
-// out admin access to anyone signed in before their role doc existed. It now safely falls
-// back to "pending" — the waiting screen — until the treasurer writes their role doc.
 async function applyLoggedInUser(user) {
   let role = "pending", roll = null, name = user.displayName || user.email;
   try {
@@ -1239,7 +938,7 @@ async function applyLoggedInUser(user) {
       roll = data.roll || null;
       name = data.name || name;
     }
-  } catch (e) { /* fall back to pending defaults */ }
+  } catch (e) {}
 
   currentUserRole = role;
   currentSubscriberRoll = roll;
@@ -1263,11 +962,11 @@ async function applyLoggedInUser(user) {
   document.getElementById('masthead-sub').textContent =
     role === 'subscriber' ? 'Subscriber Dashboard' : (role === 'girls_admin' ? 'মেয়েদের এডমিন ড্যাশবোর্ড' : (role === 'chele_admin' ? 'ছেলেদের এডমিন ড্যাশবোর্ড' : 'Treasury Dashboard'));
 
+  invalidateShareCache();
   applyRoleVisibility();
   startListeners();
 }
 
-// ============ NAV BAR: separate dashboard tabs per role ============
 const TABS_BY_ROLE = {
   treasurer: [
     { id: 'dashboard', label: '📊 ড্যাশবোর্ড' },
@@ -1319,7 +1018,7 @@ function renderNavBar() {
 }
 
 function applyRoleVisibility() {
-  const role = currentUserRole; // 'treasurer' | 'subscriber' | 'girls_admin' | 'chele_admin'
+  const role = currentUserRole;
   document.querySelectorAll('.treasurer-only').forEach(el => el.classList.toggle('hidden', role !== 'treasurer'));
   document.querySelectorAll('.subscriber-only').forEach(el => el.classList.toggle('hidden', role !== 'subscriber'));
   document.querySelectorAll('.girls-admin-only').forEach(el => el.classList.toggle('hidden', role !== 'girls_admin'));
@@ -1342,60 +1041,135 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// ============ PERFORMANCE: share cache + debounce ============
+let _shareCache = null;
+let _shareCacheKey = "";
+let _recomputeTimer = null;
+
+function invalidateShareCache() {
+  _shareCache = null;
+  _shareCacheKey = "";
+}
+
+function _computeShareCache() {
+  const cacheKey = students.length + "|" + expensesData.length + "|" + donationsData.length;
+  if (_shareCache && _shareCacheKey === cacheKey) return _shareCache;
+
+  const donationEvents = donationsData.map(d => ({
+    type: 'donation', amount: d.amount || 0,
+    time: tsToDate(d.addedAt) || new Date(0)
+  }));
+  const expenseEvents = expensesData
+    .filter(e => e.chargeType !== 'individual')
+    .map(e => ({
+      type: 'expense', id: e.id, amount: e.amount || 0,
+      time: tsToDate(e.addedAt) || new Date(0)
+    }));
+  const events = [...donationEvents, ...expenseEvents].sort((a, b) => a.time - b.time);
+
+  let pool = 0;
+  const netCostById = {};
+  events.forEach(ev => {
+    if (ev.type === 'donation') { pool += ev.amount; return; }
+    const offset = Math.min(pool, ev.amount);
+    pool -= offset;
+    netCostById[ev.id] = ev.amount - offset;
+  });
+
+  const shares = {};
+  students.forEach(student => {
+    const joinTime = tsToDate(student.addedAt);
+    let share = 0;
+    expensesData
+      .filter(e => e.chargeType !== 'individual')
+      .forEach(e => {
+        const eTime = tsToDate(e.addedAt) || new Date(0);
+        if (joinTime && eTime < joinTime) return;
+        const net = netCostById[e.id] || 0;
+        if (net <= 0) return;
+        const eligible = eligibleStudentsAt(eTime);
+        const count = eligible.length || 1;
+        share += net / count;
+      });
+    shares[student.roll] = share;
+  });
+
+  _shareCache = shares;
+  _shareCacheKey = cacheKey;
+  return shares;
+}
+
+function scheduleRecompute() {
+  if (_recomputeTimer) clearTimeout(_recomputeTimer);
+  _recomputeTimer = setTimeout(() => {
+    _recomputeTimer = null;
+    recomputeCollections();
+  }, 300);
+}
+
 // ============ FIRESTORE LISTENERS ============
 let listenersStarted = false;
-let activeUnsubscribes = []; // holds every onSnapshot's unsubscribe fn, so stopListeners() can cleanly detach them all
+let activeUnsubscribes = [];
+
 function startListeners() {
   if (listenersStarted) return;
   listenersStarted = true;
   activeUnsubscribes = [];
 
-  // order timing (window + cutoff hours) — treasurer-editable, read by everyone so the
-  // ordering UI (all roles) reflects the current setting live.
+  const isTreasurer  = currentUserRole === 'treasurer';
+  const isGirlsAdmin = currentUserRole === 'girls_admin';
+  const isBoysAdmin  = currentUserRole === 'chele_admin';
+  const isSubscriber = currentUserRole === 'subscriber';
+  const isAdmin      = isTreasurer || isGirlsAdmin || isBoysAdmin;
+
   activeUnsubscribes.push(onSnapshot(doc(db, "settings", "orderConfig"), (snap) => {
     if (snap.exists()) {
       const data = snap.data();
       orderConfig = {
-        cutoffHour: (typeof data.cutoffHour === 'number') ? data.cutoffHour : orderConfig.cutoffHour,
+        cutoffHour:      (typeof data.cutoffHour === 'number')      ? data.cutoffHour      : orderConfig.cutoffHour,
         windowStartHour: (typeof data.windowStartHour === 'number') ? data.windowStartHour : orderConfig.windowStartHour,
-        windowEndHour: (typeof data.windowEndHour === 'number') ? data.windowEndHour : orderConfig.windowEndHour,
+        windowEndHour:   (typeof data.windowEndHour === 'number')   ? data.windowEndHour   : orderConfig.windowEndHour,
         discountPercent: (typeof data.discountPercent === 'number') ? data.discountPercent : orderConfig.discountPercent
       };
     }
     renderOrderTimingSettingsForm();
-    renderSheetCatalogSubscriber();
-    renderGirlsAdminSheetCatalog();
-    renderBoysAdminSheetCatalog();
+    if (isSubscriber) renderSheetCatalogSubscriber();
+    if (isGirlsAdmin) renderGirlsAdminSheetCatalog();
+    if (isBoysAdmin)  renderBoysAdminSheetCatalog();
   }));
 
-  // print-batch counters — one doc per business date, tracking which batch number new orders
-  // currently fall into for that date (advances each time the treasurer marks a batch printed)
-  activeUnsubscribes.push(onSnapshot(collection(db, "batchCounters"), (snap) => {
-    batchCountersData = {};
-    snap.forEach(d => batchCountersData[d.id] = d.data());
-    renderSheetOrdersTreasurer();
-  }));
+  if (isTreasurer) {
+    activeUnsubscribes.push(onSnapshot(collection(db, "batchCounters"), (snap) => {
+      batchCountersData = {};
+      snap.forEach(d => batchCountersData[d.id] = d.data());
+      renderSheetOrdersTreasurer();
+    }));
+  }
 
-  activeUnsubscribes.push(onSnapshot(query(collection(db, "students"), orderBy("roll")), (snap) => {
-    students = [];
-    snap.forEach(d => students.push({ id: d.id, ...d.data() }));
-    renderStudentRows();
-    renderExpenseTargetOptions();
-    renderExpenseMultiTargetOptions();
-    renderNewUserRollOptions();
-    recomputeCollections();
-    renderExpenses();
-    renderSummary();
-    renderGirlsAdminPanel();
-    renderBoysAdminPanel();
-  }));
+  if (isAdmin) {
+    activeUnsubscribes.push(onSnapshot(query(collection(db, "students"), orderBy("roll")), (snap) => {
+      students = [];
+      snap.forEach(d => students.push({ id: d.id, ...d.data() }));
+      invalidateShareCache();
+      renderStudentRows();
+      renderExpenseTargetOptions();
+      renderExpenseMultiTargetOptions();
+      renderNewUserRollOptions();
+      scheduleRecompute();
+      renderExpenses();
+      renderSummary();
+      if (isGirlsAdmin) renderGirlsAdminPanel();
+      if (isBoysAdmin)  renderBoysAdminPanel();
+    }));
+  } else if (isSubscriber) {
+    activeUnsubscribes.push(onSnapshot(doc(db, "students", String(currentSubscriberRoll)), (snap) => {
+      students = snap.exists() ? [{ id: snap.id, ...snap.data() }] : [];
+      invalidateShareCache();
+      scheduleRecompute();
+    }));
+  }
 
-  // login accounts — treasurer-only tab; lets the treasurer create/manage accounts without
-  // touching the Firebase Console directly.
-  // FIX: this collection has no reason to be read by subscriber/girls_admin sessions — it was
-  // previously fetched unconditionally for every logged-in user, which is one of the biggest
-  // sources of wasted reads (every subscriber pulling every login-account doc, every time).
-  if (currentUserRole === 'treasurer') {
+  if (isTreasurer) {
     activeUnsubscribes.push(onSnapshot(collection(db, "users"), (snap) => {
       usersData = [];
       snap.forEach(d => usersData.push({ id: d.id, ...d.data() }));
@@ -1403,63 +1177,77 @@ function startListeners() {
     }));
   }
 
-  // READ-SAVING: a subscriber only ever sees their OWN balance, payments and orders, so their
-  // session listens to just their own documents instead of downloading every student's data.
-  // (Before this, every subscriber opening the app re-read ALL payments + ALL sheet orders, and
-  // every new order/payment by anyone was re-sent to every open tab — that was the huge read count.)
-  const isSubscriber = currentUserRole === 'subscriber' && currentSubscriberRoll !== null && currentSubscriberRoll !== undefined;
-  const myRoll = currentSubscriberRoll;
-
-  // legacy single-amount records (from before the fix) — kept as a starting balance, never written to again
-  if (isSubscriber) {
-    activeUnsubscribes.push(onSnapshot(doc(db, "collections", String(myRoll)), (snap) => {
-      legacyCollectionsData = {};
-      if (snap.exists()) legacyCollectionsData[snap.id] = snap.data();
-      recomputeCollections();
-    }));
-  } else {
+  if (isAdmin) {
     activeUnsubscribes.push(onSnapshot(collection(db, "collections"), (snap) => {
       legacyCollectionsData = {};
       snap.forEach(d => legacyCollectionsData[d.id] = d.data());
-      recomputeCollections();
+      scheduleRecompute();
+    }));
+  } else if (isSubscriber) {
+    activeUnsubscribes.push(onSnapshot(doc(db, "collections", String(currentSubscriberRoll)), (snap) => {
+      legacyCollectionsData = {};
+      if (snap.exists()) legacyCollectionsData[snap.id] = snap.data();
+      scheduleRecompute();
     }));
   }
 
-  // every payment is its own document — adding a new one never overwrites or removes an earlier one
-  // (subscriber: only their own roll; `in [n, "n"]` also catches any old doc that stored the roll as text.
-  //  No orderBy here on purpose — the subscriber panel sorts client-side, and this needs no extra index.)
-  const paymentsQuery = isSubscriber
-    ? query(collection(db, "payments"), where("roll", "in", [myRoll, String(myRoll)]))
-    : query(collection(db, "payments"), orderBy("addedAt", "desc"));
-  activeUnsubscribes.push(onSnapshot(paymentsQuery, (snap) => {
-    paymentsData = {};
-    snap.forEach(d => {
-      const data = d.data();
-      const key = String(data.roll);
-      if (!paymentsData[key]) paymentsData[key] = [];
-      paymentsData[key].push({ id: d.id, ...data });
-    });
-    recomputeCollections();
-  }));
+  if (isSubscriber) {
+    activeUnsubscribes.push(onSnapshot(
+      query(collection(db, "payments"), where("roll", "==", currentSubscriberRoll)),
+      (snap) => {
+        paymentsData = {};
+        snap.forEach(d => {
+          const data = d.data();
+          const key = String(data.roll);
+          if (!paymentsData[key]) paymentsData[key] = [];
+          paymentsData[key].push({ id: d.id, ...data });
+        });
+        scheduleRecompute();
+      }
+    ));
+  } else if (isAdmin) {
+    activeUnsubscribes.push(onSnapshot(query(collection(db, "payments"), orderBy("addedAt", "desc")), (snap) => {
+      paymentsData = {};
+      snap.forEach(d => {
+        const data = d.data();
+        const key = String(data.roll);
+        if (!paymentsData[key]) paymentsData[key] = [];
+        paymentsData[key].push({ id: d.id, ...data });
+      });
+      scheduleRecompute();
+    }));
+  }
 
-  activeUnsubscribes.push(onSnapshot(query(collection(db, "donations"), orderBy("addedAt", "desc")), (snap) => {
-    donationsData = [];
-    snap.forEach(d => donationsData.push({ id: d.id, ...d.data() }));
-    renderDonations();
-    renderStudents(); // equal share depends on total fund
-    renderSummary();
-  }));
+  if (isAdmin) {
+    activeUnsubscribes.push(onSnapshot(query(collection(db, "donations"), orderBy("addedAt", "desc")), (snap) => {
+      donationsData = [];
+      snap.forEach(d => donationsData.push({ id: d.id, ...d.data() }));
+      invalidateShareCache();
+      renderDonations();
+      renderStudents();
+      renderSummary();
+    }));
+  }
 
-  activeUnsubscribes.push(onSnapshot(query(collection(db, "expenses"), orderBy("addedAt", "desc")), (snap) => {
-    expensesData = [];
-    snap.forEach(d => expensesData.push({ id: d.id, ...d.data() }));
-    renderExpenses();
-    renderStudents(); // equal share & personal charges depend on expenses
-    renderSummary();
-  }));
+  if (isAdmin) {
+    activeUnsubscribes.push(onSnapshot(query(collection(db, "expenses"), orderBy("addedAt", "desc")), (snap) => {
+      expensesData = [];
+      snap.forEach(d => expensesData.push({ id: d.id, ...d.data() }));
+      invalidateShareCache();
+      renderExpenses();
+      renderStudents();
+      renderSummary();
+    }));
+  } else if (isSubscriber) {
+    activeUnsubscribes.push(onSnapshot(query(collection(db, "expenses"), orderBy("addedAt", "desc")), (snap) => {
+      expensesData = [];
+      snap.forEach(d => expensesData.push({ id: d.id, ...d.data() }));
+      invalidateShareCache();
+      renderSubscriberPanel();
+    }));
+  }
 
-  // READ-SAVING: the activity feed lives in the treasurer-only "কার্যক্রম" tab, nobody else needs it
-  if (currentUserRole === 'treasurer') {
+  if (isTreasurer) {
     activeUnsubscribes.push(onSnapshot(query(collection(db, "activity"), orderBy("createdAt", "desc"), limit(20)), (snap) => {
       activityData = [];
       snap.forEach(d => activityData.push({ id: d.id, ...d.data() }));
@@ -1467,55 +1255,59 @@ function startListeners() {
     }));
   }
 
-  // lecture sheet catalog — read by everyone, managed by treasurer only
-  // (sorted client-side rather than via orderBy so a sheet never silently disappears
-  // from the subscriber's list if its addedAt hasn't resolved yet)
   activeUnsubscribes.push(onSnapshot(collection(db, "sheets"), (snap) => {
     sheetsData = [];
     snap.forEach(d => sheetsData.push({ id: d.id, ...d.data() }));
     sheetsData.sort((a, b) => (tsToDate(b.addedAt) || 0) - (tsToDate(a.addedAt) || 0));
-    renderSheetCatalogTreasurer();
-    renderSheetCatalogSubscriber();
-    renderGirlsAdminSheetCatalog();
-    renderBoysAdminSheetCatalog();
+    if (isTreasurer)  renderSheetCatalogTreasurer();
+    if (isSubscriber) renderSheetCatalogSubscriber();
+    if (isGirlsAdmin) renderGirlsAdminSheetCatalog();
+    if (isBoysAdmin)  renderBoysAdminSheetCatalog();
   }));
 
-  // sheet print orders — each subscriber can create their own; treasurer/girls-admin see everyone's
-  // (subscriber: only their own orders — they never see anyone else's)
-  const sheetOrdersSource = isSubscriber
-    ? query(collection(db, "sheetOrders"), where("roll", "==", myRoll))
-    : collection(db, "sheetOrders");
-  activeUnsubscribes.push(onSnapshot(sheetOrdersSource, (snap) => {
-    sheetOrdersData = [];
-    snap.forEach(d => sheetOrdersData.push({ id: d.id, ...d.data() }));
-    sheetOrdersData.sort((a, b) => (tsToDate(b.orderedAt) || 0) - (tsToDate(a.orderedAt) || 0));
-    renderSheetOrdersTreasurer();
-    renderSheetCatalogSubscriber();
-    renderMySheetOrders();
-    renderStudents();        // sheet cost is now part of personal charge
-    renderSubscriberPanel();
-    renderGirlsAdminPanel();
-    renderBoysAdminPanel();
-    renderSummary();         // sheet cost must also count toward the admin's Total Expense/Balance cards
-    window.maybeAutoDownloadReceiversPDF();
-  }));
+  if (isSubscriber) {
+    activeUnsubscribes.push(onSnapshot(
+      query(collection(db, "sheetOrders"), where("roll", "==", currentSubscriberRoll)),
+      (snap) => {
+        sheetOrdersData = [];
+        snap.forEach(d => sheetOrdersData.push({ id: d.id, ...d.data() }));
+        sheetOrdersData.sort((a, b) => (tsToDate(b.orderedAt) || 0) - (tsToDate(a.orderedAt) || 0));
+        invalidateShareCache();
+        renderSheetCatalogSubscriber();
+        renderMySheetOrders();
+        renderSubscriberPanel();
+      }
+    ));
+  } else if (isAdmin) {
+    activeUnsubscribes.push(onSnapshot(collection(db, "sheetOrders"), (snap) => {
+      sheetOrdersData = [];
+      snap.forEach(d => sheetOrdersData.push({ id: d.id, ...d.data() }));
+      sheetOrdersData.sort((a, b) => (tsToDate(b.orderedAt) || 0) - (tsToDate(a.orderedAt) || 0));
+      invalidateShareCache();
+      if (isTreasurer)  renderSheetOrdersTreasurer();
+      if (isGirlsAdmin) renderGirlsAdminPanel();
+      if (isBoysAdmin)  renderBoysAdminPanel();
+      renderStudents();
+      renderSummary();
+      window.maybeAutoDownloadReceiversPDF();
+    }));
+  }
 }
 
-// Detaches every listener started in startListeners(). Called on logout so a signed-out (or
-// switched-to-a-different-account) tab stops consuming Firestore reads in the background —
-// previously listeners just kept running forever once started, even after signOut().
 function stopListeners() {
   activeUnsubscribes.forEach(unsub => { try { unsub(); } catch (_) {} });
   activeUnsubscribes = [];
   listenersStarted = false;
+  if (_recomputeTimer) { clearTimeout(_recomputeTimer); _recomputeTimer = null; }
+  invalidateShareCache();
 }
 
-// ============ SUBSCRIBER MANAGEMENT (WRITES) ============
+// ============ SUBSCRIBER MANAGEMENT ============
 window.addStudent = async () => {
   const name = document.getElementById('new-student-name').value.trim();
   const roll = parseInt(document.getElementById('new-student-roll').value);
   const mobile = document.getElementById('new-student-mobile').value.trim();
-  const gender = document.getElementById('new-student-gender').value; // 'male' | 'female'
+  const gender = document.getElementById('new-student-gender').value;
   if (!name || !roll) { alert("Please enter both name and roll number."); return; }
   await setDoc(doc(db, "students", roll.toString()), {
     name, roll, mobile: mobile || "", gender, addedBy: currentTreasurerName, addedAt: serverTimestamp()
@@ -1525,7 +1317,6 @@ window.addStudent = async () => {
   document.getElementById('new-student-mobile').value = "";
 };
 
-// Fix/adjust the gender on an existing subscriber (e.g. legacy records added before this field existed)
 window.updateStudentGender = async (roll, gender) => {
   try {
     await updateDoc(doc(db, "students", roll.toString()), { gender });
@@ -1547,8 +1338,9 @@ window.deleteStudent = async (roll) => {
 // ============ RENDERING ============
 function renderStudentRows() {
   const tbody = document.getElementById('student-body');
+  if (!tbody) return;
   if (!students.length) {
-    tbody.innerHTML = `<tr><td colspan="9" class="activity-meta">No subscribers added yet. Use the form above to add one.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="activity-meta">No subscribers added yet.</td></tr>`;
     return;
   }
   tbody.innerHTML = students.map(s => `
@@ -1576,7 +1368,6 @@ function renderStudentRows() {
   `).join('');
 }
 
-// ---- helpers for time-aware equal-share splitting ----
 function tsToDate(ts) {
   if (!ts) return null;
   if (ts.toDate) return ts.toDate();
@@ -1584,8 +1375,6 @@ function tsToDate(ts) {
   return isNaN(d) ? null : d;
 }
 
-// Students who already existed (were added) at/by the given time. A student with no
-// addedAt (very old legacy record) is treated as always having been present.
 function eligibleStudentsAt(time) {
   return students.filter(s => {
     const addedAt = tsToDate(s.addedAt);
@@ -1594,15 +1383,6 @@ function eligibleStudentsAt(time) {
   });
 }
 
-// BUGFIX: previously a single global equal-share (totalSharedExpense / students.length) was
-// used for every subscriber. That meant adding a NEW subscriber instantly increased the
-// divisor and silently pulled everyone's (including the new subscriber's) share down while
-// retroactively charging the new subscriber for expenses recorded before they even joined.
-// Fix: each shared ("সবার সমান ভাগে") expense is split only among the subscribers who were
-// already on the list at the moment that expense was recorded. A subscriber added later is
-// simply not included in that split at all. Fund/donation offsets are applied chronologically
-// (oldest shared expense first) so a fund doesn't retroactively erase a cost that had already
-// been fully allocated before the fund arrived.
 function getSharedExpenseNetCosts() {
   const donationEvents = donationsData.map(d => ({ type: 'donation', amount: d.amount || 0, time: tsToDate(d.addedAt) || new Date(0) }));
   const expenseEvents = expensesData
@@ -1620,30 +1400,11 @@ function getSharedExpenseNetCosts() {
   return netCostById;
 }
 
-// Per-student equal share — only counts shared expenses recorded on/after the student's own
-// join date, split only among the subscribers who existed at that expense's time.
 function getEqualShareForStudent(roll) {
-  const student = students.find(s => s.roll === roll);
-  if (!student) return 0;
-  const joinTime = tsToDate(student.addedAt); // null = legacy, always included
-  const netCostById = getSharedExpenseNetCosts();
-  let share = 0;
-  expensesData
-    .filter(e => e.chargeType !== 'individual')
-    .forEach(e => {
-      const eTime = tsToDate(e.addedAt) || new Date(0);
-      if (joinTime && eTime < joinTime) return; // subscriber wasn't added yet — not charged
-      const net = netCostById[e.id] || 0;
-      if (net <= 0) return;
-      const eligible = eligibleStudentsAt(eTime);
-      const count = eligible.length || 1;
-      share += net / count;
-    });
-  return share;
+  const shares = _computeShareCache();
+  return shares[roll] || 0;
 }
 
-// kept for places that need a rough overall average (e.g. PDF summary row) — NOT used for
-// any individual subscriber's actual due/credit calculation anymore.
 function getEqualShare() {
   if (!students.length) return 0;
   const total = students.reduce((a, s) => a + getEqualShareForStudent(s.roll), 0);
@@ -1660,11 +1421,6 @@ function getPersonalCharge(roll) {
   return individualExpenses + sheetCharges;
 }
 
-// ============ DUE LIMIT: a subscriber who owes more than this many taka can't place new
-// sheet orders until they pay down their balance. ============
-const DUE_ORDER_BLOCK_LIMIT = 20;
-
-// Positive = credit, negative = due. Same formula used everywhere the subscriber's balance is shown.
 function getSubscriberRemaining(roll) {
   const equalShare = getEqualShareForStudent(roll);
   const rec = collectionsData[roll];
@@ -1677,12 +1433,6 @@ function isOrderBlockedByDue(roll) {
   return getSubscriberRemaining(roll) < -DUE_ORDER_BLOCK_LIMIT;
 }
 
-// How many taka worth of new sheets this subscriber may still order before their due would
-// cross the limit. (credit + limit) — e.g. balance -5 with a ৳20 limit leaves ৳15.
-function getOrderableAmount(roll) {
-  return Math.max(0, getSubscriberRemaining(roll) + DUE_ORDER_BLOCK_LIMIT);
-}
-
 function renderStudents() {
   students.forEach(s => {
     const equalShare = getEqualShareForStudent(s.roll);
@@ -1691,31 +1441,36 @@ function renderStudents() {
     const personalCharge = getPersonalCharge(s.roll);
 
     const totalEl = document.getElementById(`total-${s.roll}`);
-    if (totalEl) totalEl.textContent = "৳" + amount.toFixed(2);
+    if (totalEl) {
+      const txt = "৳" + amount.toFixed(2);
+      if (totalEl.textContent !== txt) totalEl.textContent = txt;
+    }
 
     const remaining = amount - equalShare - personalCharge;
     const remEl = document.getElementById(`rem-${s.roll}`);
     if (remEl) {
       const title = personalCharge > 0 ? `এর মধ্যে ব্যক্তিগত চার্জ: ৳${personalCharge.toFixed(2)}` : "";
-      remEl.title = title;
-      remEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
-      remEl.className = "num " + (remaining >= 0 ? "due-pos" : "due-neg");
+      if (remEl.title !== title) remEl.title = title;
+      const txt = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
+      const cls = "num " + (remaining >= 0 ? "due-pos" : "due-neg");
+      if (remEl.textContent !== txt) remEl.textContent = txt;
+      if (remEl.className !== cls) remEl.className = cls;
     }
+
     const updEl = document.getElementById(`upd-${s.roll}`);
     if (updEl) {
+      let txt = "—";
       if (rec && rec.updatedBy) {
         const t = rec.updatedAt && rec.updatedAt.toDate ? rec.updatedAt.toDate().toLocaleDateString('en-US') : "";
         const count = rec.paymentCount ? ` (${rec.paymentCount} entries)` : "";
-        updEl.textContent = `${rec.updatedBy} ${t ? "· " + t : ""}${count}`;
-      } else {
-        updEl.textContent = "—";
+        txt = `${rec.updatedBy} ${t ? "· " + t : ""}${count}`;
       }
+      if (updEl.textContent !== txt) updEl.textContent = txt;
     }
   });
   if (currentUserRole === 'subscriber') renderSubscriberPanel();
 }
 
-// ============ SUBSCRIBER DASHBOARD ============
 function renderSubscriberPanel() {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   const roll = currentSubscriberRoll;
@@ -1726,10 +1481,23 @@ function renderSubscriberPanel() {
   const personalCharge = getPersonalCharge(roll);
   const remaining = amount - equalShare - personalCharge;
 
+  // ⭐ Due warning banner
+  const warnEl = document.getElementById('subscriber-due-warning');
+  const warnText = document.getElementById('subscriber-due-warning-text');
+  if (warnEl && warnText) {
+    if (isOrderBlockedByDue(roll)) {
+      const dueAmount = Math.abs(remaining).toFixed(2);
+      warnEl.style.display = 'block';
+      warnText.textContent = ` আপনার বকেয়া ৳${dueAmount} (সীমা ৳${DUE_ORDER_BLOCK_LIMIT})। নতুন শিট অর্ডার করতে Treasurer-এর কাছে টাকা জমা দিন।`;
+    } else {
+      warnEl.style.display = 'none';
+    }
+  }
+
   const subEl = document.getElementById('subscriber-account-sub');
   if (subEl) subEl.textContent = student ? `${student.name} · Roll ${student.roll}${student.mobile ? ' · ' + student.mobile : ''}` : `Roll ${roll}`;
 
-  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const set = (id, val) => { const el = document.getElementById(id); if (el && el.textContent !== val) el.textContent = val; };
   set('sub-total-collected', "৳" + amount.toFixed(2));
   set('sub-total-expense', "৳" + (equalShare + personalCharge).toFixed(2));
   const dueEl = document.getElementById('sub-due-credit');
@@ -1760,10 +1528,11 @@ function renderSummary() {
   const totalSheetCharges = sheetOrdersData.reduce((a, o) => a + (o.price || 0), 0);
   const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0) + totalSheetCharges;
   const balance = totalCollection + totalDonation - totalExpense;
-  document.getElementById('sum-collection').textContent = "৳" + totalCollection.toFixed(2);
-  document.getElementById('sum-donation').textContent = "৳" + totalDonation.toFixed(2);
-  document.getElementById('sum-expense').textContent = "৳" + totalExpense.toFixed(2);
-  document.getElementById('sum-balance').textContent = "৳" + balance.toFixed(2);
+  const setTxt = (id, v) => { const el = document.getElementById(id); if (el && el.textContent !== v) el.textContent = v; };
+  setTxt('sum-collection', "৳" + totalCollection.toFixed(2));
+  setTxt('sum-donation', "৳" + totalDonation.toFixed(2));
+  setTxt('sum-expense', "৳" + totalExpense.toFixed(2));
+  setTxt('sum-balance', "৳" + balance.toFixed(2));
   const pendingReceiveEl = document.getElementById('dashboard-pending-receive-count');
   if (pendingReceiveEl) {
     pendingReceiveEl.textContent = String(sheetOrdersData.filter(o => o.printed && !o.received).length);
@@ -1771,8 +1540,6 @@ function renderSummary() {
   renderGenderSummary();
 }
 
-// Admin dashboard: total accounts broken down by ছেলে (boys) / মেয়ে (girls) — subscriber count,
-// total collected, and their combined running balance (credit/due).
 function getGenderTotals(gender) {
   const list = students.filter(s => s.gender === gender);
   const totalCollected = list.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
@@ -1781,12 +1548,14 @@ function getGenderTotals(gender) {
 }
 
 function renderGenderSummary() {
-  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setText = (id, val) => { const el = document.getElementById(id); if (el && el.textContent !== val) el.textContent = val; };
   const setBalance = (id, val) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.textContent = (val >= 0 ? "৳" : "-৳") + Math.abs(val).toFixed(2);
-    el.style.color = val >= 0 ? 'var(--green)' : 'var(--red)';
+    const txt = (val >= 0 ? "৳" : "-৳") + Math.abs(val).toFixed(2);
+    if (el.textContent !== txt) el.textContent = txt;
+    const c = val >= 0 ? 'var(--green)' : 'var(--red)';
+    if (el.style.color !== c) el.style.color = c;
   };
   const boys = getGenderTotals('male');
   const girls = getGenderTotals('female');
@@ -1799,7 +1568,9 @@ function renderGenderSummary() {
 }
 
 function renderDonations() {
-  document.getElementById('donation-list').innerHTML = donationsData.map(d => {
+  const el = document.getElementById('donation-list');
+  if (!el) return;
+  el.innerHTML = donationsData.map(d => {
     const t = d.addedAt && d.addedAt.toDate ? d.addedAt.toDate().toLocaleDateString('en-US') : "...";
     return `<tr>
       <td class="activity-meta">${t}</td>
@@ -1812,7 +1583,9 @@ function renderDonations() {
 }
 
 function renderExpenses() {
-  document.getElementById('expense-list').innerHTML = expensesData.map(e => {
+  const el = document.getElementById('expense-list');
+  if (!el) return;
+  el.innerHTML = expensesData.map(e => {
     let chargedTo;
     if (e.chargeType === 'individual') {
       const isViewerTheTarget = currentUserRole === 'subscriber' && currentSubscriberRoll === e.targetRoll;
@@ -1834,8 +1607,10 @@ function renderExpenses() {
 }
 
 function renderActivity() {
+  const el = document.getElementById('activity-feed');
+  if (!el) return;
   const iconClass = { payment: "pay", donation: "don", expense: "exp" };
-  document.getElementById('activity-feed').innerHTML = activityData.map(a => {
+  el.innerHTML = activityData.map(a => {
     const t = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().toLocaleString('en-US') : "just now";
     return `<div class="activity-item">
       <div class="activity-dot ${iconClass[a.type] || 'pay'}"></div>
@@ -1847,12 +1622,7 @@ function renderActivity() {
   }).join('') || `<div class="activity-meta">No activity yet.</div>`;
 }
 
-// ============ LECTURE SHEETS (RENDER) ============
-
-// Groups a list of sheets by subject, then sorts each group by card# (serial),
-// then title. Sheets without a subject fall into "সাধারণ" and sort to the end.
-// This only affects display order — it never mutates sheetsData itself, so
-// nothing else that reads sheetsData (orders, PDF report, etc.) is affected.
+// ============ LECTURE SHEETS ============
 function getGroupedSheets(list) {
   const FALLBACK = 'সাধারণ';
   const groups = {};
@@ -1878,7 +1648,6 @@ function getGroupedSheets(list) {
   return subjects.map(subject => ({ subject, sheets: groups[subject] }));
 }
 
-// Treasurer: the catalog list (subject, card#, title, price, delete button)
 function renderSheetCatalogTreasurer() {
   const tbody = document.getElementById('sheet-catalog-body');
   if (!tbody) return;
@@ -1891,12 +1660,11 @@ function renderSheetCatalogTreasurer() {
       <td class="activity-meta">${s.pages ? s.pages + ' পেজ · ' + sheetBreakdownLabel(s.pages) : '—'}</td>
       <td class="num">৳${(s.price || 0).toFixed(2)}</td>
       <td class="activity-meta">${s.addedBy || ''}</td>
-      <td><button class="icon-btn edit" onclick="editSheet('${s.id}')" title="সম্পাদনা করুন">✎</button> <button class="icon-btn" onclick="deleteSheet('${s.id}')" title="মুছে ফেলুন">✕</button></td>
+      <td><button class="icon-btn edit" onclick="editSheet('${s.id}')">✎</button> <button class="icon-btn" onclick="deleteSheet('${s.id}')">✕</button></td>
     </tr>
   `).join('')).join('') || `<tr><td colspan="7" class="activity-meta">এখনো কোনো লেকচার শিট যোগ করা হয়নি।</td></tr>`;
 }
 
-// Subscriber: selectable list of sheets with checkboxes, disabled/checked for already-ordered ones
 function renderSheetCatalogSubscriber() {
   const box = document.getElementById('sheet-select-list');
   if (!box || currentUserRole !== 'subscriber') return;
@@ -1909,11 +1677,18 @@ function renderSheetCatalogSubscriber() {
   if (notice) {
     if (dueBlocked) {
       const remaining = getSubscriberRemaining(currentSubscriberRoll);
+      const dueAmount = Math.abs(remaining).toFixed(2);
+      const needToDeposit = (remaining + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
       notice.classList.remove('hidden');
       notice.style.background = 'var(--red-bg)';
       notice.style.color = 'var(--red)';
       notice.style.borderColor = 'var(--red)';
-      notice.textContent = `⛔ আপনার বাকি ৳${Math.abs(remaining).toFixed(2)}, যা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি — তাই এখন নতুন শিট অর্ডার করা যাচ্ছে না। আগে বকেয়া পরিশোধ করুন।`;
+      notice.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div>⛔ <strong>আপনার বকেয়া ৳${dueAmount}</strong> — অনুমোদিত সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি।</div>
+          <div style="font-size:.78rem;font-weight:500;">💡 নতুন শিট অর্ডার করতে হলে কমপক্ষে <strong>৳${needToDeposit}</strong> জমা দিয়ে বকেয়া ৳${DUE_ORDER_BLOCK_LIMIT} টাকার নিচে নামাতে হবে। Treasurer-এর সাথে যোগাযোগ করুন।</div>
+        </div>
+      `;
     } else {
       notice.style.background = '';
       notice.style.color = '';
@@ -1977,18 +1752,15 @@ function renderSheetCatalogSubscriber() {
     </div>
   `).join('');
 
-  // reflect "checked" highlight state on load (in case of re-render after a partial selection)
   box.querySelectorAll('.sheet-check:checked').forEach(cb => cb.closest('.sheet-card').classList.add('checked'));
   updateSheetOrderSummary();
 }
 
-// Toggle the visual "checked" state of a card and refresh the live selection summary
 window.onSheetCheckChange = (cb) => {
   cb.closest('.sheet-card').classList.toggle('checked', cb.checked);
   updateSheetOrderSummary();
 };
 
-// Live count + total of currently-checked (not-yet-ordered) sheets
 function updateSheetOrderSummary() {
   const countEl = document.getElementById('sheet-selected-count');
   const totalEl = document.getElementById('sheet-selected-total');
@@ -2000,7 +1772,6 @@ function updateSheetOrderSummary() {
   totalEl.textContent = '৳' + total.toFixed(2);
 }
 
-// Subscriber: their own order history
 function renderMySheetOrders() {
   const tbody = document.getElementById('my-sheet-orders-body');
   if (!tbody || currentUserRole !== 'subscriber') return;
@@ -2020,14 +1791,10 @@ function renderMySheetOrders() {
   }).join('') || `<tr><td colspan="5" class="activity-meta">এখনো কোনো শিট অর্ডার করা হয়নি।</td></tr>`;
 }
 
-// Subscriber confirms they've personally received a printed sheet — a one-way action (can't be
-// undone from here) that updates ONLY that subscriber's own order/copy, exactly like the
-// treasurer/girls-admin checkbox does for theirs. Firestore rules restrict this so a subscriber
-// can only flip received false->true on their own order and touch nothing else.
 window.markMyOrderReceived = async (orderId) => {
   const order = sheetOrdersData.find(o => o.id === orderId && o.roll === currentSubscriberRoll);
   if (!order || order.received) return;
-  if (!confirm(`আপনি কি "${order.sheetTitle}" শিটটি বুঝে পেয়েছেন? এটি একবার নিশ্চিত করার পর আর পরিবর্তন করা যাবে না।`)) return;
+  if (!confirm(`আপনি কি "${order.sheetTitle}" শিটটি বুঝে পেয়েছেন?`)) return;
   const student = students.find(s => s.roll === currentSubscriberRoll);
   try {
     await updateDoc(doc(db, "sheetOrders", orderId), {
@@ -2039,9 +1806,6 @@ window.markMyOrderReceived = async (orderId) => {
   }
 };
 
-// ---- batch key list & filter (treasurer's order panel) ----
-// Each entry is a distinct "businessDate#seq" print batch. Sorted newest date first, and within
-// the same date, highest (most recently opened) batch number first.
 function getDistinctBatchKeys() {
   const set = new Set(sheetOrdersData.map(o => orderBatchKey(o)).filter(Boolean));
   return Array.from(set).sort((a, b) => {
@@ -2057,18 +1821,10 @@ function orderStatusLabel(o) {
     : (o.printed ? '<span style="color:var(--gold);font-weight:600;">প্রিন্ট সম্পন্ন</span>' : '<span class="activity-meta">পেন্ডিং</span>');
 }
 
-// A personal (girls-admin, no-charge) order has no roll — label it clearly instead of "Roll null"
 function orderRollTag(o) {
   return o.personal ? '(এডমিন - ব্যক্তিগত)' : `(Roll ${o.roll})`;
 }
 
-// Populates a "প্রাপ্তি স্বীকার" checklist's date & sheet <select> filters from the given order
-// pool, and returns the subset of orders matching whatever ends up selected. Replaces the old
-// "dump everything at once" behaviour — the treasurer/girls-admin now picks a date (and,
-// optionally, a specific sheet within that date) before seeing rows, instead of scrolling through
-// every batch and every sheet at once. Passing dateFilter/sheetFilter in (rather than reading
-// state directly) keeps this a pure function of its inputs; the caller is responsible for saving
-// the returned effective values back into its own state variable.
 function applyReceivedFilters(orders, dateSelectEl, sheetSelectEl, dateFilter, sheetFilter) {
   const dateKeys = Array.from(new Set(orders.map(o => o.businessDate).filter(Boolean))).sort().reverse();
   if (dateSelectEl) {
@@ -2093,12 +1849,6 @@ function applyReceivedFilters(orders, dateSelectEl, sheetSelectEl, dateFilter, s
   return { filtered, effectiveDateFilter, effectiveSheetFilter };
 }
 
-// Shared "received" checklist renderer — used by both the treasurer's panel (all genders) and
-// the girls-admin panel (female only). Grouped by batch date, then by sheet name.
-// IMPORTANT: the sort key never depends on o.received — earlier this list re-sorted "pending
-// first" on every tick, so the instant someone checked a box the whole list reshuffled under
-// their finger and they'd end up mis-tapping a *different* row right after. Sorting only by
-// date/sheet/name keeps every row's position fixed regardless of its checked state.
 function renderGroupedReceivedChecklist(orders, tbodyId, showGenderCol, pendingOnly, countElId) {
   const tbody = document.getElementById(tbodyId);
   if (!tbody) return;
@@ -2110,12 +1860,12 @@ function renderGroupedReceivedChecklist(orders, tbodyId, showGenderCol, pendingO
   }
   const visibleOrders = pendingOnly ? orders.filter(o => !o.received) : orders;
   if (!visibleOrders.length) {
-    tbody.innerHTML = `<tr><td colspan="${colspan}" class="activity-meta">${pendingOnly ? 'চমৎকার — বাছাইকৃত তালিকায় সবাই ইতিমধ্যে বুঝে পেয়েছে।' : 'এই তারিখ/শিটের জন্য কোনো প্রিন্ট-সম্পন্ন অর্ডার পাওয়া যায়নি — অন্য তারিখ বা শিট বেছে নিন, অথবা "সব তারিখ" / "সব শিট" রাখুন।'}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${colspan}" class="activity-meta">${pendingOnly ? 'সবাই ইতিমধ্যে বুঝে পেয়েছে।' : 'কোনো প্রিন্ট-সম্পন্ন অর্ডার পাওয়া যায়নি।'}</td></tr>`;
     return;
   }
   orders = visibleOrders;
   const sorted = [...orders].sort((a, b) => {
-    const dcmp = (b.businessDate || '').localeCompare(a.businessDate || ''); // newest batch first
+    const dcmp = (b.businessDate || '').localeCompare(a.businessDate || '');
     if (dcmp !== 0) return dcmp;
     const scmp = (a.sheetTitle || '').localeCompare(b.sheetTitle || '', 'bn');
     if (scmp !== 0) return scmp;
@@ -2128,7 +1878,7 @@ function renderGroupedReceivedChecklist(orders, tbodyId, showGenderCol, pendingO
     if (o.businessDate !== lastDate) {
       html += `<tr><td colspan="${colspan}" style="background:var(--bg);font-weight:700;padding:10px 8px 6px;">📅 ${o.businessDate ? formatBusinessDateLabel(o.businessDate) : 'তারিখ নেই'}</td></tr>`;
       lastDate = o.businessDate;
-      lastSheet = null; // force sheet header to reprint under the new date
+      lastSheet = null;
     }
     if (o.sheetTitle !== lastSheet) {
       html += `<tr><td colspan="${colspan}" style="color:var(--ink-soft);font-size:.82rem;font-weight:600;padding:6px 8px 6px 20px;">📄 ${o.sheetTitle}</td></tr>`;
@@ -2157,7 +1907,7 @@ window.onOrderDateFilterChange = () => {
 window.onReceivedDateFilterChange = () => {
   const sel = document.getElementById('received-date-select');
   currentReceivedDateFilter = sel ? sel.value : 'all';
-  currentReceivedSheetFilter = 'all'; // sheet list depends on date — reset so an old pick doesn't linger
+  currentReceivedSheetFilter = 'all';
   renderSheetOrdersTreasurer();
 };
 window.onReceivedSheetFilterChange = () => {
@@ -2166,9 +1916,6 @@ window.onReceivedSheetFilterChange = () => {
   renderSheetOrdersTreasurer();
 };
 
-// Treasurer: batch-date picker + grouped view + detailed view (both scoped to the selected
-// batch) + a received checklist so a sheet requested by several subscribers at once is
-// immediately visible for batch printing.
 function renderSheetOrdersTreasurer() {
   const detailBody = document.getElementById('sheet-orders-detail-body');
   const groupedBody = document.getElementById('sheet-orders-grouped-body');
@@ -2178,7 +1925,7 @@ function renderSheetOrdersTreasurer() {
   const batchKeys = getDistinctBatchKeys();
   const today = currentBusinessDateKey();
   const todayCurrentKey = `${today}#${currentBatchSeqFor(today)}`;
-  if (!batchKeys.includes(todayCurrentKey)) batchKeys.unshift(todayCurrentKey); // always allow picking today's (possibly empty) open batch
+  if (!batchKeys.includes(todayCurrentKey)) batchKeys.unshift(todayCurrentKey);
   batchKeys.sort((a, b) => {
     const pa = parseBatchKey(a), pb = parseBatchKey(b);
     if (pa.businessDate !== pb.businessDate) return pb.businessDate.localeCompare(pa.businessDate);
@@ -2196,7 +1943,6 @@ function renderSheetOrdersTreasurer() {
     return `<option value="${key}">${formatBatchLabel(d, seq, tag)} — ${count} অর্ডার</option>`;
   }).join('');
   dateSelect.value = currentOrderDateFilter;
-  if (dateSelect.value !== currentOrderDateFilter) dateSelect.selectedIndex = 0; // fallback safety
 
   const batchOrders = sheetOrdersData.filter(o => orderBatchKey(o) === currentOrderDateFilter);
 
@@ -2238,10 +1984,6 @@ function renderSheetOrdersTreasurer() {
     markBtn.textContent = pendingPrintCount === 0 ? '✓ এই ব্যাচ প্রিন্ট সম্পন্ন' : `✓ প্রিন্ট সম্পন্ন চিহ্নিত করুন (${pendingPrintCount})`;
   }
 
-  // received checklist — printed orders, both genders, narrowed to the date/sheet chosen in the
-  // filter selects above (see applyReceivedFilters); grouping within that subset still goes by
-  // date then sheet name (see renderGroupedReceivedChecklist for why it never resorts by
-  // received status)
   const receivedDateSel = document.getElementById('received-date-select');
   const receivedSheetSel = document.getElementById('received-sheet-select');
   const { filtered: receivedFiltered, effectiveDateFilter, effectiveSheetFilter } = applyReceivedFilters(
@@ -2259,26 +2001,19 @@ window.onTreasurerPendingOnlyToggle = () => {
   renderSheetOrdersTreasurer();
 };
 
-// Wrappers so inline onclick (which runs outside module scope) can reach the
-// module-scoped currentOrderDateFilter variable safely.
 window.markCurrentBatchPrinted = () => window.markOrdersPrinted(currentOrderDateFilter);
 window.downloadCurrentBatchPDF = () => window.downloadOrdersPDF(currentOrderDateFilter);
 
-// Marks every un-printed order in the given batch (businessDate#seq) as printed, then advances
-// that business date's batch counter — so any order placed after this point (even later the same
-// business date) automatically starts a brand-new batch instead of mixing into this one.
 window.markOrdersPrinted = async (batchKey) => {
   if (!batchKey) return;
   const { businessDate, seq } = parseBatchKey(batchKey);
   const toMark = sheetOrdersData.filter(o => orderBatchKey(o) === batchKey && !o.printed);
   if (!toMark.length) { alert("এই ব্যাচের সব অর্ডার ইতিমধ্যে প্রিন্ট সম্পন্ন চিহ্নিত করা আছে।"); return; }
-  if (!confirm(`${formatBatchLabel(businessDate, seq)}-এর ${toMark.length}টি অর্ডার প্রিন্ট সম্পন্ন হিসেবে চিহ্নিত করবেন? এরপর নতুন যেকোনো অর্ডার এই তারিখের একটি নতুন (পরবর্তী) ব্যাচ হিসেবে গণনা হবে।`)) return;
+  if (!confirm(`${formatBatchLabel(businessDate, seq)}-এর ${toMark.length}টি অর্ডার প্রিন্ট সম্পন্ন হিসেবে চিহ্নিত করবেন?`)) return;
   try {
     await Promise.all(toMark.map(o => updateDoc(doc(db, "sheetOrders", o.id), {
       printed: true, printedAt: serverTimestamp(), printedBy: currentTreasurerName
     })));
-    // Only advance the counter if this WAS the currently-open batch for that date (marking an
-    // already-closed older batch printed shouldn't reopen/skip batch numbers).
     if (seq >= currentBatchSeqFor(businessDate)) {
       await setDoc(doc(db, "batchCounters", businessDate), {
         currentSeq: increment(1), updatedBy: currentTreasurerName, updatedAt: serverTimestamp()
@@ -2289,17 +2024,13 @@ window.markOrdersPrinted = async (batchKey) => {
   }
 };
 
-// "প্রাপ্তি স্বীকার" (received) checkboxes are ONE-WAY: once checked, the box is rendered
-// `disabled` so it physically can't be unchecked from the UI. This handler only ever runs for
-// the check (false -> true) transition, and asks for confirmation before writing since it can't
-// be undone afterwards.
 window.toggleOrderReceived = async (orderId, checkboxEl) => {
-  if (!checkboxEl.checked) return; // guard — shouldn't fire since the box is disabled once received
-  if (!confirm("নিশ্চিত করছেন এই শিটটি বুঝে পেয়েছে? একবার টিক দেওয়ার পর এটি আর পরিবর্তন/আনটিক করা যাবে না।")) {
+  if (!checkboxEl.checked) return;
+  if (!confirm("নিশ্চিত করছেন এই শিটটি বুঝে পেয়েছে? একবার টিক দেওয়ার পর এটি আর পরিবর্তন করা যাবে না।")) {
     checkboxEl.checked = false;
     return;
   }
-  checkboxEl.disabled = true; // lock immediately so a second click can't slip through before the write completes
+  checkboxEl.disabled = true;
   try {
     await updateDoc(doc(db, "sheetOrders", orderId), {
       received: true, receivedAt: serverTimestamp(), receivedBy: currentTreasurerName
@@ -2311,14 +2042,13 @@ window.toggleOrderReceived = async (orderId, checkboxEl) => {
   }
 };
 
-// ============ GIRLS ADMIN DASHBOARD ============
+// ============ GIRLS ADMIN ============
 function getGirlsTotals() {
   const femaleStudents = students.filter(s => s.gender === 'female');
   const totalCollected = femaleStudents.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
   return { count: femaleStudents.length, totalCollected };
 }
 
-// Girls admin: payment-entry table, restricted to female subscribers only (also enforced server-side)
 function renderGirlsAdminStudentRows() {
   const tbody = document.getElementById('girls-admin-student-body');
   if (!tbody) return;
@@ -2374,8 +2104,6 @@ window.addPaymentGirlsAdmin = async (roll) => {
   }
 };
 
-// Girls admin: her own personal sheet catalog — selecting & confirming here never charges
-// any subscriber (order docs are created with roll: null, personal: true)
 function renderGirlsAdminSheetCatalog() {
   const box = document.getElementById('girls-admin-sheet-select-list');
   if (!box || currentUserRole !== 'girls_admin') return;
@@ -2392,7 +2120,6 @@ function renderGirlsAdminSheetCatalog() {
   if (confirmBtn) {
     confirmBtn.disabled = !windowOpen;
     confirmBtn.style.opacity = windowOpen ? '1' : '.55';
-    confirmBtn.style.cursor = windowOpen ? 'pointer' : 'not-allowed';
   }
 
   if (!sheetsData.length) {
@@ -2428,10 +2155,7 @@ window.confirmGirlsAdminPersonalOrder = async () => {
   const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
   const names = chosenSheets.map(s => s.title).join(', ');
   const businessDate = currentBusinessDateKey();
-  const cutoffNote = isPastCutoffNow()
-    ? `\n\n⏰ ${formatHourLabel(orderConfig.cutoffHour)} পার হয়ে গেছে, তাই এই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`
-    : `\n\nএই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`;
-  if (!confirm(`নিচের শিটগুলো আপনার ব্যক্তিগত অর্ডার হিসেবে বসাতে চান? এতে কোনো সাবস্ক্রাইবারের হিসাব থেকে টাকা কাটা হবে না।\n\n${names}${cutoffNote}`)) return;
+  if (!confirm(`নিচের শিটগুলো আপনার ব্যক্তিগত অর্ডার হিসেবে বসাতে চান?\n\n${names}\n\nএই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`)) return;
 
   const batchSeq = currentBatchSeqFor(businessDate);
   try {
@@ -2457,7 +2181,6 @@ window.confirmGirlsAdminPersonalOrder = async () => {
   }
 };
 
-// Girls admin: her own personal order history
 function renderGirlsAdminMyOrders() {
   const tbody = document.getElementById('girls-admin-my-orders-body');
   if (!tbody || currentUserRole !== 'girls_admin') return;
@@ -2476,7 +2199,7 @@ function renderGirlsAdminMyOrders() {
 function renderGirlsAdminPanel() {
   if (currentUserRole !== 'girls_admin') return;
   const { count, totalCollected } = getGirlsTotals();
-  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setText = (id, val) => { const el = document.getElementById(id); if (el && el.textContent !== val) el.textContent = val; };
   setText('girls-count', count);
   setText('girls-total-collected', "৳" + totalCollected.toFixed(2));
 
@@ -2514,7 +2237,7 @@ window.onGirlsReceivedSheetFilterChange = () => {
   renderGirlsAdminPanel();
 };
 
-// ============ BOYS (ছেলেদের) ADMIN DASHBOARD — mirrors the girls-admin logic above, scoped to gender:'male' ============
+// ============ BOYS ADMIN ============
 function getBoysTotals() {
   const maleStudents = students.filter(s => s.gender === 'male');
   const totalCollected = maleStudents.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
@@ -2576,8 +2299,6 @@ window.addPaymentBoysAdmin = async (roll) => {
   }
 };
 
-// Boys admin: his own personal sheet catalog — selecting & confirming here never charges
-// any subscriber (order docs are created with roll: null, personal: true)
 function renderBoysAdminSheetCatalog() {
   const box = document.getElementById('boys-admin-sheet-select-list');
   if (!box || currentUserRole !== 'chele_admin') return;
@@ -2594,7 +2315,6 @@ function renderBoysAdminSheetCatalog() {
   if (confirmBtn) {
     confirmBtn.disabled = !windowOpen;
     confirmBtn.style.opacity = windowOpen ? '1' : '.55';
-    confirmBtn.style.cursor = windowOpen ? 'pointer' : 'not-allowed';
   }
 
   if (!sheetsData.length) {
@@ -2630,10 +2350,7 @@ window.confirmBoysAdminPersonalOrder = async () => {
   const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
   const names = chosenSheets.map(s => s.title).join(', ');
   const businessDate = currentBusinessDateKey();
-  const cutoffNote = isPastCutoffNow()
-    ? `\n\n⏰ ${formatHourLabel(orderConfig.cutoffHour)} পার হয়ে গেছে, তাই এই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`
-    : `\n\nএই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`;
-  if (!confirm(`নিচের শিটগুলো আপনার ব্যক্তিগত অর্ডার হিসেবে বসাতে চান? এতে কোনো সাবস্ক্রাইবারের হিসাব থেকে টাকা কাটা হবে না।\n\n${names}${cutoffNote}`)) return;
+  if (!confirm(`নিচের শিটগুলো আপনার ব্যক্তিগত অর্ডার হিসেবে বসাতে চান?\n\n${names}\n\nএই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`)) return;
 
   const batchSeq = currentBatchSeqFor(businessDate);
   try {
@@ -2659,7 +2376,6 @@ window.confirmBoysAdminPersonalOrder = async () => {
   }
 };
 
-// Boys admin: his own personal order history
 function renderBoysAdminMyOrders() {
   const tbody = document.getElementById('boys-admin-my-orders-body');
   if (!tbody || currentUserRole !== 'chele_admin') return;
@@ -2678,7 +2394,7 @@ function renderBoysAdminMyOrders() {
 function renderBoysAdminPanel() {
   if (currentUserRole !== 'chele_admin') return;
   const { count, totalCollected } = getBoysTotals();
-  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setText = (id, val) => { const el = document.getElementById(id); if (el && el.textContent !== val) el.textContent = val; };
   setText('boys-count', count);
   setText('boys-total-collected', "৳" + totalCollected.toFixed(2));
 
@@ -2716,9 +2432,7 @@ window.onBoysReceivedSheetFilterChange = () => {
   renderBoysAdminPanel();
 };
 
-// ============ ORDERS PDF (treasurer) ============
-// Printing-floor summary only: no subscriber names. Per sheet — total copies needed, plus a
-// boys/girls split. (Personal/admin orders have no gender and are counted only in the total.)
+// ============ PDFs ============
 window.downloadOrdersPDF = (batchKey) => {
   if (!batchKey) return;
   const { businessDate, seq } = parseBatchKey(batchKey);
@@ -2762,12 +2476,6 @@ window.downloadOrdersPDF = (batchKey) => {
   doc.save(`Sheet_Orders_${businessDate}_batch${seq}.pdf`);
 };
 
-// ============ RECEIVERS PDF (who receives which sheet — boys & girls listed separately) ============
-// Shared builder — split into a Boys table and a Girls table, each grouped by batch date then
-// sheet name, with received/pending status. Used both by the manual "কে কোন সিট রিসিভ করবে" button
-// (downloadReceiversPDF, below) and by the automatic end-of-order-window PDF
-// (maybeAutoDownloadReceiversPDF, further down) — mirrors the on-screen "প্রাপ্তি স্বীকার" checklist
-// but as a standalone, printable PDF.
 function buildReceiversPDF(orders, titleText, filenameSuffix) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -2822,16 +2530,10 @@ function buildReceiversPDF(orders, titleText, filenameSuffix) {
 
 window.downloadReceiversPDF = () => {
   const printedOrders = sheetOrdersData.filter(o => o.printed && (o.gender === 'male' || o.gender === 'female'));
-  if (!printedOrders.length) { alert("এখনো কোনো অর্ডার প্রিন্ট সম্পন্ন হয়নি — রিসিভ তালিকা তৈরি করার কিছু নেই।"); return; }
+  if (!printedOrders.length) { alert("এখনো কোনো অর্ডার প্রিন্ট সম্পন্ন হয়নি।"); return; }
   buildReceiversPDF(printedOrders, "Sheet Receivers List", localDateKey(new Date()));
 };
 
-// ============ TODAY'S RECEIVERS PDF — reusable across the automatic trigger and a manual button ============
-// Builds the boys/girls receivers PDF for TODAY's orders specifically (regardless of printed
-// status), since at order-close time most of the day's orders won't be marked "printed" yet.
-// Used both by maybeAutoDownloadReceiversPDF (automatic) and downloadTodayReceiversPDF (manual —
-// there are two treasurers, and either of them may need this same list several times a day, so
-// this always runs fresh on demand with no dedup/guard of its own).
 function generateTodayReceiversPDF() {
   const todayKey = localDateKey(new Date());
   const todaysOrders = sheetOrdersData.filter(o => {
@@ -2839,7 +2541,7 @@ function generateTodayReceiversPDF() {
     const t = tsToDate(o.orderedAt);
     return t && localDateKey(t) === todayKey;
   });
-  if (!todaysOrders.length) return false; // no orders came in today — nothing to generate
+  if (!todaysOrders.length) return false;
 
   buildReceiversPDF(
     todaysOrders,
@@ -2851,36 +2553,21 @@ function generateTodayReceiversPDF() {
 
 window.downloadTodayReceiversPDF = () => {
   const ok = generateTodayReceiversPDF();
-  if (!ok) alert("আজকে এখনো কোনো অর্ডার আসেনি — ডাউনলোড করার কিছু নেই।");
+  if (!ok) alert("আজকে এখনো কোনো অর্ডার আসেনি।");
 };
 
-// ============ AUTO RECEIVERS PDF — fires right after the order window closes ============
-// Subscribers can only place orders within the treasurer-configured window (orderConfig) daily.
-// Once the treasurer's browser is open at/after the window's end hour, we automatically build & download today's
-// receivers list (boys & girls, sheet-by-sheet) so nobody has to remember to click the button.
-//
-// This is a per-tab, in-memory guard only (autoReceiversFiredKey below) — NOT persisted to
-// localStorage. That's intentional: there are two treasurers, and the same list may legitimately
-// need downloading several times a day (a second treasurer opening the app on their own device,
-// someone reopening/refreshing the page after clearing their downloads, etc). The in-memory guard
-// only stops it from firing again and again every 60 seconds while a single tab stays open past
-// 5 PM — refreshing the page, opening a new tab, or being the *other* treasurer all get a fresh
-// automatic download. Anyone can also always pull it manually via downloadTodayReceiversPDF()
-// above, with no restriction at all.
 let autoReceiversFiredKey = null;
 window.maybeAutoDownloadReceiversPDF = () => {
   if (currentUserRole !== 'treasurer') return;
   const now = new Date();
-  if (now.getHours() < orderConfig.windowEndHour) return; // order window still open — nothing to do yet
+  if (now.getHours() < orderConfig.windowEndHour) return;
   const todayKey = localDateKey(now);
-  if (autoReceiversFiredKey === todayKey) return; // already auto-fired this tab session today
+  if (autoReceiversFiredKey === todayKey) return;
 
   const generated = generateTodayReceiversPDF();
   if (generated) autoReceiversFiredKey = todayKey;
 };
 
-// Subscriber: "কোন খাতে খরচ হচ্ছে" — everything currently counted in their due/credit,
-// broken down by purpose (their slice of each shared expense, any personal charges, sheet orders)
 function renderSubscriberExpenseBreakdown() {
   const tbody = document.getElementById('sub-expense-breakdown');
   if (!tbody || currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
@@ -2924,8 +2611,6 @@ function renderExpenseTargetOptions() {
   if (prev && students.some(s => String(s.roll) === prev)) sel.value = prev;
 }
 
-// Checkbox list for the "একাধিক সাবস্ক্রাইবার" bulk-charge option — keeps whichever boxes were
-// already checked when the student list re-renders (e.g. a new subscriber gets added mid-entry).
 function renderExpenseMultiTargetOptions() {
   const box = document.getElementById('expense-multi-target-list');
   if (!box) return;
@@ -2945,7 +2630,7 @@ window.onExpenseChargeTypeChange = () => {
   if (type === 'multiple') renderExpenseMultiTargetOptions();
 };
 
-// ============ LOGIN ACCOUNTS (treasurer creates/manages users directly from the app) ============
+// ============ LOGIN ACCOUNTS ============
 function roleLabel(role) {
   if (role === 'subscriber') return 'Subscriber';
   if (role === 'girls_admin') return 'মেয়েদের এডমিন';
@@ -2961,7 +2646,7 @@ function renderNewUserRollOptions() {
   const takenRolls = new Set(usersData.filter(u => u.role === 'subscriber' && u.roll != null).map(u => String(u.roll)));
   sel.innerHTML = students.map(s =>
     `<option value="${s.roll}" ${takenRolls.has(String(s.roll)) ? 'disabled' : ''}>${s.name} (Roll ${s.roll})${takenRolls.has(String(s.roll)) ? ' — আগে থেকেই অ্যাকাউন্ট আছে' : ''}</option>`
-  ).join('') || `<option value="">কোনো সাবস্ক্রাইবার নেই — আগে "সাবস্ক্রাইবার" ট্যাব থেকে যোগ করুন</option>`;
+  ).join('') || `<option value="">কোনো সাবস্ক্রাইবার নেই</option>`;
   if (prev && students.some(s => String(s.roll) === prev)) sel.value = prev;
 }
 
@@ -2970,11 +2655,6 @@ window.onNewUserRoleChange = () => {
   document.getElementById('new-user-roll-wrap').classList.toggle('hidden', role !== 'subscriber');
 };
 
-// Creates the Firebase Auth account AND the matching Firestore users/{uid} role doc in one
-// go, so the treasurer never has to open the Firebase Console. A brand-new, throwaway
-// secondary app instance is used for the sign-up call — the client SDK auto-signs-in as
-// whichever account was just created on a given auth instance, so without this isolation the
-// treasurer would get bumped out of their own session every time they added someone.
 window.addUserAccount = async () => {
   const name = document.getElementById('new-user-name').value.trim();
   const email = document.getElementById('new-user-email').value.trim();
@@ -2985,7 +2665,7 @@ window.addUserAccount = async () => {
 
   if (!name || !email || !password) { alert("নাম, ইমেইল ও পাসওয়ার্ড — সবগুলো দিন।"); return; }
   if (password.length < 6) { alert("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।"); return; }
-  if (role === 'subscriber' && !roll) { alert("Subscriber এর জন্য একজন সাবস্ক্রাইবার (Roll) নির্বাচন করুন।"); return; }
+  if (role === 'subscriber' && !roll) { alert("Subscriber এর জন্য একজন সাবস্ক্রাইবার নির্বাচন করুন।"); return; }
   if (role === 'subscriber' && usersData.some(u => u.role === 'subscriber' && u.roll === roll)) {
     alert("এই সাবস্ক্রাইবারের জন্য আগে থেকেই একটি অ্যাকাউন্ট আছে।"); return;
   }
@@ -3038,11 +2718,8 @@ function renderUsersList() {
   renderNewUserRollOptions();
 }
 
-// Deletes only the Firestore role doc — the Firebase Auth account itself is left intact so it
-// can be re-activated later with a fresh role, and so nobody is silently locked out of email
-// re-use. Once the doc is gone, applyLoggedInUser() falls back to "pending" for that account.
 window.revokeUserAccess = async (uid, label) => {
-  if (!confirm(`${label} এর অ্যাক্সেস বাতিল করতে চান? (পুনরায় role দিয়ে সক্রিয় করা যাবে)`)) return;
+  if (!confirm(`${label} এর অ্যাক্সেস বাতিল করতে চান?`)) return;
   try {
     await deleteDoc(doc(db, "users", uid));
   } catch (e) {
@@ -3060,10 +2737,6 @@ window.filterStudents = () => {
 };
 
 // ============ WRITES ============
-
-// Recompute each subscriber's running total from the legacy single-amount doc (if any, kept as
-// a starting balance) plus every additive payment ever recorded for that roll. This is the fix
-// for entries disappearing: nothing is ever overwritten, every entry only adds to the total.
 function recomputeCollections() {
   collectionsData = {};
   const rolls = new Set([
@@ -3094,10 +2767,14 @@ function recomputeCollections() {
       paymentCount: pays.length
     };
   });
+
+  invalidateShareCache();
+
   renderStudents();
   renderSummary();
-  renderGirlsAdminPanel();
-  renderBoysAdminPanel();
+  if (currentUserRole === 'girls_admin') renderGirlsAdminPanel();
+  if (currentUserRole === 'chele_admin') renderBoysAdminPanel();
+  if (currentUserRole === 'subscriber') renderSubscriberPanel();
 }
 
 window.addPayment = async (roll) => {
@@ -3141,17 +2818,14 @@ window.saveExpense = async () => {
   const amount = parseFloat(document.getElementById('expense-amount').value);
   if (!desc || !amount || amount <= 0) { alert("Please enter a description and a valid amount."); return; }
 
-  const chargeType = document.getElementById('expense-charge-type').value; // 'all' | 'individual' | 'multiple'
+  const chargeType = document.getElementById('expense-charge-type').value;
   const date = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  // "multiple" — same amount charged separately to each selected subscriber (not split/divided).
-  // Each subscriber gets their own "individual" expense doc, so it shows up on their personal
-  // ledger and breakdown exactly like a normal individual charge would.
   if (chargeType === 'multiple') {
     const checkedRolls = Array.from(document.querySelectorAll('.expense-multi-check:checked')).map(cb => parseInt(cb.value));
     if (!checkedRolls.length) { alert("অনুগ্রহ করে অন্তত একজন সাবস্ক্রাইবার নির্বাচন করুন।"); return; }
     const targets = checkedRolls.map(roll => students.find(s => s.roll === roll)).filter(Boolean);
-    if (!confirm(`${targets.length} জন সাবস্ক্রাইবারের প্রত্যেকের হিসাব থেকে ৳${amount.toFixed(2)} করে (সর্বমোট ৳${(amount * targets.length).toFixed(2)}) কাটা হবে — "${desc}"।\n\n${targets.map(t => t.name).join(', ')}\n\nনিশ্চিত করবেন?`)) return;
+    if (!confirm(`${targets.length} জন সাবস্ক্রাইবারের প্রত্যেকের হিসাব থেকে ৳${amount.toFixed(2)} করে কাটা হবে — "${desc}"।`)) return;
     try {
       await Promise.all(targets.map(t => addDoc(collection(db, "expenses"), {
         description: desc, amount, date, addedBy: currentTreasurerName, addedAt: serverTimestamp(),
@@ -3159,7 +2833,7 @@ window.saveExpense = async () => {
       })));
       await addDoc(collection(db, "activity"), {
         type: "expense", actor: currentTreasurerName,
-        detail: `৳${amount.toFixed(2)} করে "${desc}" — ${targets.length} জন সাবস্ক্রাইবারের প্রত্যেকের হিসাব থেকে একসাথে কাটা হয়েছে (${targets.map(t => t.name).join(', ')})`,
+        detail: `৳${amount.toFixed(2)} করে "${desc}" — ${targets.length} জনের থেকে একসাথে কাটা হয়েছে`,
         amount: amount * targets.length, createdAt: serverTimestamp()
       });
     } catch (e) {
@@ -3182,8 +2856,8 @@ window.saveExpense = async () => {
     await addDoc(collection(db, "activity"), {
       type: "expense", actor: currentTreasurerName,
       detail: chargeType === 'individual'
-        ? `ব্যক্তিগত খরচ ৳${amount.toFixed(2)} "${desc}" — শুধু ${targetName} (Roll ${targetRoll}) এর হিসাব থেকে কাটা হয়েছে`
-        : `Expense of ৳${amount.toFixed(2)} added for "${desc}" (সবার মধ্যে সমান ভাগ)`,
+        ? `ব্যক্তিগত খরচ ৳${amount.toFixed(2)} "${desc}" — ${targetName} (Roll ${targetRoll})`
+        : `Expense of ৳${amount.toFixed(2)} added for "${desc}"`,
       amount, createdAt: serverTimestamp()
     });
   }
@@ -3194,13 +2868,12 @@ window.saveExpense = async () => {
   onExpenseChargeTypeChange();
 };
 
-// ============ ORDER TIMING SETTINGS (treasurer-editable) ============
+// ============ ORDER TIMING SETTINGS ============
 function renderOrderTimingSettingsForm() {
   const s = document.getElementById('cfg-window-start');
   const e = document.getElementById('cfg-window-end');
   const c = document.getElementById('cfg-cutoff');
   const dsc = document.getElementById('cfg-discount');
-  // Don't stomp on whatever the treasurer is actively typing.
   if (s && document.activeElement !== s) s.value = orderConfig.windowStartHour;
   if (e && document.activeElement !== e) e.value = orderConfig.windowEndHour;
   if (c && document.activeElement !== c) c.value = orderConfig.cutoffHour;
@@ -3208,7 +2881,7 @@ function renderOrderTimingSettingsForm() {
   const preview = document.getElementById('cfg-preview');
   if (preview) {
     const discountNote = (orderConfig.discountPercent > 0) ? ` বর্তমানে সবার জন্য ${orderConfig.discountPercent}% ডিসকাউন্ট চালু আছে।` : '';
-    preview.textContent = `এখন অর্ডার নেওয়া হচ্ছে ${formatHourLabel(orderConfig.windowStartHour)} থেকে ${formatHourLabel(orderConfig.windowEndHour)} পর্যন্ত। ${formatHourLabel(orderConfig.cutoffHour)}-এর পরের অর্ডার পরের দিনের ব্যাচে যোগ হবে।${discountNote}`;
+    preview.textContent = `অর্ডার নেওয়া হচ্ছে ${formatHourLabel(orderConfig.windowStartHour)} থেকে ${formatHourLabel(orderConfig.windowEndHour)} পর্যন্ত। ${formatHourLabel(orderConfig.cutoffHour)}-এর পরের অর্ডার পরের দিনের ব্যাচে যোগ হবে।${discountNote}`;
   }
 }
 
@@ -3219,15 +2892,15 @@ window.saveOrderTimingSettings = async () => {
   const discountRaw = document.getElementById('cfg-discount').value;
   const discountPercent = discountRaw === '' ? 0 : parseFloat(discountRaw);
   if ([start, end, cutoff].some(v => isNaN(v) || v < 0 || v > 23)) {
-    alert("প্রতিটি ঘণ্টা অবশ্যই ০ থেকে ২৩ এর মধ্যে একটি সংখ্যা হতে হবে।");
+    alert("প্রতিটি ঘণ্টা ০ থেকে ২৩ এর মধ্যে হতে হবে।");
     return;
   }
   if (start >= end) {
-    alert("অর্ডার শুরুর সময় অবশ্যই শেষ সময়ের আগে হতে হবে।");
+    alert("শুরুর সময় শেষ সময়ের আগে হতে হবে।");
     return;
   }
   if (isNaN(discountPercent) || discountPercent < 0 || discountPercent > 100) {
-    alert("ডিসকাউন্ট অবশ্যই ০ থেকে ১০০ এর মধ্যে একটি সংখ্যা হতে হবে।");
+    alert("ডিসকাউন্ট ০ থেকে ১০০ এর মধ্যে হতে হবে।");
     return;
   }
   try {
@@ -3235,15 +2908,13 @@ window.saveOrderTimingSettings = async () => {
       windowStartHour: start, windowEndHour: end, cutoffHour: cutoff, discountPercent,
       updatedBy: currentTreasurerName, updatedAt: serverTimestamp()
     }, { merge: true });
-    alert("অর্ডার সময়সূচী সংরক্ষণ করা হয়েছে।");
+    alert("সংরক্ষণ করা হয়েছে।");
   } catch (e) {
     alert("সংরক্ষণ করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
   }
 };
 
 // ============ LECTURE SHEETS (WRITES) ============
-// Live price preview + breakdown while the treasurer fills in the "শিট যোগ করুন" form — price is
-// never typed by hand, it's always computed from page count (see computeSheetPrice above).
 window.updateNewSheetPricePreview = () => {
   const pages = parseInt(document.getElementById('new-sheet-pages').value, 10) || 0;
   const preview = document.getElementById('new-sheet-price-preview');
@@ -3252,8 +2923,6 @@ window.updateNewSheetPricePreview = () => {
   if (breakdown) breakdown.textContent = pages > 0 ? sheetBreakdownLabel(pages) : '';
 };
 
-// editingSheetId is null while adding a brand-new sheet; set to a sheet's id while the treasurer
-// is editing that sheet's name/subject/card/pages inline via the same form + button.
 let editingSheetId = null;
 
 window.cancelSheetEdit = () => {
@@ -3270,8 +2939,6 @@ window.cancelSheetEdit = () => {
   if (cancelBtn) cancelBtn.classList.add('hidden');
 };
 
-// Loads an existing sheet's info into the form above so the treasurer can change its name,
-// subject, card number, or page count — price recalculates automatically from the new page count.
 window.editSheet = (id) => {
   const s = sheetsData.find(x => x.id === id);
   if (!s) return;
@@ -3281,9 +2948,6 @@ window.editSheet = (id) => {
   document.getElementById('new-sheet-subject').value = s.subject || "";
   document.getElementById('new-sheet-card').value = (s.cardNo !== null && s.cardNo !== undefined) ? s.cardNo : "";
   window.updateNewSheetPricePreview();
-  // If this sheet's saved price doesn't match the auto-calculated price for its page count,
-  // it was manually overridden earlier — show that custom value so editing doesn't silently
-  // reset it back to the auto price.
   const autoPrice = computeSheetPrice(s.pages);
   document.getElementById('new-sheet-custom-price').value =
     (typeof s.price === 'number' && Math.abs(s.price - autoPrice) > 0.001) ? s.price : "";
@@ -3304,7 +2968,7 @@ window.addSheet = async () => {
   if (!pages || pages <= 0) { alert("সঠিক পেজ সংখ্যা লিখুন।"); return; }
   const customPriceRaw = document.getElementById('new-sheet-custom-price').value;
   const customPrice = customPriceRaw !== '' ? parseFloat(customPriceRaw) : null;
-  if (customPrice !== null && (isNaN(customPrice) || customPrice < 0)) { alert("কাস্টম দাম সঠিক একটি সংখ্যা হতে হবে।"); return; }
+  if (customPrice !== null && (isNaN(customPrice) || customPrice < 0)) { alert("কাস্টম দাম সঠিক হতে হবে।"); return; }
   const price = (customPrice !== null) ? customPrice : computeSheetPrice(pages);
   try {
     if (editingSheetId) {
@@ -3318,14 +2982,14 @@ window.addSheet = async () => {
         addedBy: currentTreasurerName, addedAt: serverTimestamp()
       });
     }
-    window.cancelSheetEdit(); // clears the form and resets the button back to "add" mode
+    window.cancelSheetEdit();
   } catch (e) {
     alert((editingSheetId ? "পরিবর্তন সংরক্ষণ করা যায়নি।" : "শিট যোগ করা যায়নি।") + " কারণ: " + (e && e.message ? e.message : e));
   }
 };
 
 window.deleteSheet = async (id) => {
-  if (!confirm("এই শিটটি লিস্ট থেকে সরিয়ে দিতে চান?")) return;
+  if (!confirm("এই শিটটি সরিয়ে দিতে চান?")) return;
   if (editingSheetId === id) window.cancelSheetEdit();
   try {
     await deleteDoc(doc(db, "sheets", id));
@@ -3334,17 +2998,28 @@ window.deleteSheet = async (id) => {
   }
 };
 
-// Subscriber confirms which checked sheets to order. Each order is its own document (a
-// subscriber can only ever create orders for their own roll — enforced by Firestore rules),
-// and its price is automatically added to that subscriber's personal charge (see getPersonalCharge).
+// ⭐ SUBSCRIBER ORDER CONFIRM — Due limit 20 check with deposit alert
 window.confirmSheetOrders = async () => {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   if (!isWithinOrderWindow()) { alert('⏰ ' + orderWindowMessage()); renderSheetCatalogSubscriber(); return; }
+
+  // ⛔ DUE LIMIT CHECK — ২০ টাকার বেশি হলে alert
   if (isOrderBlockedByDue(currentSubscriberRoll)) {
-    alert(`⛔ আপনার বাকি ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি হয়ে গেছে — তাই এখন নতুন শিট অর্ডার করা যাচ্ছে না। আগে বকেয়া পরিশোধ করুন।`);
+    const remaining = getSubscriberRemaining(currentSubscriberRoll);
+    const dueAmount = Math.abs(remaining).toFixed(2);
+    const needToDeposit = (remaining + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
+    alert(
+      `⛔ আপনার বকেয়া ৳${dueAmount} — অনুমোদিত সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি।\n\n` +
+      `📌 নতুন শিট অর্ডার করতে হলে আগে Treasurer-এর কাছে টাকা জমা দিয়ে বকেয়া কমাতে হবে।\n\n` +
+      `💰 আপনার বর্তমান অবস্থা:\n` +
+      `   • বকেয়া: ৳${dueAmount}\n` +
+      `   • অর্ডার করার জন্য আরও জমা লাগবে: ৳${needToDeposit}\n\n` +
+      `অনুগ্রহ করে Treasurer-এর সাথে যোগাযোগ করুন।`
+    );
     renderSheetCatalogSubscriber();
     return;
   }
+
   const alreadyOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
   const checked = Array.from(document.querySelectorAll('.sheet-check:checked'))
     .map(cb => cb.value)
@@ -3353,11 +3028,6 @@ window.confirmSheetOrders = async () => {
 
   const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
   const total = chosenSheets.reduce((a, s) => a + discountedPrice(s.price || 0), 0);
-  // Hard cap: this order itself must not push the subscriber's due past the limit either.
-  if (total > getOrderableAmount(currentSubscriberRoll) + 0.001) {
-    alert(`⛔ এই অর্ডারের মোট ৳${total.toFixed(2)}, কিন্তু বাকিতে সর্বোচ্চ ৳${DUE_ORDER_BLOCK_LIMIT} পর্যন্ত কেনা যায়। আপনি এখন সর্বোচ্চ ৳${getOrderableAmount(currentSubscriberRoll).toFixed(2)} টাকার শিট অর্ডার করতে পারবেন — কম শিট বাছাই করুন অথবা আগে টাকা জমা দিন।`);
-    return;
-  }
   const names = chosenSheets.map(s => {
     const dPrice = discountedPrice(s.price || 0);
     const hasDiscount = dPrice < (s.price || 0) - 0.001;
@@ -3365,8 +3035,8 @@ window.confirmSheetOrders = async () => {
   }).join(', ');
   const businessDate = currentBusinessDateKey();
   const cutoffNote = isPastCutoffNow()
-    ? `\n\n⏰ ${formatHourLabel(orderConfig.cutoffHour)} পার হয়ে গেছে, তাই এই অর্ডারটি আজকের নয় — ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`
-    : `\n\nএই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে (প্রতিদিন ${formatHourLabel(orderConfig.cutoffHour)} পর্যন্ত অর্ডার নেওয়া হয়)।`;
+    ? `\n\n⏰ ${formatHourLabel(orderConfig.cutoffHour)} পার হয়ে গেছে, তাই এই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`
+    : `\n\nএই অর্ডারটি ${formatBusinessDateLabel(businessDate)} তারিখের ব্যাচে গণনা হবে।`;
   if (!confirm(`নিচের শিটগুলো প্রিন্টের জন্য অর্ডার করবেন? মোট ৳${total.toFixed(2)} আপনার হিসাব থেকে কাটা হবে।\n\n${names}${cutoffNote}`)) return;
 
   const user = auth.currentUser;
@@ -3390,7 +3060,7 @@ window.confirmSheetOrders = async () => {
       orderedByUid: user ? user.uid : null
     })));
   } catch (e) {
-    alert("শিট অর্ডার করা যায়নি। কারণ: " + (e && e.message ? e.message : e) + "\n\nসম্ভবত Firestore Rules-এ sheetOrders এর জন্য সঠিক rule যোগ করা হয়নি।");
+    alert("শিট অর্ডার করা যায়নি। কারণ: " + (e && e.message ? e.message : e));
   }
 };
 
@@ -3427,13 +3097,11 @@ window.downloadFullReport = () => {
   const balance = totalCollection + totalDonation - totalExpense;
   const now = new Date();
 
-  // Header
   doc.setFontSize(18); doc.setTextColor(30, 41, 59);
   doc.text("Class Treasury Ledger — Report", 14, 18);
   doc.setFontSize(10); doc.setTextColor(100, 116, 139);
   doc.text(`Prepared by: ${currentTreasurerName}   |   Generated: ${now.toLocaleString()}`, 14, 25);
 
-  // Summary table
   doc.autoTable({
     startY: 32,
     head: [["Total Collection", "Total Fund", "Total Expense", "Balance in Hand", "Avg Per-student Share"]],
@@ -3446,7 +3114,6 @@ window.downloadFullReport = () => {
     styles: { halign: "center", fontSize: 9 }
   });
 
-  // Student ledger
   doc.setFontSize(12); doc.setTextColor(30, 41, 59);
   doc.text("Student Ledger", 14, doc.lastAutoTable.finalY + 10);
   const studentRows = students.map(s => {
@@ -3470,7 +3137,6 @@ window.downloadFullReport = () => {
     }
   });
 
-  // Fund (donations)
   if (donationsData.length) {
     doc.setFontSize(12); doc.setTextColor(30, 41, 59);
     doc.text("Fund", 14, doc.lastAutoTable.finalY + 10);
@@ -3482,7 +3148,6 @@ window.downloadFullReport = () => {
     });
   }
 
-  // Expenses
   if (expensesData.length) {
     doc.setFontSize(12); doc.setTextColor(30, 41, 59);
     doc.text("Expenses", 14, doc.lastAutoTable.finalY + 10);
@@ -3498,7 +3163,6 @@ window.downloadFullReport = () => {
     });
   }
 
-  // Footer
   const finalY = doc.lastAutoTable.finalY + 20;
   doc.setDrawColor(37, 99, 235); doc.setLineWidth(0.8);
   doc.circle(30, finalY, 12);
