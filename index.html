@@ -185,6 +185,10 @@
   }
   .auth-card h1{font-size:1.3rem;margin:0 0 4px;text-align:center;font-weight:700;letter-spacing:-.01em;}
   .auth-card .sub{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-bottom:22px;}
+  .auth-info{background:var(--green-bg);color:#166534;border:1px solid var(--green);border-radius:8px;padding:10px 12px;font-size:.82rem;line-height:1.5;margin-bottom:14px;}
+  .auth-forgot{text-align:right;margin:-8px 0 14px;font-size:.8rem;}
+  .auth-forgot a{color:var(--accent);cursor:pointer;font-weight:600;}
+  .auth-forgot a:hover{text-decoration:underline;}
   .auth-toggle{text-align:center;margin-top:16px;font-size:.85rem;color:var(--ink-soft);}
   .auth-toggle a{color:var(--accent);cursor:pointer;font-weight:600;text-decoration:none;}
   .auth-toggle a:hover{text-decoration:underline;}
@@ -307,6 +311,7 @@
     <div class="sub">Treasury Login</div>
 
     <div id="auth-error" class="auth-error hidden"></div>
+    <div id="auth-info" class="auth-info hidden"></div>
 
     <!-- LOGIN FORM -->
     <div id="login-form">
@@ -318,8 +323,20 @@
         <label>Password</label>
         <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter'){doLogin();}">
       </div>
+      <div class="auth-forgot"><a onclick="showForgotForm()">পাসওয়ার্ড ভুলে গেছেন? (Forgot password?)</a></div>
       <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Log In</button>
       <div class="auth-toggle">Subscriber, first time here? <a onclick="showRegisterForm()">Register with your Roll</a></div>
+    </div>
+
+    <!-- FORGOT PASSWORD FORM -->
+    <div id="forgot-form" class="hidden">
+      <p style="color:var(--ink-soft);font-size:.8rem;margin:-6px 0 14px;">আপনার রেজিস্টার করা ইমেইল দিন — আমরা পাসওয়ার্ড রিসেট করার লিংক পাঠিয়ে দেব।<br><b style="color:var(--gold);">⚠️ মেইল ইনবক্সে না পেলে অবশ্যই Spam / Junk ফোল্ডার চেক করুন</b> — রিসেট মেইল অনেক সময় সেখানেই জমা হয়।</p>
+      <div class="field" style="margin-bottom:16px;">
+        <label>Email</label>
+        <input type="email" id="forgot-email" placeholder="you@example.com" autocomplete="username" onkeydown="if(event.key==='Enter'){doForgotPassword();}">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" id="forgot-btn" onclick="doForgotPassword()">রিসেট লিংক পাঠান</button>
+      <div class="auth-toggle"><a onclick="showLoginForm()">← Log in-এ ফিরে যান</a></div>
     </div>
 
     <!-- REGISTER FORM (subscriber self-registration — Treasurer must add Name + Roll first) -->
@@ -859,7 +876,7 @@
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut,
-  createUserWithEmailAndPassword, deleteUser
+  createUserWithEmailAndPassword, deleteUser, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, deleteDoc, updateDoc, collection, onSnapshot, addDoc,
@@ -1045,6 +1062,7 @@ window.doLogin = async () => {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   if (!email || !password) return showAuthError("Please enter both email and password.");
+  document.getElementById('auth-info').classList.add('hidden');
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (e) {
@@ -1060,16 +1078,78 @@ window.doLogout = async () => {
   await signOut(auth);
 };
 
-window.showRegisterForm = () => {
+function hideAuthMessages() {
   document.getElementById('auth-error').classList.add('hidden');
-  document.getElementById('login-form').classList.add('hidden');
-  document.getElementById('register-form').classList.remove('hidden');
+  document.getElementById('auth-info').classList.add('hidden');
+}
+function showAuthInfo(msg) {
+  const el = document.getElementById('auth-info');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function showOnlyAuthForm(id) {
+  ['login-form', 'register-form', 'forgot-form'].forEach(f => {
+    document.getElementById(f).classList.toggle('hidden', f !== id);
+  });
+}
+
+window.showRegisterForm = () => {
+  hideAuthMessages();
+  showOnlyAuthForm('register-form');
 };
 
 window.showLoginForm = () => {
-  document.getElementById('auth-error').classList.add('hidden');
-  document.getElementById('register-form').classList.add('hidden');
-  document.getElementById('login-form').classList.remove('hidden');
+  hideAuthMessages();
+  showOnlyAuthForm('login-form');
+};
+
+window.showForgotForm = () => {
+  hideAuthMessages();
+  // carry over whatever the person already typed in the login box
+  const typed = document.getElementById('login-email').value.trim();
+  if (typed) document.getElementById('forgot-email').value = typed;
+  showOnlyAuthForm('forgot-form');
+};
+
+// Forgot password: Firebase emails a reset link. Those mails very often land in Spam/Junk, so
+// every success message says so explicitly. A 60s cooldown on the button stops accidental
+// repeat-taps (and Firebase's own "too many requests" limit).
+let forgotCooldownTimer = null;
+window.doForgotPassword = async () => {
+  const email = document.getElementById('forgot-email').value.trim();
+  hideAuthMessages();
+  if (!email) return showAuthError("আপনার ইমেইল ঠিকানা দিন।");
+  const btn = document.getElementById('forgot-btn');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = "পাঠানো হচ্ছে…";
+  let sent = false;
+  try {
+    await sendPasswordResetEmail(auth, email);
+    sent = true;
+    showAuthInfo(`✅ ${email} ঠিকানায় পাসওয়ার্ড রিসেট লিংক পাঠানো হয়েছে (যদি এই ইমেইলে অ্যাকাউন্ট থাকে)। ইনবক্সে না পেলে অবশ্যই Spam / Junk ফোল্ডার চেক করুন — অনেক সময় মেইলটি সেখানে চলে যায়। মেইল আসতে ২–৩ মিনিট লাগতে পারে।`);
+  } catch (e) {
+    const code = e && e.code;
+    if (code === 'auth/invalid-email') showAuthError("সঠিক ইমেইল ঠিকানা দিন।");
+    else if (code === 'auth/user-not-found') showAuthError("এই ইমেইলে কোনো অ্যাকাউন্ট পাওয়া যায়নি। যে ইমেইল দিয়ে রেজিস্টার করেছিলেন সেটি দিন।");
+    else if (code === 'auth/too-many-requests') showAuthError("অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।");
+    else if (code === 'auth/network-request-failed') showAuthError("ইন্টারনেট সংযোগ চেক করুন, তারপর আবার চেষ্টা করুন।");
+    else showAuthError("রিসেট মেইল পাঠানো যায়নি। কারণ: " + (e && e.message ? e.message : e));
+  }
+  // cooldown so it can't be spammed
+  let left = sent ? 60 : 5;
+  btn.textContent = `আবার পাঠাতে ${left}s অপেক্ষা করুন`;
+  clearInterval(forgotCooldownTimer);
+  forgotCooldownTimer = setInterval(() => {
+    left -= 1;
+    if (left <= 0) {
+      clearInterval(forgotCooldownTimer);
+      btn.disabled = false;
+      btn.textContent = sent ? "আবার পাঠান" : "রিসেট লিংক পাঠান";
+    } else {
+      btn.textContent = `আবার পাঠাতে ${left}s অপেক্ষা করুন`;
+    }
+  }, 1000);
 };
 
 // Subscriber self-registration. The treasurer must have already added this Roll under the
@@ -1114,8 +1194,9 @@ window.doRegister = async () => {
     }
     const student = studentDoc.data();
 
-    const existingSnap = await getDocs(query(collection(db, "users"), where("role", "==", "subscriber")));
-    if (existingSnap.docs.some(d => d.data().roll === roll)) {
+    // READ-SAVING: look up only this roll (max 1 doc) instead of downloading every subscriber account
+    const existingSnap = await getDocs(query(collection(db, "users"), where("role", "==", "subscriber"), where("roll", "==", roll), limit(1)));
+    if (existingSnap.docs.length > 0) {
       throw new Error(`Roll ${roll} এর জন্য আগে থেকেই একটি অ্যাকাউন্ট রেজিস্টার করা আছে। এটি আপনার নিজের অ্যাকাউন্ট না হলে Treasurer-এর সাথে যোগাযোগ করুন।`);
     }
 
@@ -1322,15 +1403,35 @@ function startListeners() {
     }));
   }
 
+  // READ-SAVING: a subscriber only ever sees their OWN balance, payments and orders, so their
+  // session listens to just their own documents instead of downloading every student's data.
+  // (Before this, every subscriber opening the app re-read ALL payments + ALL sheet orders, and
+  // every new order/payment by anyone was re-sent to every open tab — that was the huge read count.)
+  const isSubscriber = currentUserRole === 'subscriber' && currentSubscriberRoll !== null && currentSubscriberRoll !== undefined;
+  const myRoll = currentSubscriberRoll;
+
   // legacy single-amount records (from before the fix) — kept as a starting balance, never written to again
-  activeUnsubscribes.push(onSnapshot(collection(db, "collections"), (snap) => {
-    legacyCollectionsData = {};
-    snap.forEach(d => legacyCollectionsData[d.id] = d.data());
-    recomputeCollections();
-  }));
+  if (isSubscriber) {
+    activeUnsubscribes.push(onSnapshot(doc(db, "collections", String(myRoll)), (snap) => {
+      legacyCollectionsData = {};
+      if (snap.exists()) legacyCollectionsData[snap.id] = snap.data();
+      recomputeCollections();
+    }));
+  } else {
+    activeUnsubscribes.push(onSnapshot(collection(db, "collections"), (snap) => {
+      legacyCollectionsData = {};
+      snap.forEach(d => legacyCollectionsData[d.id] = d.data());
+      recomputeCollections();
+    }));
+  }
 
   // every payment is its own document — adding a new one never overwrites or removes an earlier one
-  activeUnsubscribes.push(onSnapshot(query(collection(db, "payments"), orderBy("addedAt", "desc")), (snap) => {
+  // (subscriber: only their own roll; `in [n, "n"]` also catches any old doc that stored the roll as text.
+  //  No orderBy here on purpose — the subscriber panel sorts client-side, and this needs no extra index.)
+  const paymentsQuery = isSubscriber
+    ? query(collection(db, "payments"), where("roll", "in", [myRoll, String(myRoll)]))
+    : query(collection(db, "payments"), orderBy("addedAt", "desc"));
+  activeUnsubscribes.push(onSnapshot(paymentsQuery, (snap) => {
     paymentsData = {};
     snap.forEach(d => {
       const data = d.data();
@@ -1357,11 +1458,14 @@ function startListeners() {
     renderSummary();
   }));
 
-  activeUnsubscribes.push(onSnapshot(query(collection(db, "activity"), orderBy("createdAt", "desc"), limit(20)), (snap) => {
-    activityData = [];
-    snap.forEach(d => activityData.push({ id: d.id, ...d.data() }));
-    renderActivity();
-  }));
+  // READ-SAVING: the activity feed lives in the treasurer-only "কার্যক্রম" tab, nobody else needs it
+  if (currentUserRole === 'treasurer') {
+    activeUnsubscribes.push(onSnapshot(query(collection(db, "activity"), orderBy("createdAt", "desc"), limit(20)), (snap) => {
+      activityData = [];
+      snap.forEach(d => activityData.push({ id: d.id, ...d.data() }));
+      renderActivity();
+    }));
+  }
 
   // lecture sheet catalog — read by everyone, managed by treasurer only
   // (sorted client-side rather than via orderBy so a sheet never silently disappears
@@ -1377,7 +1481,11 @@ function startListeners() {
   }));
 
   // sheet print orders — each subscriber can create their own; treasurer/girls-admin see everyone's
-  activeUnsubscribes.push(onSnapshot(collection(db, "sheetOrders"), (snap) => {
+  // (subscriber: only their own orders — they never see anyone else's)
+  const sheetOrdersSource = isSubscriber
+    ? query(collection(db, "sheetOrders"), where("roll", "==", myRoll))
+    : collection(db, "sheetOrders");
+  activeUnsubscribes.push(onSnapshot(sheetOrdersSource, (snap) => {
     sheetOrdersData = [];
     snap.forEach(d => sheetOrdersData.push({ id: d.id, ...d.data() }));
     sheetOrdersData.sort((a, b) => (tsToDate(b.orderedAt) || 0) - (tsToDate(a.orderedAt) || 0));
@@ -1554,7 +1662,7 @@ function getPersonalCharge(roll) {
 
 // ============ DUE LIMIT: a subscriber who owes more than this many taka can't place new
 // sheet orders until they pay down their balance. ============
-const DUE_ORDER_BLOCK_LIMIT = 70;
+const DUE_ORDER_BLOCK_LIMIT = 20;
 
 // Positive = credit, negative = due. Same formula used everywhere the subscriber's balance is shown.
 function getSubscriberRemaining(roll) {
@@ -1567,6 +1675,12 @@ function getSubscriberRemaining(roll) {
 
 function isOrderBlockedByDue(roll) {
   return getSubscriberRemaining(roll) < -DUE_ORDER_BLOCK_LIMIT;
+}
+
+// How many taka worth of new sheets this subscriber may still order before their due would
+// cross the limit. (credit + limit) — e.g. balance -5 with a ৳20 limit leaves ৳15.
+function getOrderableAmount(roll) {
+  return Math.max(0, getSubscriberRemaining(roll) + DUE_ORDER_BLOCK_LIMIT);
 }
 
 function renderStudents() {
@@ -3239,6 +3353,11 @@ window.confirmSheetOrders = async () => {
 
   const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
   const total = chosenSheets.reduce((a, s) => a + discountedPrice(s.price || 0), 0);
+  // Hard cap: this order itself must not push the subscriber's due past the limit either.
+  if (total > getOrderableAmount(currentSubscriberRoll) + 0.001) {
+    alert(`⛔ এই অর্ডারের মোট ৳${total.toFixed(2)}, কিন্তু বাকিতে সর্বোচ্চ ৳${DUE_ORDER_BLOCK_LIMIT} পর্যন্ত কেনা যায়। আপনি এখন সর্বোচ্চ ৳${getOrderableAmount(currentSubscriberRoll).toFixed(2)} টাকার শিট অর্ডার করতে পারবেন — কম শিট বাছাই করুন অথবা আগে টাকা জমা দিন।`);
+    return;
+  }
   const names = chosenSheets.map(s => {
     const dPrice = discountedPrice(s.price || 0);
     const hasDiscount = dPrice < (s.price || 0) - 0.001;
