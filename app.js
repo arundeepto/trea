@@ -1,7 +1,7 @@
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut,
-  createUserWithEmailAndPassword, deleteUser
+  createUserWithEmailAndPassword, deleteUser, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, deleteDoc, updateDoc, collection, onSnapshot, addDoc,
@@ -160,6 +160,14 @@ function showAuthError(msg) {
   el.classList.remove('hidden');
 }
 
+function resetAuthErrorStyle() {
+  const el = document.getElementById('auth-error');
+  if (!el) return;
+  el.style.background = '';
+  el.style.color = '';
+  el.style.borderColor = '';
+}
+
 window.doLogin = async () => {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
@@ -181,13 +189,63 @@ window.doLogout = async () => {
 
 window.showRegisterForm = () => {
   document.getElementById('auth-error').classList.add('hidden');
+  resetAuthErrorStyle();
   document.getElementById('login-form').classList.add('hidden');
+  const ff = document.getElementById('forgot-password-form');
+  if (ff) ff.classList.add('hidden');
   document.getElementById('register-form').classList.remove('hidden');
 };
+
 window.showLoginForm = () => {
   document.getElementById('auth-error').classList.add('hidden');
+  resetAuthErrorStyle();
   document.getElementById('register-form').classList.add('hidden');
+  const ff = document.getElementById('forgot-password-form');
+  if (ff) ff.classList.add('hidden');
   document.getElementById('login-form').classList.remove('hidden');
+};
+
+window.showForgotPasswordForm = () => {
+  document.getElementById('auth-error').classList.add('hidden');
+  resetAuthErrorStyle();
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('forgot-password-form').classList.remove('hidden');
+};
+
+window.doForgotPassword = async () => {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) { showAuthError("Please enter your email address."); return; }
+
+  const btn = document.getElementById('forgot-btn');
+  if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
+  document.getElementById('auth-error').classList.add('hidden');
+  resetAuthErrorStyle();
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    const errEl = document.getElementById('auth-error');
+    errEl.textContent = `✓ Reset link sent to ${email}. Check your inbox (and spam folder).`;
+    errEl.style.background = 'var(--success-soft)';
+    errEl.style.color = '#065F46';
+    errEl.style.borderColor = '#A7F3D0';
+    errEl.classList.remove('hidden');
+    document.getElementById('forgot-email').value = '';
+    setTimeout(() => {
+      resetAuthErrorStyle();
+      errEl.classList.add('hidden');
+    }, 8000);
+  } catch (e) {
+    const code = e && e.code;
+    let msg = "Could not send reset link. ";
+    if (code === 'auth/invalid-email') msg = "Invalid email address.";
+    else if (code === 'auth/user-not-found') msg = "No account found with this email.";
+    else if (code === 'auth/too-many-requests') msg = "Too many requests. Try again later.";
+    else msg += (e && e.message ? e.message : e);
+    showAuthError(msg);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Send Reset Link"; }
+  }
 };
 
 window.doRegister = async () => {

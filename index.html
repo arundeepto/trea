@@ -18,16 +18,12 @@
     <div class="auth-illustration">
       <div class="auth-logo">৳</div>
       <h1>Arundeepto Printers</h1>
-      <p class="auth-tagline">Class Treasury & Sheet Printing Manager</p>
-      <div class="auth-features">
-        <div class="auth-feature"><span>📊</span><span>Real-time ledger</span></div>
-        <div class="auth-feature"><span>🖨️</span><span>Smart sheet orders</span></div>
-        <div class="auth-feature"><span>💰</span><span>Instant balance</span></div>
-      </div>
+      <p class="auth-tagline">Treasury Management</p>
     </div>
     <div class="auth-form-side">
       <div class="auth-card">
         <div id="auth-error" class="auth-error hidden"></div>
+
         <div id="login-form">
           <h2>Welcome back</h2>
           <p class="sub">Log in to your account</p>
@@ -35,13 +31,17 @@
             <label>Email</label>
             <input type="email" id="login-email" placeholder="you@example.com" autocomplete="username">
           </div>
-          <div class="field" style="margin-bottom:20px;">
+          <div class="field" style="margin-bottom:8px;">
             <label>Password</label>
             <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter'){doLogin();}">
+          </div>
+          <div style="text-align:right;margin-bottom:20px;">
+            <a onclick="showForgotPasswordForm()" style="font-size:.82rem;color:var(--primary);font-weight:600;cursor:pointer;">Forgot Password?</a>
           </div>
           <button class="btn btn-primary btn-full" onclick="doLogin()">Log In</button>
           <div class="auth-toggle">New subscriber? <a onclick="showRegisterForm()">Register with your Roll</a></div>
         </div>
+
         <div id="register-form" class="hidden">
           <h2>Create your account</h2>
           <p class="sub">Treasurer must add your name first</p>
@@ -64,6 +64,18 @@
           <button class="btn btn-primary btn-full" id="register-btn" onclick="doRegister()">Register</button>
           <div class="auth-toggle">Already have an account? <a onclick="showLoginForm()">Log in</a></div>
         </div>
+
+        <div id="forgot-password-form" class="hidden">
+          <h2>Reset your password</h2>
+          <p class="sub">We'll send a reset link to your email</p>
+          <div class="field" style="margin-bottom:20px;">
+            <label>Email</label>
+            <input type="email" id="forgot-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter'){doForgotPassword();}">
+          </div>
+          <button class="btn btn-primary btn-full" id="forgot-btn" onclick="doForgotPassword()">Send Reset Link</button>
+          <div class="auth-toggle">Remembered it? <a onclick="showLoginForm()">Back to Log in</a></div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -86,7 +98,6 @@
 <!-- ═══════════ MAIN APP ═══════════ -->
 <div id="app" class="app-shell hidden">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-stamp">৳</div>
@@ -108,7 +119,6 @@
     </div>
   </aside>
 
-  <!-- MAIN AREA -->
   <main class="main-area">
     <header class="topbar">
       <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileSidebar()">☰</button>
@@ -124,7 +134,7 @@
 
     <div class="content-area">
 
-      <!-- ══ SUBSCRIBER DASHBOARD ══ -->
+      <!-- SUBSCRIBER DASHBOARD -->
       <div class="role-panel subscriber-only hidden" data-tab="dashboard">
         <div id="subscriber-due-warning" class="alert-banner alert-danger hidden">
           <div class="alert-icon">⚠️</div>
@@ -179,7 +189,7 @@
         </div>
       </div>
 
-      <!-- ══ SUBSCRIBER SHEETS ══ -->
+      <!-- SUBSCRIBER SHEETS -->
       <div class="role-panel subscriber-only hidden" data-tab="sheets">
         <div class="page-header">
           <div>
@@ -215,7 +225,7 @@
         </div>
       </div>
 
-      <!-- ══ GIRLS ADMIN DASHBOARD ══ -->
+      <!-- GIRLS ADMIN DASHBOARD -->
       <div class="role-panel girls-admin-only hidden" data-tab="dashboard">
         <div class="page-header">
           <div>
@@ -260,7 +270,7 @@
         </div>
       </div>
 
-      <!-- ══ GIRLS ADMIN PAYMENTS ══ -->
+      <!-- GIRLS ADMIN PAYMENTS -->
       <div class="role-panel girls-admin-only hidden" data-tab="payments">
         <div class="page-header">
           <div>
@@ -282,7 +292,7 @@
         </div>
       </div>
 
-      <!-- ══ GIRLS ADMIN PERSONAL SHEETS ══ -->
+      <!-- GIRLS ADMIN PERSONAL SHEETS -->
       <div class="role-panel girls-admin-only hidden" data-tab="sheets">
         <div class="page-header">
           <div>
@@ -307,7 +317,7 @@
         </div>
       </div>
 
-      <!-- ══ BOYS ADMIN DASHBOARD ══ -->
+      <!-- BOYS ADMIN DASHBOARD -->
       <div class="role-panel boys-admin-only hidden" data-tab="dashboard">
         <div class="page-header">
           <div>
@@ -349,7 +359,7 @@
         </div>
       </div>
 
-      <!-- ══ BOYS ADMIN PAYMENTS ══ -->
+      <!-- BOYS ADMIN PAYMENTS -->
       <div class="role-panel boys-admin-only hidden" data-tab="payments">
         <div class="page-header">
           <div>
@@ -371,7 +381,7 @@
         </div>
       </div>
 
-      <!-- ══ BOYS ADMIN PERSONAL SHEETS ══ -->
+      <!-- BOYS ADMIN PERSONAL SHEETS -->
       <div class="role-panel boys-admin-only hidden" data-tab="sheets">
         <div class="page-header">
           <div>
@@ -395,7 +405,7 @@
         </div>
       </div>
 
-      <!-- ══ TREASURER DASHBOARD ══ -->
+      <!-- TREASURER DASHBOARD -->
       <div class="role-panel treasurer-only hidden" data-tab="dashboard">
         <div class="page-header">
           <div>
@@ -461,7 +471,7 @@
         </div>
       </div>
 
-      <!-- ══ TREASURER SUBSCRIBERS ══ -->
+      <!-- TREASURER SUBSCRIBERS -->
       <div class="role-panel treasurer-only hidden" data-tab="subscribers">
         <div class="page-header">
           <div>
@@ -508,7 +518,7 @@
         </div>
       </div>
 
-      <!-- ══ TREASURER LOGIN ACCOUNTS ══ -->
+      <!-- TREASURER LOGIN ACCOUNTS -->
       <div class="role-panel treasurer-only hidden" data-tab="users">
         <div class="page-header">
           <div>
@@ -555,7 +565,7 @@
         </div>
       </div>
 
-      <!-- ══ TREASURER EXPENSE ══ -->
+      <!-- TREASURER EXPENSE -->
       <div class="role-panel treasurer-only hidden" data-tab="expense">
         <div class="page-header">
           <div>
@@ -606,7 +616,7 @@
         </div>
       </div>
 
-      <!-- ══ TREASURER SHEETS ══ -->
+      <!-- TREASURER SHEETS -->
       <div class="role-panel treasurer-only hidden" data-tab="sheets">
         <div class="page-header">
           <div>
@@ -715,7 +725,7 @@
         </div>
       </div>
 
-      <!-- ══ TREASURER ACTIVITY ══ -->
+      <!-- TREASURER ACTIVITY -->
       <div class="role-panel treasurer-only hidden" data-tab="activity">
         <div class="page-header">
           <div>
