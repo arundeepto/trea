@@ -746,6 +746,9 @@ function getPersonalCharge(roll) {
     .reduce((a, o) => a + (o.price || 0), 0);
   return individualExpenses + sheetCharges;
 }
+
+// Full balance = payments − equal share − personal charge
+// Used for DISPLAY purposes (subscriber dashboard, due/credit column)
 function getSubscriberRemaining(roll) {
   const equalShare = getEqualShareForStudent(roll);
   const rec = collectionsData[roll];
@@ -753,9 +756,21 @@ function getSubscriberRemaining(roll) {
   const personalCharge = getPersonalCharge(roll);
   return amount - equalShare - personalCharge;
 }
-function isOrderBlockedByDue(roll) {
-  return getSubscriberRemaining(roll) < -DUE_ORDER_BLOCK_LIMIT;
+
+// ⭐ FIX: Order block is based on PERSONAL balance only (payments − personal charges)
+// This way, a subscriber who has money for their own sheets won't get blocked
+// just because the class-wide equal share makes their overall balance look negative.
+function getPersonalBalance(roll) {
+  const rec = collectionsData[roll];
+  const jomaa = rec ? (rec.amount || 0) : 0;
+  const personalCharge = getPersonalCharge(roll);
+  return jomaa - personalCharge;
 }
+
+function isOrderBlockedByDue(roll) {
+  return getPersonalBalance(roll) < -DUE_ORDER_BLOCK_LIMIT;
+}
+
 function getGenderTotals(gender) {
   const list = students.filter(s => s.gender === gender);
   const totalCollected = list.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
@@ -800,13 +815,18 @@ window.addPayment = async (roll) => {
   const amt = parseFloat(input ? input.value : "");
   if (!amt || amt <= 0) { alert("সঠিক পরিমাণ লিখুন।"); return; }
   const student = students.find(s => s.roll === roll);
-  await addDoc(collection(db, "payments"), { roll, amount: amt, addedBy: currentTreasurerName, addedAt: serverTimestamp() });
-  await addDoc(collection(db, "activity"), {
-    type: "payment", actor: currentTreasurerName,
-    detail: `${student ? student.name : 'Roll ' + roll} (Roll ${roll}) থেকে ৳${amt.toFixed(2)} জমা`,
-    amount: amt, createdAt: serverTimestamp()
-  });
-  if (input) input.value = "";
+  try {
+    await addDoc(collection(db, "payments"), { roll, amount: amt, addedBy: currentTreasurerName, addedAt: serverTimestamp() });
+    await addDoc(collection(db, "activity"), {
+      type: "payment", actor: currentTreasurerName,
+      detail: `${student ? student.name : 'Roll ' + roll} (Roll ${roll}) থেকে ৳${amt.toFixed(2)} জমা`,
+      amount: amt, createdAt: serverTimestamp()
+    });
+    if (input) input.value = "";
+  } catch (e) {
+    console.error("Add payment error:", e);
+    alert("Payment add failed: " + (e && e.message ? e.message : e));
+  }
 };
 
 // ═══════════════════════════════════════════
@@ -857,6 +877,7 @@ function renderStudents() {
     if (remEl) {
       remEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
       remEl.className = "num " + (remaining >= 0 ? "balance-pos" : "balance-neg");
+      remEl.title = personalCharge > 0 ? `ব্যক্তিগত চার্জ: ৳${personalCharge.toFixed(2)}` : "";
     }
     const updEl = document.getElementById(`upd-${s.roll}`);
     if (updEl) {
@@ -885,12 +906,14 @@ function renderSubscriberPanel() {
   const personalCharge = getPersonalCharge(roll);
   const remaining = amount - equalShare - personalCharge;
 
+  // ⭐ Due warning uses PERSONAL balance (same as order block)
+  const personalBal = getPersonalBalance(roll);
   const warnEl = document.getElementById('subscriber-due-warning');
   const warnText = document.getElementById('subscriber-due-warning-text');
   if (warnEl && warnText) {
     if (isOrderBlockedByDue(roll)) {
       warnEl.classList.remove('hidden');
-      warnText.innerHTML = ` আপনার বাকেয়া <strong>৳${Math.abs(remaining).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT}। নতুন শিট অর্ডার করতে Treasurer-এর কাছে টাকা জমা দিন।`;
+      warnText.innerHTML = ` আপনার নিজস্ব বাকেয়া <strong>৳${Math.abs(personalBal).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT}। নতুন শিট অর্ডার করতে Treasurer-এর কাছে টাকা জমা দিন।`;
     } else warnEl.classList.add('hidden');
   }
 
@@ -1175,13 +1198,13 @@ function renderSheetCatalogSubscriber() {
   const notice = document.getElementById('order-window-notice');
   if (notice) {
     if (dueBlocked) {
-      const remaining = getSubscriberRemaining(currentSubscriberRoll);
-      const needToDeposit = (remaining + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
+      const personalBal = getPersonalBalance(currentSubscriberRoll);
+      const needToDeposit = (personalBal + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
       notice.classList.remove('hidden');
       notice.style.background = 'var(--danger-soft)';
       notice.style.color = '#991B1B';
       notice.style.borderColor = '#FECACA';
-      notice.innerHTML = `⛔ আপনার বাকেয়া <strong>৳${Math.abs(remaining).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} এর বেশি। কমপক্ষে <strong>৳${needToDeposit}</strong> জমা দিয়ে বাকেয়া কমাতে হবে।`;
+      notice.innerHTML = `⛔ আপনার নিজস্ব বাকেয়া <strong>৳${Math.abs(personalBal).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} এর বেশি। কমপক্ষে <strong>৳${needToDeposit}</strong> জমা দিয়ে বাকেয়া কমাতে হবে।`;
     } else {
       notice.style.background = '';
       notice.style.color = '';
@@ -1293,10 +1316,10 @@ window.confirmSheetOrders = async () => {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   if (!isWithinOrderWindow()) { alert('⏰ ' + orderWindowMessage()); return; }
   if (isOrderBlockedByDue(currentSubscriberRoll)) {
-    const remaining = getSubscriberRemaining(currentSubscriberRoll);
-    const dueAmount = Math.abs(remaining).toFixed(2);
-    const needToDeposit = (remaining + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
-    alert(`⛔ আপনার বাকেয়া ৳${dueAmount} — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} এর বেশি।\n\nকমপক্ষে ৳${needToDeposit} জমা দিতে হবে। Treasurer-এর সাথে যোগাযোগ করুন।`);
+    const personalBal = getPersonalBalance(currentSubscriberRoll);
+    const dueAmount = Math.abs(personalBal).toFixed(2);
+    const needToDeposit = (personalBal + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
+    alert(`⛔ আপনার নিজস্ব বাকেয়া ৳${dueAmount} — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} এর বেশি।\n\nকমপক্ষে ৳${needToDeposit} জমা দিতে হবে। Treasurer-এর সাথে যোগাযোগ করুন।`);
     return;
   }
   const alreadyOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
@@ -1603,7 +1626,8 @@ window.filterGirlsAdminStudents = () => {
 
 window.addPaymentGirlsAdmin = async (roll) => {
   const student = students.find(s => s.roll === roll);
-  if (!student || student.gender !== 'female') { alert("Only female subscribers."); return; }
+  if (!student) { alert("Subscriber not found."); return; }
+  if (student.gender !== 'female') { alert("Only female subscribers can be charged here.\n\nThis subscriber's gender is: " + (student.gender || "not set") + "\n\nAsk Treasurer to set gender to 'female'."); return; }
   const input = document.getElementById(`girls-pay-${roll}`);
   const amt = parseFloat(input ? input.value : "");
   if (!amt || amt <= 0) { alert("Enter valid amount."); return; }
@@ -1615,7 +1639,14 @@ window.addPaymentGirlsAdmin = async (roll) => {
       amount: amt, createdAt: serverTimestamp()
     });
     if (input) input.value = "";
-  } catch (e) { alert("Failed: " + (e && e.message ? e.message : e)); }
+  } catch (e) {
+    console.error("Girls admin payment error:", e);
+    let msg = "Failed: " + (e && e.message ? e.message : e);
+    if (e && e.code === 'permission-denied') {
+      msg = "Permission denied. This subscriber's gender may not be 'female' in the database, OR the Firestore Rules block this action.\n\nCheck:\n1. Firebase Console → students → Roll " + roll + " → gender field is 'female'\n2. Firestore Rules has the correct payments rule for girls_admin";
+    }
+    alert(msg);
+  }
 };
 
 function renderGirlsAdminSheetCatalog() {
@@ -1776,7 +1807,8 @@ window.filterBoysAdminStudents = () => {
 
 window.addPaymentBoysAdmin = async (roll) => {
   const student = students.find(s => s.roll === roll);
-  if (!student || student.gender !== 'male') { alert("Only male subscribers."); return; }
+  if (!student) { alert("Subscriber not found."); return; }
+  if (student.gender !== 'male') { alert("Only male subscribers can be charged here.\n\nThis subscriber's gender is: " + (student.gender || "not set") + "\n\nAsk Treasurer to set gender to 'male'."); return; }
   const input = document.getElementById(`boys-pay-${roll}`);
   const amt = parseFloat(input ? input.value : "");
   if (!amt || amt <= 0) { alert("Enter valid amount."); return; }
@@ -1788,7 +1820,14 @@ window.addPaymentBoysAdmin = async (roll) => {
       amount: amt, createdAt: serverTimestamp()
     });
     if (input) input.value = "";
-  } catch (e) { alert("Failed: " + (e && e.message ? e.message : e)); }
+  } catch (e) {
+    console.error("Boys admin payment error:", e);
+    let msg = "Failed: " + (e && e.message ? e.message : e);
+    if (e && e.code === 'permission-denied') {
+      msg = "Permission denied. This subscriber's gender may not be 'male' in the database, OR the Firestore Rules block this action.";
+    }
+    alert(msg);
+  }
 };
 
 function renderBoysAdminSheetCatalog() {
