@@ -737,6 +737,7 @@ function getEqualShareForStudent(roll) {
   const shares = _computeShareCache();
   return shares[roll] || 0;
 }
+
 function getPersonalCharge(roll) {
   const individualExpenses = expensesData
     .filter(e => e.chargeType === 'individual' && e.targetRoll === roll)
@@ -747,28 +748,18 @@ function getPersonalCharge(roll) {
   return individualExpenses + sheetCharges;
 }
 
-// Full balance = payments − equal share − personal charge
-// Used for DISPLAY purposes (subscriber dashboard, due/credit column)
+// ⭐ Current Balance = Total Deposited − Personal Charges
+// (Equal share is NOT subtracted here)
 function getSubscriberRemaining(roll) {
-  const equalShare = getEqualShareForStudent(roll);
   const rec = collectionsData[roll];
   const amount = rec ? (rec.amount || 0) : 0;
   const personalCharge = getPersonalCharge(roll);
-  return amount - equalShare - personalCharge;
+  return amount - personalCharge;
 }
 
-// ⭐ FIX: Order block is based on PERSONAL balance only (payments − personal charges)
-// This way, a subscriber who has money for their own sheets won't get blocked
-// just because the class-wide equal share makes their overall balance look negative.
-function getPersonalBalance(roll) {
-  const rec = collectionsData[roll];
-  const jomaa = rec ? (rec.amount || 0) : 0;
-  const personalCharge = getPersonalCharge(roll);
-  return jomaa - personalCharge;
-}
-
+// ⭐ Order block: when Current Balance < -20
 function isOrderBlockedByDue(roll) {
-  return getPersonalBalance(roll) < -DUE_ORDER_BLOCK_LIMIT;
+  return getSubscriberRemaining(roll) < -DUE_ORDER_BLOCK_LIMIT;
 }
 
 function getGenderTotals(gender) {
@@ -866,11 +857,10 @@ function renderStudentRows() {
 
 function renderStudents() {
   students.forEach(s => {
-    const equalShare = getEqualShareForStudent(s.roll);
     const rec = collectionsData[s.roll];
     const amount = rec ? (rec.amount || 0) : 0;
     const personalCharge = getPersonalCharge(s.roll);
-    const remaining = amount - equalShare - personalCharge;
+    const remaining = amount - personalCharge;
     const totalEl = document.getElementById(`total-${s.roll}`);
     if (totalEl) totalEl.textContent = "৳" + amount.toFixed(2);
     const remEl = document.getElementById(`rem-${s.roll}`);
@@ -904,16 +894,16 @@ function renderSubscriberPanel() {
   const rec = collectionsData[roll];
   const amount = rec ? (rec.amount || 0) : 0;
   const personalCharge = getPersonalCharge(roll);
-  const remaining = amount - equalShare - personalCharge;
+  // ⭐ Current Balance = Deposited − Personal Charges (no equal share)
+  const remaining = amount - personalCharge;
 
-  // ⭐ Due warning uses PERSONAL balance (same as order block)
-  const personalBal = getPersonalBalance(roll);
+  // Warning based on Current Balance
   const warnEl = document.getElementById('subscriber-due-warning');
   const warnText = document.getElementById('subscriber-due-warning-text');
   if (warnEl && warnText) {
     if (isOrderBlockedByDue(roll)) {
       warnEl.classList.remove('hidden');
-      warnText.innerHTML = ` আপনার নিজস্ব বাকেয়া <strong>৳${Math.abs(personalBal).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT}। নতুন শিট অর্ডার করতে Treasurer-এর কাছে টাকা জমা দিন।`;
+      warnText.innerHTML = ` আপনার বর্তমান ব্যালেন্স <strong>−৳${Math.abs(remaining).toFixed(2)}</strong> — যা সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি বাকি। নতুন শিট অর্ডার করতে Treasurer-এর কাছে টাকা জমা দিন।`;
     } else warnEl.classList.add('hidden');
   }
 
@@ -924,6 +914,7 @@ function renderSubscriberPanel() {
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   set('sub-total-collected', "৳" + amount.toFixed(2));
+  // Total Spent = Equal Share + Personal Charge (info only)
   set('sub-total-expense', "৳" + (equalShare + personalCharge).toFixed(2));
   const dueEl = document.getElementById('sub-due-credit');
   if (dueEl) {
@@ -1198,13 +1189,13 @@ function renderSheetCatalogSubscriber() {
   const notice = document.getElementById('order-window-notice');
   if (notice) {
     if (dueBlocked) {
-      const personalBal = getPersonalBalance(currentSubscriberRoll);
-      const needToDeposit = (personalBal + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
+      const currentBal = getSubscriberRemaining(currentSubscriberRoll);
+      const needToDeposit = (currentBal + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
       notice.classList.remove('hidden');
       notice.style.background = 'var(--danger-soft)';
       notice.style.color = '#991B1B';
       notice.style.borderColor = '#FECACA';
-      notice.innerHTML = `⛔ আপনার নিজস্ব বাকেয়া <strong>৳${Math.abs(personalBal).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} এর বেশি। কমপক্ষে <strong>৳${needToDeposit}</strong> জমা দিয়ে বাকেয়া কমাতে হবে।`;
+      notice.innerHTML = `⛔ আপনার বর্তমান ব্যালেন্স <strong>−৳${Math.abs(currentBal).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি বাকি। কমপক্ষে <strong>৳${needToDeposit}</strong> জমা দিয়ে ব্যালেন্স ৳${DUE_ORDER_BLOCK_LIMIT} টাকার নিচে আনতে হবে।`;
     } else {
       notice.style.background = '';
       notice.style.color = '';
@@ -1315,13 +1306,16 @@ window.markMyOrderReceived = async (orderId) => {
 window.confirmSheetOrders = async () => {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   if (!isWithinOrderWindow()) { alert('⏰ ' + orderWindowMessage()); return; }
+
+  // ⭐ Block check based on Current Balance
   if (isOrderBlockedByDue(currentSubscriberRoll)) {
-    const personalBal = getPersonalBalance(currentSubscriberRoll);
-    const dueAmount = Math.abs(personalBal).toFixed(2);
-    const needToDeposit = (personalBal + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
-    alert(`⛔ আপনার নিজস্ব বাকেয়া ৳${dueAmount} — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} এর বেশি।\n\nকমপক্ষে ৳${needToDeposit} জমা দিতে হবে। Treasurer-এর সাথে যোগাযোগ করুন।`);
+    const currentBal = getSubscriberRemaining(currentSubscriberRoll);
+    const dueAmount = Math.abs(currentBal).toFixed(2);
+    const needToDeposit = (currentBal + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
+    alert(`⛔ আপনার বর্তমান ব্যালেন্স −৳${dueAmount} — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি বাকি।\n\nকমপক্ষে ৳${needToDeposit} জমা দিতে হবে। Treasurer-এর সাথে যোগাযোগ করুন।`);
     return;
   }
+
   const alreadyOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
   const checked = Array.from(document.querySelectorAll('.sheet-check:checked'))
     .map(cb => cb.value).filter(id => !alreadyOrderedIds.has(id));
