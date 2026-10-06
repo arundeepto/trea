@@ -748,16 +748,20 @@ function getPersonalCharge(roll) {
   return individualExpenses + sheetCharges;
 }
 
-// ⭐ Current Balance = Total Deposited − Personal Charges
-// (Equal share is NOT subtracted here)
-function getSubscriberRemaining(roll) {
-  const rec = collectionsData[roll];
-  const amount = rec ? (rec.amount || 0) : 0;
-  const personalCharge = getPersonalCharge(roll);
-  return amount - personalCharge;
+// Total Spent = Equal Share + Personal Charges
+function getTotalSpent(roll) {
+  return getEqualShareForStudent(roll) + getPersonalCharge(roll);
 }
 
-// ⭐ Order block: when Current Balance < -20
+// ⭐ Current Balance = Total Deposited − Total Spent
+function getSubscriberRemaining(roll) {
+  const rec = collectionsData[roll];
+  const totalDeposited = rec ? (rec.amount || 0) : 0;
+  const totalSpent = getTotalSpent(roll);
+  return totalDeposited - totalSpent;
+}
+
+// ⭐ Order Block: Current Balance < -20
 function isOrderBlockedByDue(roll) {
   return getSubscriberRemaining(roll) < -DUE_ORDER_BLOCK_LIMIT;
 }
@@ -857,17 +861,19 @@ function renderStudentRows() {
 
 function renderStudents() {
   students.forEach(s => {
+    const equalShare = getEqualShareForStudent(s.roll);
     const rec = collectionsData[s.roll];
     const amount = rec ? (rec.amount || 0) : 0;
     const personalCharge = getPersonalCharge(s.roll);
-    const remaining = amount - personalCharge;
+    // Current Balance = Deposited − (Equal Share + Personal Charge)
+    const remaining = amount - equalShare - personalCharge;
     const totalEl = document.getElementById(`total-${s.roll}`);
     if (totalEl) totalEl.textContent = "৳" + amount.toFixed(2);
     const remEl = document.getElementById(`rem-${s.roll}`);
     if (remEl) {
       remEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
       remEl.className = "num " + (remaining >= 0 ? "balance-pos" : "balance-neg");
-      remEl.title = personalCharge > 0 ? `ব্যক্তিগত চার্জ: ৳${personalCharge.toFixed(2)}` : "";
+      remEl.title = `জমা ৳${amount.toFixed(2)} − খরচ ৳${(equalShare + personalCharge).toFixed(2)}`;
     }
     const updEl = document.getElementById(`upd-${s.roll}`);
     if (updEl) {
@@ -894,8 +900,9 @@ function renderSubscriberPanel() {
   const rec = collectionsData[roll];
   const amount = rec ? (rec.amount || 0) : 0;
   const personalCharge = getPersonalCharge(roll);
-  // ⭐ Current Balance = Deposited − Personal Charges (no equal share)
-  const remaining = amount - personalCharge;
+  const totalSpent = equalShare + personalCharge;
+  // Current Balance = Deposited − Total Spent
+  const remaining = amount - totalSpent;
 
   // Warning based on Current Balance
   const warnEl = document.getElementById('subscriber-due-warning');
@@ -914,8 +921,7 @@ function renderSubscriberPanel() {
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   set('sub-total-collected', "৳" + amount.toFixed(2));
-  // Total Spent = Equal Share + Personal Charge (info only)
-  set('sub-total-expense', "৳" + (equalShare + personalCharge).toFixed(2));
+  set('sub-total-expense', "৳" + totalSpent.toFixed(2));
   const dueEl = document.getElementById('sub-due-credit');
   if (dueEl) {
     dueEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
@@ -1195,7 +1201,7 @@ function renderSheetCatalogSubscriber() {
       notice.style.background = 'var(--danger-soft)';
       notice.style.color = '#991B1B';
       notice.style.borderColor = '#FECACA';
-      notice.innerHTML = `⛔ আপনার বর্তমান ব্যালেন্স <strong>−৳${Math.abs(currentBal).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি বাকি। কমপক্ষে <strong>৳${needToDeposit}</strong> জমা দিয়ে ব্যালেন্স ৳${DUE_ORDER_BLOCK_LIMIT} টাকার নিচে আনতে হবে।`;
+      notice.innerHTML = `⛔ আপনার বর্তমান ব্যালেন্স <strong>−৳${Math.abs(currentBal).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি বাকি। কমপক্ষে <strong>৳${needToDeposit}</strong> জমা দিয়ে ব্যালেন্স −৳${DUE_ORDER_BLOCK_LIMIT} এর উপরে আনতে হবে।`;
     } else {
       notice.style.background = '';
       notice.style.color = '';
@@ -1307,7 +1313,7 @@ window.confirmSheetOrders = async () => {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   if (!isWithinOrderWindow()) { alert('⏰ ' + orderWindowMessage()); return; }
 
-  // ⭐ Block check based on Current Balance
+  // Block check based on Current Balance
   if (isOrderBlockedByDue(currentSubscriberRoll)) {
     const currentBal = getSubscriberRemaining(currentSubscriberRoll);
     const dueAmount = Math.abs(currentBal).toFixed(2);
