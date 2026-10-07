@@ -682,7 +682,6 @@ function getPersonalCharge(roll) {
   return individualExpenses + sheetCharges;
 }
 
-// Current Balance = Total Deposited − Total Spent
 function getSubscriberRemaining(roll) {
   const rec = collectionsData[roll];
   const totalDeposited = rec ? (rec.amount || 0) : 0;
@@ -692,7 +691,7 @@ function getSubscriberRemaining(roll) {
   return totalDeposited - totalSpent;
 }
 
-// ⚠️ ORDER BLOCK DISABLED — any subscriber can order any time
+// ⚠️ ORDER BLOCK DISABLED
 function isOrderBlockedByDue(roll) {
   return false;
 }
@@ -752,6 +751,7 @@ window.addPayment = async (roll) => {
   }
 };
 
+// ⭐ Input field এ বড়, স্পষ্ট styling সহ
 function renderStudentRows() {
   const tbody = document.getElementById('student-body');
   if (!tbody) return;
@@ -772,9 +772,15 @@ function renderStudentRows() {
       </td>
       <td class="num" id="total-${s.roll}">৳0</td>
       <td>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <input type="number" class="coll-input" id="pay-${s.roll}" placeholder="৳" onkeydown="if(event.key==='Enter'){addPayment(${s.roll});}">
-          <button class="btn btn-outline btn-sm" onclick="addPayment(${s.roll})">+ Add</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="number" 
+                 class="coll-input" 
+                 id="pay-${s.roll}" 
+                 placeholder="৳ Amount" 
+                 inputmode="decimal"
+                 style="width:130px;padding:10px 12px;font-size:1rem;font-weight:600;color:#0F172A;background:#fff;border:2px solid #CBD5E1;border-radius:8px;box-sizing:border-box;"
+                 onkeydown="if(event.key==='Enter'){addPayment(${s.roll});}">
+          <button class="btn btn-outline btn-sm" style="padding:10px 14px;font-weight:600;" onclick="addPayment(${s.roll})">+ Add</button>
         </div>
       </td>
       <td class="num" id="rem-${s.roll}">৳0</td>
@@ -825,7 +831,6 @@ function renderSubscriberPanel() {
   const totalSpent = equalShare + personalCharge;
   const remaining = amount - totalSpent;
 
-  // ⚠️ Due warning banner DISABLED
   const warnEl = document.getElementById('subscriber-due-warning');
   if (warnEl) warnEl.classList.add('hidden');
 
@@ -1082,7 +1087,6 @@ function renderSheetCatalogSubscriber() {
   if (!box || currentUserRole !== 'subscriber') return;
   const myOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
   const windowOpen = isWithinOrderWindow();
-  // ⚠️ Order block DISABLED — canOrder only depends on windowOpen
   const canOrder = windowOpen;
 
   const notice = document.getElementById('order-window-notice');
@@ -1190,8 +1194,6 @@ window.markMyOrderReceived = async (orderId) => {
 window.confirmSheetOrders = async () => {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   if (!isWithinOrderWindow()) { alert('⏰ ' + orderWindowMessage()); return; }
-  // ⚠️ Order block DISABLED — no due check
-
   const alreadyOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
   const checked = Array.from(document.querySelectorAll('.sheet-check:checked'))
     .map(cb => cb.value).filter(id => !alreadyOrderedIds.has(id));
@@ -1443,6 +1445,7 @@ function getGirlsTotals() {
   return { count: list.length + adminIncluded, totalCollected };
 }
 
+// ⭐ Girls admin students table — বড় clear input field
 function renderGirlsAdminStudentRows() {
   const tbody = document.getElementById('girls-admin-student-body');
   if (!tbody) return;
@@ -1459,9 +1462,15 @@ function renderGirlsAdminStudentRows() {
       <td>${escapeHtml(s.name || '')}</td>
       <td class="num">৳${amt.toFixed(2)}</td>
       <td>
-        <div style="display:flex;gap:6px;">
-          <input type="number" class="coll-input" id="girls-pay-${s.roll}" placeholder="৳" onkeydown="if(event.key==='Enter'){addPaymentGirlsAdmin(${s.roll});}">
-          <button class="btn btn-outline btn-sm" onclick="addPaymentGirlsAdmin(${s.roll})">+ Add</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="number" 
+                 class="coll-input" 
+                 id="girls-pay-${s.roll}" 
+                 placeholder="৳ Amount" 
+                 inputmode="decimal"
+                 style="width:130px;padding:10px 12px;font-size:1rem;font-weight:600;color:#0F172A;background:#fff;border:2px solid #CBD5E1;border-radius:8px;box-sizing:border-box;"
+                 onkeydown="if(event.key==='Enter'){addPaymentGirlsAdmin(${s.roll});}">
+          <button class="btn btn-outline btn-sm" style="padding:10px 14px;font-weight:600;" onclick="addPaymentGirlsAdmin(${s.roll})">+ Add</button>
         </div>
       </td>
     </tr>`;
@@ -1491,7 +1500,22 @@ window.addPaymentGirlsAdmin = async (roll) => {
       detail: `${student.name} (Roll ${roll}) — ৳${amt.toFixed(2)} added (girls admin)`,
       amount: amt, createdAt: serverTimestamp()
     });
+    
+    if (!collectionsData[roll]) collectionsData[roll] = { amount: 0 };
+    collectionsData[roll].amount = (collectionsData[roll].amount || 0) + amt;
+    
+    const row = document.querySelector(`#girls-admin-student-body tr[data-roll="${roll}"]`);
+    if (row) {
+      const totalCell = row.querySelector('td:nth-child(3)');
+      if (totalCell) totalCell.textContent = "৳" + collectionsData[roll].amount.toFixed(2);
+    }
+    
+    const totals = getGirlsTotals();
+    const totalEl = document.getElementById('girls-total-collected');
+    if (totalEl) totalEl.textContent = "৳" + totals.totalCollected.toFixed(2);
+    
     if (input) input.value = "";
+    scheduleRecompute();
   } catch (e) {
     console.error("Girls admin payment error:", e);
     let msg = "Failed: " + (e && e.message ? e.message : e);
@@ -1618,6 +1642,7 @@ function getBoysTotals() {
   return { count: list.length + adminIncluded, totalCollected };
 }
 
+// ⭐ Boys admin students table — বড় clear input field
 function renderBoysAdminStudentRows() {
   const tbody = document.getElementById('boys-admin-student-body');
   if (!tbody) return;
@@ -1634,9 +1659,15 @@ function renderBoysAdminStudentRows() {
       <td>${escapeHtml(s.name || '')}</td>
       <td class="num">৳${amt.toFixed(2)}</td>
       <td>
-        <div style="display:flex;gap:6px;">
-          <input type="number" class="coll-input" id="boys-pay-${s.roll}" placeholder="৳" onkeydown="if(event.key==='Enter'){addPaymentBoysAdmin(${s.roll});}">
-          <button class="btn btn-outline btn-sm" onclick="addPaymentBoysAdmin(${s.roll})">+ Add</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="number" 
+                 class="coll-input" 
+                 id="boys-pay-${s.roll}" 
+                 placeholder="৳ Amount" 
+                 inputmode="decimal"
+                 style="width:130px;padding:10px 12px;font-size:1rem;font-weight:600;color:#0F172A;background:#fff;border:2px solid #CBD5E1;border-radius:8px;box-sizing:border-box;"
+                 onkeydown="if(event.key==='Enter'){addPaymentBoysAdmin(${s.roll});}">
+          <button class="btn btn-outline btn-sm" style="padding:10px 14px;font-weight:600;" onclick="addPaymentBoysAdmin(${s.roll})">+ Add</button>
         </div>
       </td>
     </tr>`;
@@ -1666,7 +1697,22 @@ window.addPaymentBoysAdmin = async (roll) => {
       detail: `${student.name} (Roll ${roll}) — ৳${amt.toFixed(2)} added (boys admin)`,
       amount: amt, createdAt: serverTimestamp()
     });
+    
+    if (!collectionsData[roll]) collectionsData[roll] = { amount: 0 };
+    collectionsData[roll].amount = (collectionsData[roll].amount || 0) + amt;
+    
+    const row = document.querySelector(`#boys-admin-student-body tr[data-roll="${roll}"]`);
+    if (row) {
+      const totalCell = row.querySelector('td:nth-child(3)');
+      if (totalCell) totalCell.textContent = "৳" + collectionsData[roll].amount.toFixed(2);
+    }
+    
+    const totals = getBoysTotals();
+    const totalEl = document.getElementById('boys-total-collected');
+    if (totalEl) totalEl.textContent = "৳" + totals.totalCollected.toFixed(2);
+    
     if (input) input.value = "";
+    scheduleRecompute();
   } catch (e) {
     console.error("Boys admin payment error:", e);
     let msg = "Failed: " + (e && e.message ? e.message : e);
