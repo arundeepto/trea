@@ -682,9 +682,7 @@ function getPersonalCharge(roll) {
   return individualExpenses + sheetCharges;
 }
 
-// ⭐⭐⭐ FIXED: Current Balance = Total Deposited − Total Spent
-// Total Spent = Equal Share + Personal Charges
-// This is the SAME calculation shown on subscriber dashboard
+// Current Balance = Total Deposited − Total Spent
 function getSubscriberRemaining(roll) {
   const rec = collectionsData[roll];
   const totalDeposited = rec ? (rec.amount || 0) : 0;
@@ -694,9 +692,9 @@ function getSubscriberRemaining(roll) {
   return totalDeposited - totalSpent;
 }
 
-// ⭐ Block if Current Balance < -20
+// ⚠️ ORDER BLOCK DISABLED — any subscriber can order any time
 function isOrderBlockedByDue(roll) {
-  return getSubscriberRemaining(roll) < -DUE_ORDER_BLOCK_LIMIT;
+  return false;
 }
 
 function getGenderTotals(gender) {
@@ -827,14 +825,9 @@ function renderSubscriberPanel() {
   const totalSpent = equalShare + personalCharge;
   const remaining = amount - totalSpent;
 
+  // ⚠️ Due warning banner DISABLED
   const warnEl = document.getElementById('subscriber-due-warning');
-  const warnText = document.getElementById('subscriber-due-warning-text');
-  if (warnEl && warnText) {
-    if (isOrderBlockedByDue(roll)) {
-      warnEl.classList.remove('hidden');
-      warnText.innerHTML = ` আপনার বর্তমান ব্যালেন্স <strong>−৳${Math.abs(remaining).toFixed(2)}</strong> — যা সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি বাকি। নতুন শিট অর্ডার করতে Treasurer-এর কাছে টাকা জমা দিন।`;
-    } else warnEl.classList.add('hidden');
-  }
+  if (warnEl) warnEl.classList.add('hidden');
 
   const greetingEl = document.getElementById('subscriber-greeting-name');
   if (greetingEl) greetingEl.textContent = student ? student.name : `Roll ${roll}`;
@@ -1089,25 +1082,16 @@ function renderSheetCatalogSubscriber() {
   if (!box || currentUserRole !== 'subscriber') return;
   const myOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
   const windowOpen = isWithinOrderWindow();
-  const dueBlocked = isOrderBlockedByDue(currentSubscriberRoll);
-  const canOrder = windowOpen && !dueBlocked;
+  // ⚠️ Order block DISABLED — canOrder only depends on windowOpen
+  const canOrder = windowOpen;
+
   const notice = document.getElementById('order-window-notice');
   if (notice) {
-    if (dueBlocked) {
-      const currentBal = getSubscriberRemaining(currentSubscriberRoll);
-      const needToDeposit = (currentBal + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
-      notice.classList.remove('hidden');
-      notice.style.background = 'var(--danger-soft)';
-      notice.style.color = '#991B1B';
-      notice.style.borderColor = '#FECACA';
-      notice.innerHTML = `⛔ আপনার বর্তমান ব্যালেন্স <strong>−৳${Math.abs(currentBal).toFixed(2)}</strong> — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি বাকি। কমপক্ষে <strong>৳${needToDeposit}</strong> জমা দিয়ে ব্যালেন্স −৳${DUE_ORDER_BLOCK_LIMIT} এর উপরে আনতে হবে।`;
-    } else {
-      notice.style.background = '';
-      notice.style.color = '';
-      notice.style.borderColor = '';
-      notice.classList.toggle('hidden', windowOpen);
-      if (!windowOpen) notice.textContent = '⏰ ' + orderWindowMessage();
-    }
+    notice.style.background = '';
+    notice.style.color = '';
+    notice.style.borderColor = '';
+    notice.classList.toggle('hidden', windowOpen);
+    if (!windowOpen) notice.textContent = '⏰ ' + orderWindowMessage();
   }
   const confirmBtn = document.getElementById('confirm-sheet-order-btn');
   if (confirmBtn) confirmBtn.disabled = !canOrder;
@@ -1206,13 +1190,8 @@ window.markMyOrderReceived = async (orderId) => {
 window.confirmSheetOrders = async () => {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   if (!isWithinOrderWindow()) { alert('⏰ ' + orderWindowMessage()); return; }
-  if (isOrderBlockedByDue(currentSubscriberRoll)) {
-    const currentBal = getSubscriberRemaining(currentSubscriberRoll);
-    const dueAmount = Math.abs(currentBal).toFixed(2);
-    const needToDeposit = (currentBal + DUE_ORDER_BLOCK_LIMIT).toFixed(2);
-    alert(`⛔ আপনার বর্তমান ব্যালেন্স −৳${dueAmount} — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি বাকি।\n\nকমপক্ষে ৳${needToDeposit} জমা দিতে হবে। Treasurer-এর সাথে যোগাযোগ করুন।`);
-    return;
-  }
+  // ⚠️ Order block DISABLED — no due check
+
   const alreadyOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
   const checked = Array.from(document.querySelectorAll('.sheet-check:checked'))
     .map(cb => cb.value).filter(id => !alreadyOrderedIds.has(id));
