@@ -8,9 +8,6 @@ import {
   query, orderBy, limit, serverTimestamp, where, getDocs, getDoc, increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ═══════════════════════════════════════════
-// FIREBASE CONFIG
-// ═══════════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyCuT_E8UUdBmftYGcVa7nxww6fUE1WBuak",
   authDomain: "tree-d26aa.firebaseapp.com",
@@ -24,9 +21,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
 let students = [];
 let collectionsData = {};
 let legacyCollectionsData = {};
@@ -55,12 +49,8 @@ let batchCountersData = {};
 let expenseSelectedRoll = null;
 
 let orderConfig = { cutoffHour: 15, windowStartHour: 10, windowEndHour: 17, discountPercent: 0 };
-
 const DUE_ORDER_BLOCK_LIMIT = 20;
 
-// ═══════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════
 function discountedPrice(basePrice) {
   const pct = Number(orderConfig.discountPercent) || 0;
   if (pct <= 0) return +(basePrice || 0).toFixed(2);
@@ -150,16 +140,12 @@ function sheetBreakdownLabel(pages) {
   return parts.join(' + ') || 'পেজ নেই';
 }
 
-// ═══════════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════════
 function showAuthError(msg) {
   const el = document.getElementById('auth-error');
   if (!el) return;
   el.textContent = msg;
   el.classList.remove('hidden');
 }
-
 function resetAuthErrorStyle() {
   const el = document.getElementById('auth-error');
   if (!el) return;
@@ -195,7 +181,6 @@ window.showRegisterForm = () => {
   if (ff) ff.classList.add('hidden');
   document.getElementById('register-form').classList.remove('hidden');
 };
-
 window.showLoginForm = () => {
   document.getElementById('auth-error').classList.add('hidden');
   resetAuthErrorStyle();
@@ -204,7 +189,6 @@ window.showLoginForm = () => {
   if (ff) ff.classList.add('hidden');
   document.getElementById('login-form').classList.remove('hidden');
 };
-
 window.showForgotPasswordForm = () => {
   document.getElementById('auth-error').classList.add('hidden');
   resetAuthErrorStyle();
@@ -216,12 +200,10 @@ window.showForgotPasswordForm = () => {
 window.doForgotPassword = async () => {
   const email = document.getElementById('forgot-email').value.trim();
   if (!email) { showAuthError("Please enter your email address."); return; }
-
   const btn = document.getElementById('forgot-btn');
   if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
   document.getElementById('auth-error').classList.add('hidden');
   resetAuthErrorStyle();
-
   try {
     await sendPasswordResetEmail(auth, email);
     const errEl = document.getElementById('auth-error');
@@ -231,10 +213,7 @@ window.doForgotPassword = async () => {
     errEl.style.borderColor = '#A7F3D0';
     errEl.classList.remove('hidden');
     document.getElementById('forgot-email').value = '';
-    setTimeout(() => {
-      resetAuthErrorStyle();
-      errEl.classList.add('hidden');
-    }, 8000);
+    setTimeout(() => { resetAuthErrorStyle(); errEl.classList.add('hidden'); }, 8000);
   } catch (e) {
     const code = e && e.code;
     let msg = "Could not send reset link. ";
@@ -253,16 +232,13 @@ window.doRegister = async () => {
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   const confirmPassword = document.getElementById('reg-confirm-password').value;
-
   if (!roll && roll !== 0) return showAuthError("সঠিক Roll নম্বর দিন।");
   if (!email || !password) return showAuthError("ইমেইল ও পাসওয়ার্ড — দুটোই দিন।");
   if (password.length < 6) return showAuthError("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।");
   if (password !== confirmPassword) return showAuthError("পাসওয়ার্ড দুইবার একই দেননি।");
-
   const btn = document.getElementById('register-btn');
   if (btn) { btn.disabled = true; btn.textContent = "রেজিস্ট্রেশন হচ্ছে…"; }
   document.getElementById('auth-error').classList.add('hidden');
-
   let cred;
   try {
     cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -275,24 +251,16 @@ window.doRegister = async () => {
     if (btn) { btn.disabled = false; btn.textContent = "Register"; }
     return;
   }
-
   try {
     const studentDoc = await getDoc(doc(db, "students", roll.toString()));
-    if (!studentDoc.exists()) {
-      throw new Error(`Roll ${roll} এখনো Treasurer যোগ করেননি।`);
-    }
+    if (!studentDoc.exists()) throw new Error(`Roll ${roll} এখনো Treasurer যোগ করেননি।`);
     const student = studentDoc.data();
     const existingSnap = await getDocs(query(collection(db, "users"), where("role", "==", "subscriber")));
-    if (existingSnap.docs.some(d => d.data().roll === roll)) {
-      throw new Error(`Roll ${roll} এর জন্য আগে থেকেই একটি অ্যাকাউন্ট রেজিস্টার করা আছে।`);
-    }
-
+    if (existingSnap.docs.some(d => d.data().roll === roll)) throw new Error(`Roll ${roll} এর জন্য আগে থেকেই একটি অ্যাকাউন্ট রেজিস্টার করা আছে।`);
     await setDoc(doc(db, "users", cred.user.uid), {
-      role: 'subscriber', roll, name: student.name, email,
-      gender: student.gender || null,
+      role: 'subscriber', roll, name: student.name, email, gender: student.gender || null,
       createdAt: serverTimestamp(), addedBy: 'self-registration'
     });
-
     document.getElementById('reg-roll').value = "";
     document.getElementById('reg-email').value = "";
     document.getElementById('reg-password').value = "";
@@ -319,16 +287,13 @@ async function applyLoggedInUser(user) {
       adminGender = data.gender || (role === 'girls_admin' ? 'female' : (role === 'chele_admin' ? 'male' : null));
     }
   } catch (e) { console.error("Error loading user doc:", e); }
-
   currentUserRole = role;
   currentSubscriberRoll = roll;
   currentTreasurerName = name;
   currentUserGender = adminGender;
-
   document.getElementById('auth-screen').classList.add('hidden');
   const pendingEl = document.getElementById('pending-screen');
   const appEl = document.getElementById('app');
-
   if (role === 'pending') {
     appEl.classList.add('hidden');
     document.getElementById('pending-email').textContent = user.email || name;
@@ -337,7 +302,6 @@ async function applyLoggedInUser(user) {
   }
   pendingEl.classList.add('hidden');
   appEl.classList.remove('hidden');
-
   document.getElementById('current-user-name').textContent = name;
   document.getElementById('current-user-role').textContent =
     role === 'subscriber' ? 'Subscriber' : (role === 'girls_admin' ? 'মেয়েদের এডমিন' : (role === 'chele_admin' ? 'ছেলেদের এডমিন' : 'Treasurer'));
@@ -345,16 +309,14 @@ async function applyLoggedInUser(user) {
   document.getElementById('current-user-stamp').textContent = initials;
   const topStamp = document.getElementById('topbar-user-stamp');
   if (topStamp) topStamp.textContent = initials;
-
   invalidateShareCache();
   applyRoleVisibility();
   startListeners();
 }
 
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    applyLoggedInUser(user);
-  } else {
+  if (user) { applyLoggedInUser(user); }
+  else {
     stopListeners();
     document.getElementById('app').classList.add('hidden');
     document.getElementById('pending-screen').classList.add('hidden');
@@ -363,9 +325,6 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// ═══════════════════════════════════════════
-// NAV / ROLE VISIBILITY
-// ═══════════════════════════════════════════
 const TABS_BY_ROLE = {
   treasurer: [
     { id: 'dashboard', label: '📊 Dashboard' },
@@ -392,13 +351,8 @@ const TABS_BY_ROLE = {
 };
 
 const PAGE_TITLES = {
-  dashboard: 'Dashboard',
-  subscribers: 'Subscribers',
-  users: 'Login Accounts',
-  expense: 'Add Expense',
-  sheets: 'Sheets & Orders',
-  activity: 'Activity',
-  payments: 'Add Payment'
+  dashboard: 'Dashboard', subscribers: 'Subscribers', users: 'Login Accounts',
+  expense: 'Add Expense', sheets: 'Sheets & Orders', activity: 'Activity', payments: 'Add Payment'
 };
 
 function getRoleClass(role) {
@@ -442,7 +396,6 @@ function renderSidebar() {
 
 function applyRoleVisibility() {
   const role = currentUserRole || 'pending';
-  console.log('[RoleVisibility] Applying for role:', role);
   const topbarSearch = document.getElementById('topbar-search-wrap');
   if (topbarSearch) {
     if (role === 'treasurer') topbarSearch.classList.remove('hidden');
@@ -459,9 +412,6 @@ window.toggleMobileSidebar = () => {
   if (sb) sb.classList.toggle('open');
 };
 
-// ═══════════════════════════════════════════
-// SHARE CACHE + DEBOUNCE
-// ═══════════════════════════════════════════
 let _shareCache = null;
 let _shareCacheKey = "";
 let _recomputeTimer = null;
@@ -471,11 +421,9 @@ function invalidateShareCache() { _shareCache = null; _shareCacheKey = ""; }
 function _computeShareCache() {
   const cacheKey = students.length + "|" + expensesData.length + "|" + donationsData.length;
   if (_shareCache && _shareCacheKey === cacheKey) return _shareCache;
-
   const donationEvents = donationsData.map(d => ({ type: 'donation', amount: d.amount || 0, time: tsToDate(d.addedAt) || new Date(0) }));
   const expenseEvents = expensesData.filter(e => e.chargeType !== 'individual').map(e => ({ type: 'expense', id: e.id, amount: e.amount || 0, time: tsToDate(e.addedAt) || new Date(0) }));
   const events = [...donationEvents, ...expenseEvents].sort((a, b) => a.time - b.time);
-
   let pool = 0;
   const netCostById = {};
   events.forEach(ev => {
@@ -484,7 +432,6 @@ function _computeShareCache() {
     pool -= offset;
     netCostById[ev.id] = ev.amount - offset;
   });
-
   const shares = {};
   students.forEach(student => {
     const joinTime = tsToDate(student.addedAt);
@@ -499,7 +446,6 @@ function _computeShareCache() {
     });
     shares[student.roll] = share;
   });
-
   _shareCache = shares;
   _shareCacheKey = cacheKey;
   return shares;
@@ -513,9 +459,6 @@ function scheduleRecompute() {
   }, 300);
 }
 
-// ═══════════════════════════════════════════
-// FIRESTORE LISTENERS
-// ═══════════════════════════════════════════
 let listenersStarted = false;
 let activeUnsubscribes = [];
 
@@ -523,22 +466,19 @@ function startListeners() {
   if (listenersStarted) return;
   listenersStarted = true;
   activeUnsubscribes = [];
-
   const isTreasurer  = currentUserRole === 'treasurer';
   const isGirlsAdmin = currentUserRole === 'girls_admin';
   const isBoysAdmin  = currentUserRole === 'chele_admin';
   const isSubscriber = currentUserRole === 'subscriber';
   const isAdmin      = isTreasurer || isGirlsAdmin || isBoysAdmin;
 
-  console.log('[Listeners] Starting for role:', currentUserRole);
-
   activeUnsubscribes.push(onSnapshot(doc(db, "settings", "orderConfig"), (snap) => {
     if (snap.exists()) {
       const data = snap.data();
       orderConfig = {
-        cutoffHour:      typeof data.cutoffHour === 'number'      ? data.cutoffHour      : orderConfig.cutoffHour,
+        cutoffHour: typeof data.cutoffHour === 'number' ? data.cutoffHour : orderConfig.cutoffHour,
         windowStartHour: typeof data.windowStartHour === 'number' ? data.windowStartHour : orderConfig.windowStartHour,
-        windowEndHour:   typeof data.windowEndHour === 'number'   ? data.windowEndHour   : orderConfig.windowEndHour,
+        windowEndHour: typeof data.windowEndHour === 'number' ? data.windowEndHour : orderConfig.windowEndHour,
         discountPercent: typeof data.discountPercent === 'number' ? data.discountPercent : orderConfig.discountPercent
       };
     }
@@ -702,9 +642,6 @@ function stopListeners() {
   invalidateShareCache();
 }
 
-// ═══════════════════════════════════════════
-// RECOMPUTE
-// ═══════════════════════════════════════════
 function recomputeCollections() {
   collectionsData = {};
   const rolls = new Set([...Object.keys(legacyCollectionsData), ...Object.keys(paymentsData)]);
@@ -730,9 +667,6 @@ function recomputeCollections() {
   if (currentUserRole === 'subscriber') renderSubscriberPanel();
 }
 
-// ═══════════════════════════════════════════
-// CALCULATIONS
-// ═══════════════════════════════════════════
 function getEqualShareForStudent(roll) {
   const shares = _computeShareCache();
   return shares[roll] || 0;
@@ -748,20 +682,19 @@ function getPersonalCharge(roll) {
   return individualExpenses + sheetCharges;
 }
 
+// ⭐⭐⭐ FIXED: Current Balance = Total Deposited − Total Spent
 // Total Spent = Equal Share + Personal Charges
-function getTotalSpent(roll) {
-  return getEqualShareForStudent(roll) + getPersonalCharge(roll);
-}
-
-// ⭐ Current Balance = Total Deposited − Total Spent
+// This is the SAME calculation shown on subscriber dashboard
 function getSubscriberRemaining(roll) {
   const rec = collectionsData[roll];
   const totalDeposited = rec ? (rec.amount || 0) : 0;
-  const totalSpent = getTotalSpent(roll);
+  const equalShare = getEqualShareForStudent(roll);
+  const personalCharge = getPersonalCharge(roll);
+  const totalSpent = equalShare + personalCharge;
   return totalDeposited - totalSpent;
 }
 
-// ⭐ Order Block: Current Balance < -20
+// ⭐ Block if Current Balance < -20
 function isOrderBlockedByDue(roll) {
   return getSubscriberRemaining(roll) < -DUE_ORDER_BLOCK_LIMIT;
 }
@@ -773,9 +706,6 @@ function getGenderTotals(gender) {
   return { count: list.length, totalCollected, totalBalance };
 }
 
-// ═══════════════════════════════════════════
-// SUBSCRIBER MANAGEMENT
-// ═══════════════════════════════════════════
 window.addStudent = async () => {
   const name = document.getElementById('new-student-name').value.trim();
   const roll = parseInt(document.getElementById('new-student-roll').value);
@@ -824,9 +754,6 @@ window.addPayment = async (roll) => {
   }
 };
 
-// ═══════════════════════════════════════════
-// RENDERS — STUDENT LIST
-// ═══════════════════════════════════════════
 function renderStudentRows() {
   const tbody = document.getElementById('student-body');
   if (!tbody) return;
@@ -865,15 +792,15 @@ function renderStudents() {
     const rec = collectionsData[s.roll];
     const amount = rec ? (rec.amount || 0) : 0;
     const personalCharge = getPersonalCharge(s.roll);
-    // Current Balance = Deposited − (Equal Share + Personal Charge)
-    const remaining = amount - equalShare - personalCharge;
+    const totalSpent = equalShare + personalCharge;
+    const remaining = amount - totalSpent;
     const totalEl = document.getElementById(`total-${s.roll}`);
     if (totalEl) totalEl.textContent = "৳" + amount.toFixed(2);
     const remEl = document.getElementById(`rem-${s.roll}`);
     if (remEl) {
       remEl.textContent = (remaining >= 0 ? "৳" : "-৳") + Math.abs(remaining).toFixed(2);
       remEl.className = "num " + (remaining >= 0 ? "balance-pos" : "balance-neg");
-      remEl.title = `জমা ৳${amount.toFixed(2)} − খরচ ৳${(equalShare + personalCharge).toFixed(2)}`;
+      remEl.title = `জমা ৳${amount.toFixed(2)} − খরচ ৳${totalSpent.toFixed(2)}`;
     }
     const updEl = document.getElementById(`upd-${s.roll}`);
     if (updEl) {
@@ -889,9 +816,6 @@ function renderStudents() {
   if (currentUserRole === 'subscriber') renderSubscriberPanel();
 }
 
-// ═══════════════════════════════════════════
-// RENDERS — SUBSCRIBER PANEL
-// ═══════════════════════════════════════════
 function renderSubscriberPanel() {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   const roll = currentSubscriberRoll;
@@ -901,10 +825,8 @@ function renderSubscriberPanel() {
   const amount = rec ? (rec.amount || 0) : 0;
   const personalCharge = getPersonalCharge(roll);
   const totalSpent = equalShare + personalCharge;
-  // Current Balance = Deposited − Total Spent
   const remaining = amount - totalSpent;
 
-  // Warning based on Current Balance
   const warnEl = document.getElementById('subscriber-due-warning');
   const warnText = document.getElementById('subscriber-due-warning-text');
   if (warnEl && warnText) {
@@ -949,7 +871,6 @@ function renderSubscriberExpenseBreakdown() {
   const roll = currentSubscriberRoll;
   const student = students.find(s => s.roll === roll);
   const joinTime = student ? tsToDate(student.addedAt) : null;
-
   const donationEvents = donationsData.map(d => ({ type: 'donation', amount: d.amount || 0, time: tsToDate(d.addedAt) || new Date(0) }));
   const expenseEvents = expensesData.filter(e => e.chargeType !== 'individual').map(e => ({ type: 'expense', id: e.id, amount: e.amount || 0, time: tsToDate(e.addedAt) || new Date(0) }));
   const events = [...donationEvents, ...expenseEvents].sort((a, b) => a.time - b.time);
@@ -961,7 +882,6 @@ function renderSubscriberExpenseBreakdown() {
     pool -= offset;
     netCostById[ev.id] = ev.amount - offset;
   });
-
   const rows = [];
   expensesData.filter(e => e.chargeType !== 'individual').forEach(e => {
     const eTime = tsToDate(e.addedAt) || new Date(0);
@@ -978,7 +898,6 @@ function renderSubscriberExpenseBreakdown() {
     rows.push({ time: tsToDate(o.orderedAt) || new Date(0), purpose: `শিট: ${o.sheetTitle}`, tag: 'লেকচার শিট', amount: o.price || 0 });
   });
   rows.sort((a, b) => b.time - a.time);
-
   tbody.innerHTML = rows.map(r => `
     <tr>
       <td class="activity-meta">${r.time.toLocaleDateString('en-US')}</td>
@@ -988,9 +907,6 @@ function renderSubscriberExpenseBreakdown() {
   `).join('') || `<tr><td colspan="3" class="activity-meta">এখনো আপনার হিসাব থেকে কোনো খরচ কাটা হয়নি।</td></tr>`;
 }
 
-// ═══════════════════════════════════════════
-// RENDERS — SUMMARY
-// ═══════════════════════════════════════════
 function renderSummary() {
   const totalCollection = students.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
   const totalDonation = donationsData.reduce((a, d) => a + (d.amount || 0), 0);
@@ -998,16 +914,13 @@ function renderSummary() {
   const totalExpense = expensesData.reduce((a, e) => a + (e.amount || 0), 0) + totalSheetCharges;
   const totalEarning = totalCollection + totalDonation;
   const balance = totalEarning - totalExpense;
-
   const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   setTxt('sum-earning', "৳" + totalEarning.toFixed(2));
   setTxt('sum-collection', "৳" + totalCollection.toFixed(2));
   setTxt('sum-expense', "৳" + totalExpense.toFixed(2));
   setTxt('sum-balance', "৳" + balance.toFixed(2));
-
   const pending = sheetOrdersData.filter(o => o.printed && !o.received).length;
   setTxt('dashboard-pending-receive-count', String(pending));
-
   const boys = getGenderTotals('male');
   const girls = getGenderTotals('female');
   setTxt('boys-count-admin', boys.count);
@@ -1025,9 +938,6 @@ function setBalance(id, val) {
   el.style.color = val >= 0 ? 'var(--success)' : 'var(--danger)';
 }
 
-// ═══════════════════════════════════════════
-// RENDERS — EXPENSES LIST
-// ═══════════════════════════════════════════
 function renderExpenses() {
   const el = document.getElementById('expense-list');
   if (!el) return;
@@ -1046,17 +956,13 @@ function renderExpenses() {
   }).join('') || `<tr><td colspan="5" class="activity-meta">No expenses added yet.</td></tr>`;
 }
 
-// ═══════════════════════════════════════════
-// EXPENSE SEARCH
-// ═══════════════════════════════════════════
 window.filterExpenseSubscriberList = (q) => {
   const dd = document.getElementById('expense-subscriber-dropdown');
   if (!dd) return;
   const query = (q || '').trim().toLowerCase();
   let matches;
-  if (!query) {
-    matches = students.slice(0, 30);
-  } else {
+  if (!query) matches = students.slice(0, 30);
+  else {
     matches = students.filter(s => {
       const name = (s.name || '').toLowerCase();
       const roll = String(s.roll);
@@ -1115,15 +1021,12 @@ window.saveExpense = async () => {
   if (!expenseSelectedRoll) { alert("Please select a subscriber to charge."); return; }
   const student = students.find(s => s.roll === expenseSelectedRoll);
   if (!student) { alert("Subscriber not found."); return; }
-
   const date = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
   try {
     await addDoc(collection(db, "expenses"), {
       description: desc, amount, date,
       addedBy: currentTreasurerName, addedAt: serverTimestamp(),
-      chargeType: 'individual',
-      targetRoll: student.roll,
-      targetName: student.name
+      chargeType: 'individual', targetRoll: student.roll, targetName: student.name
     });
     await addDoc(collection(db, "activity"), {
       type: "expense", actor: currentTreasurerName,
@@ -1136,9 +1039,6 @@ window.saveExpense = async () => {
   } catch (e) { alert("Could not save charge: " + (e && e.message ? e.message : e)); }
 };
 
-// ═══════════════════════════════════════════
-// SHEETS
-// ═══════════════════════════════════════════
 function getGroupedSheets(list) {
   const FALLBACK = 'General';
   const groups = {};
@@ -1191,7 +1091,6 @@ function renderSheetCatalogSubscriber() {
   const windowOpen = isWithinOrderWindow();
   const dueBlocked = isOrderBlockedByDue(currentSubscriberRoll);
   const canOrder = windowOpen && !dueBlocked;
-
   const notice = document.getElementById('order-window-notice');
   if (notice) {
     if (dueBlocked) {
@@ -1212,23 +1111,19 @@ function renderSheetCatalogSubscriber() {
   }
   const confirmBtn = document.getElementById('confirm-sheet-order-btn');
   if (confirmBtn) confirmBtn.disabled = !canOrder;
-
   if (!sheetsData.length) {
     box.innerHTML = `<div class="product-empty">📄 এখনো কোনো লেকচার শিট যোগ করা হয়নি।</div>`;
     updateSheetOrderSummary();
     return;
   }
-
   const searchInput = document.getElementById('sheet-search-input');
   const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
   const filtered = q ? sheetsData.filter(s => (s.title || '').toLowerCase().includes(q)) : sheetsData;
-
   if (!filtered.length) {
     box.innerHTML = `<div class="product-empty">🔍 "${escapeHtml(q)}" নামে কোনো শিট পাওয়া যায়নি।</div>`;
     updateSheetOrderSummary();
     return;
   }
-
   const grouped = getGroupedSheets(filtered);
   box.innerHTML = grouped.map(g => `
     <div class="subject-section">
@@ -1260,7 +1155,6 @@ function renderSheetCatalogSubscriber() {
       </div>
     </div>
   `).join('');
-
   box.querySelectorAll('.sheet-check:checked').forEach(cb => cb.closest('.product-card').classList.add('checked'));
   updateSheetOrderSummary();
 }
@@ -1312,8 +1206,6 @@ window.markMyOrderReceived = async (orderId) => {
 window.confirmSheetOrders = async () => {
   if (currentUserRole !== 'subscriber' || !currentSubscriberRoll) return;
   if (!isWithinOrderWindow()) { alert('⏰ ' + orderWindowMessage()); return; }
-
-  // Block check based on Current Balance
   if (isOrderBlockedByDue(currentSubscriberRoll)) {
     const currentBal = getSubscriberRemaining(currentSubscriberRoll);
     const dueAmount = Math.abs(currentBal).toFixed(2);
@@ -1321,18 +1213,15 @@ window.confirmSheetOrders = async () => {
     alert(`⛔ আপনার বর্তমান ব্যালেন্স −৳${dueAmount} — সীমা ৳${DUE_ORDER_BLOCK_LIMIT} টাকার বেশি বাকি।\n\nকমপক্ষে ৳${needToDeposit} জমা দিতে হবে। Treasurer-এর সাথে যোগাযোগ করুন।`);
     return;
   }
-
   const alreadyOrderedIds = new Set(sheetOrdersData.filter(o => o.roll === currentSubscriberRoll).map(o => o.sheetId));
   const checked = Array.from(document.querySelectorAll('.sheet-check:checked'))
     .map(cb => cb.value).filter(id => !alreadyOrderedIds.has(id));
   if (!checked.length) { alert("No new sheets selected."); return; }
-
   const chosenSheets = sheetsData.filter(s => checked.includes(s.id));
   const total = chosenSheets.reduce((a, s) => a + discountedPrice(s.price || 0), 0);
   const names = chosenSheets.map(s => s.title).join(', ');
   const businessDate = currentBusinessDateKey();
   if (!confirm(`Order ${chosenSheets.length} sheet(s)?\n\n${names}\n\nTotal: ৳${total.toFixed(2)} will be charged.`)) return;
-
   const user = auth.currentUser;
   const student = students.find(s => s.roll === currentSubscriberRoll);
   const batchSeq = currentBatchSeqFor(businessDate);
@@ -1354,9 +1243,6 @@ window.confirmSheetOrders = async () => {
   } catch (e) { alert("Order failed: " + (e && e.message ? e.message : e)); }
 };
 
-// ═══════════════════════════════════════════
-// TREASURER SHEET ORDERS
-// ═══════════════════════════════════════════
 function getDistinctBatchKeys() {
   const set = new Set(sheetOrdersData.map(o => orderBatchKey(o)).filter(Boolean));
   return Array.from(set).sort((a, b) => {
@@ -1379,7 +1265,6 @@ function renderSheetOrdersTreasurer() {
   const groupedBody = document.getElementById('sheet-orders-grouped-body');
   const dateSelect = document.getElementById('order-date-select');
   if (!detailBody || !groupedBody || !dateSelect) return;
-
   const batchKeys = getDistinctBatchKeys();
   const today = currentBusinessDateKey();
   const todayCurrentKey = `${today}#${currentBatchSeqFor(today)}`;
@@ -1389,7 +1274,6 @@ function renderSheetOrdersTreasurer() {
     if (pa.businessDate !== pb.businessDate) return pb.businessDate.localeCompare(pa.businessDate);
     return pb.seq - pa.seq;
   });
-
   if (!currentOrderDateFilter || !batchKeys.includes(currentOrderDateFilter)) {
     currentOrderDateFilter = batchKeys.includes(todayCurrentKey) ? todayCurrentKey : batchKeys[0];
   }
@@ -1401,9 +1285,7 @@ function renderSheetOrdersTreasurer() {
     return `<option value="${key}">${formatBatchLabel(d, seq, tag)} — ${count}</option>`;
   }).join('');
   dateSelect.value = currentOrderDateFilter;
-
   const batchOrders = sheetOrdersData.filter(o => orderBatchKey(o) === currentOrderDateFilter);
-
   detailBody.innerHTML = batchOrders.map(o => {
     const t = o.orderedAt && o.orderedAt.toDate ? o.orderedAt.toDate().toLocaleString('en-US') : '...';
     const genderLabel = o.gender === 'female' ? 'মেয়ে' : (o.gender === 'male' ? 'ছেলে' : '—');
@@ -1416,7 +1298,6 @@ function renderSheetOrdersTreasurer() {
       <td>${orderStatusLabel(o)}</td>
     </tr>`;
   }).join('') || `<tr><td colspan="6" class="activity-meta">No orders in this batch.</td></tr>`;
-
   const groups = {};
   batchOrders.forEach(o => {
     const key = o.sheetId || o.sheetTitle;
@@ -1433,14 +1314,12 @@ function renderSheetOrdersTreasurer() {
       <td class="num">৳${g.total.toFixed(2)}</td>
     </tr>
   `).join('') || `<tr><td colspan="4" class="activity-meta">No orders in this batch.</td></tr>`;
-
   const markBtn = document.getElementById('mark-printed-btn');
   if (markBtn) {
     const pending = batchOrders.filter(o => !o.printed).length;
     markBtn.disabled = pending === 0;
     markBtn.textContent = pending === 0 ? '✓ Batch Printed' : `✓ Mark Printed (${pending})`;
   }
-
   const rds = document.getElementById('received-date-select');
   const rss = document.getElementById('received-sheet-select');
   const { filtered, effectiveDateFilter, effectiveSheetFilter } = applyReceivedFilters(
@@ -1495,7 +1374,6 @@ function renderGroupedReceivedChecklist(orders, tbodyId, showGenderCol, pendingO
     if (scmp !== 0) return scmp;
     return (a.studentName || '').localeCompare(b.studentName || '', 'bn');
   });
-
   let html = '';
   let lastDate = null, lastSheet = null;
   sorted.forEach(o => {
@@ -1543,7 +1421,6 @@ window.onTreasurerPendingOnlyToggle = () => {
   treasurerPendingOnly = el ? el.checked : false;
   renderSheetOrdersTreasurer();
 };
-
 window.markCurrentBatchPrinted = () => window.markOrdersPrinted(currentOrderDateFilter);
 window.downloadCurrentBatchPDF = () => window.downloadOrdersPDF(currentOrderDateFilter);
 
@@ -1580,9 +1457,6 @@ window.toggleOrderReceived = async (orderId, checkboxEl) => {
   }
 };
 
-// ═══════════════════════════════════════════
-// GIRLS ADMIN
-// ═══════════════════════════════════════════
 function getGirlsTotals() {
   const list = students.filter(s => s.gender === 'female');
   const totalCollected = list.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
@@ -1627,7 +1501,7 @@ window.filterGirlsAdminStudents = () => {
 window.addPaymentGirlsAdmin = async (roll) => {
   const student = students.find(s => s.roll === roll);
   if (!student) { alert("Subscriber not found."); return; }
-  if (student.gender !== 'female') { alert("Only female subscribers can be charged here.\n\nThis subscriber's gender is: " + (student.gender || "not set") + "\n\nAsk Treasurer to set gender to 'female'."); return; }
+  if (student.gender !== 'female') { alert("Only female subscribers can be charged here."); return; }
   const input = document.getElementById(`girls-pay-${roll}`);
   const amt = parseFloat(input ? input.value : "");
   if (!amt || amt <= 0) { alert("Enter valid amount."); return; }
@@ -1642,9 +1516,7 @@ window.addPaymentGirlsAdmin = async (roll) => {
   } catch (e) {
     console.error("Girls admin payment error:", e);
     let msg = "Failed: " + (e && e.message ? e.message : e);
-    if (e && e.code === 'permission-denied') {
-      msg = "Permission denied. This subscriber's gender may not be 'female' in the database, OR the Firestore Rules block this action.\n\nCheck:\n1. Firebase Console → students → Roll " + roll + " → gender field is 'female'\n2. Firestore Rules has the correct payments rule for girls_admin";
-    }
+    if (e && e.code === 'permission-denied') msg = "Permission denied. Check subscriber's gender is 'female'.";
     alert(msg);
   }
 };
@@ -1731,7 +1603,6 @@ function renderGirlsAdminPanel() {
   renderGirlsAdminStudentRows();
   renderGirlsAdminSheetCatalog();
   renderGirlsAdminMyOrders();
-
   const printedGirls = sheetOrdersData.filter(o => o.gender === 'female' && o.printed);
   const gds = document.getElementById('girls-received-date-select');
   const gss = document.getElementById('girls-received-sheet-select');
@@ -1761,9 +1632,6 @@ window.onGirlsReceivedSheetFilterChange = () => {
   renderGirlsAdminPanel();
 };
 
-// ═══════════════════════════════════════════
-// BOYS ADMIN
-// ═══════════════════════════════════════════
 function getBoysTotals() {
   const list = students.filter(s => s.gender === 'male');
   const totalCollected = list.reduce((a, s) => a + ((collectionsData[s.roll] || {}).amount || 0), 0);
@@ -1808,7 +1676,7 @@ window.filterBoysAdminStudents = () => {
 window.addPaymentBoysAdmin = async (roll) => {
   const student = students.find(s => s.roll === roll);
   if (!student) { alert("Subscriber not found."); return; }
-  if (student.gender !== 'male') { alert("Only male subscribers can be charged here.\n\nThis subscriber's gender is: " + (student.gender || "not set") + "\n\nAsk Treasurer to set gender to 'male'."); return; }
+  if (student.gender !== 'male') { alert("Only male subscribers can be charged here."); return; }
   const input = document.getElementById(`boys-pay-${roll}`);
   const amt = parseFloat(input ? input.value : "");
   if (!amt || amt <= 0) { alert("Enter valid amount."); return; }
@@ -1823,9 +1691,7 @@ window.addPaymentBoysAdmin = async (roll) => {
   } catch (e) {
     console.error("Boys admin payment error:", e);
     let msg = "Failed: " + (e && e.message ? e.message : e);
-    if (e && e.code === 'permission-denied') {
-      msg = "Permission denied. This subscriber's gender may not be 'male' in the database, OR the Firestore Rules block this action.";
-    }
+    if (e && e.code === 'permission-denied') msg = "Permission denied. Check subscriber's gender is 'male'.";
     alert(msg);
   }
 };
@@ -1912,7 +1778,6 @@ function renderBoysAdminPanel() {
   renderBoysAdminStudentRows();
   renderBoysAdminSheetCatalog();
   renderBoysAdminMyOrders();
-
   const printedBoys = sheetOrdersData.filter(o => o.gender === 'male' && o.printed);
   const bds = document.getElementById('boys-received-date-select');
   const bss = document.getElementById('boys-received-sheet-select');
@@ -1942,9 +1807,6 @@ window.onBoysReceivedSheetFilterChange = () => {
   renderBoysAdminPanel();
 };
 
-// ═══════════════════════════════════════════
-// SHEET CRUD
-// ═══════════════════════════════════════════
 window.updateNewSheetPricePreview = () => {
   const pages = parseInt(document.getElementById('new-sheet-pages').value, 10) || 0;
   const preview = document.getElementById('new-sheet-price-preview');
@@ -2022,9 +1884,6 @@ window.deleteSheet = async (id) => {
   catch (e) { alert("Failed: " + (e && e.message ? e.message : e)); }
 };
 
-// ═══════════════════════════════════════════
-// ORDER TIMING
-// ═══════════════════════════════════════════
 function renderOrderTimingSettingsForm() {
   const s = document.getElementById('cfg-window-start');
   const e = document.getElementById('cfg-window-end');
@@ -2059,9 +1918,6 @@ window.saveOrderTimingSettings = async () => {
   } catch (e) { alert("Failed: " + (e && e.message ? e.message : e)); }
 };
 
-// ═══════════════════════════════════════════
-// USERS
-// ═══════════════════════════════════════════
 function roleLabel(role) {
   if (role === 'subscriber') return 'Subscriber';
   if (role === 'girls_admin') return 'Girls Admin';
@@ -2093,17 +1949,14 @@ window.addUserAccount = async () => {
   const role = document.getElementById('new-user-role').value;
   const rollRaw = document.getElementById('new-user-roll').value;
   const roll = role === 'subscriber' ? parseInt(rollRaw) : null;
-
   if (!name || !email || !password) { alert("Fill all fields."); return; }
   if (password.length < 6) { alert("Password must be 6+ characters."); return; }
   if (role === 'subscriber' && !roll) { alert("Select subscriber."); return; }
   if (role === 'subscriber' && usersData.some(u => u.role === 'subscriber' && u.roll === roll)) {
     alert("Account already exists for this subscriber."); return;
   }
-
   const btn = document.getElementById('add-user-btn');
   if (btn) { btn.disabled = true; btn.textContent = "Creating…"; }
-
   const secondaryApp = initializeApp(firebaseConfig, "secondary-" + Date.now());
   const secondaryAuth = getAuth(secondaryApp);
   try {
@@ -2165,9 +2018,6 @@ window.filterStudents = () => {
   });
 };
 
-// ═══════════════════════════════════════════
-// ACTIVITY
-// ═══════════════════════════════════════════
 window.loadActivity = async () => {
   if (currentUserRole !== 'treasurer') return;
   const feed = document.getElementById('activity-feed');
@@ -2192,9 +2042,6 @@ window.loadActivity = async () => {
   } catch (e) { feed.innerHTML = `<div class="activity-meta">Failed to load activity.</div>`; }
 };
 
-// ═══════════════════════════════════════════
-// PDF EXPORTS
-// ═══════════════════════════════════════════
 window.downloadOrdersPDF = (batchKey) => {
   if (!batchKey) return;
   const { businessDate, seq } = parseBatchKey(batchKey);
